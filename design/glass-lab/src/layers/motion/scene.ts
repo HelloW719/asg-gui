@@ -122,18 +122,22 @@ function drawPointerLight(
   width: number,
   height: number,
   now: number,
+  color: [number, number, number],
 ): void {
   const p = pointerAt(now);
   if (!p.active) return;
 
   const lx = width * p.x;
   const ly = height * p.y;
-  const radius = Math.min(width, height) * 0.5;
+  const radius = Math.min(width, height) * 0.3;
+  const [cr, cg, cb] = color;
 
+  // 中心偏实的圆 + 向外晕开的长尾，读起来是「一个有色圆圈」而不是一片白光。
   const glow = ctx.createRadialGradient(lx, ly, 0, lx, ly, radius);
-  glow.addColorStop(0, 'rgba(255,255,255,0.17)');
-  glow.addColorStop(0.3, 'rgba(255,255,255,0.07)');
-  glow.addColorStop(0.65, 'rgba(255,255,255,0.02)');
+  glow.addColorStop(0, `rgba(${cr | 0},${cg | 0},${cb | 0},0.28)`);
+  glow.addColorStop(0.34, `rgba(${cr | 0},${cg | 0},${cb | 0},0.14)`);
+  glow.addColorStop(0.62, `rgba(${cr | 0},${cg | 0},${cb | 0},0.045)`);
+  glow.addColorStop(0.85, `rgba(${cr | 0},${cg | 0},${cb | 0},0.01)`);
   glow.addColorStop(1, TRANSPARENT);
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, width, height);
@@ -163,7 +167,7 @@ export function drawScene(
 
   drawAmbient(ctx, width, height, t, palette);
   drawShape(ctx, width, height, t, shape);
-  drawPointerLight(ctx, width, height, timeMs);
+  drawPointerLight(ctx, width, height, timeMs, shape.color);
 
   ctx.restore();
 }
