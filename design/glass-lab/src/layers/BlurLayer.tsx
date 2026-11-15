@@ -114,6 +114,8 @@ export function BlurLayer({ state, speed, blur, downsample, alpha }: BlurLayerPr
         speed,
         palette: DARK_PALETTE[state],
         shape: morphAt(now),
+        // L3 只有 1/N 分辨率且最终还要模糊，没必要再做一遍融合合成。
+        fuse: false,
       });
 
       // ---- 2) 不填底色：L3 只叠「模糊后的形状」。
