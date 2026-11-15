@@ -1,0 +1,128 @@
+/* L4 玻璃层：全应用唯一的 backdrop-filter 使用者。
+ *
+ * 边缘是「曲面」：
+ *   切线暗边（1–2px）→ 曲面亮带（离边 2–7px）→ 长尾衰减。
+ *   亮带不贴着边框，所以读起来是「凸起的曲面」，不是描边。
+ *   底部反向：切线暗边更沉，亮带换成暗带（背面），面板因此有 2.5D 的厚度。
+ *   四角用 radial-gradient 叠一层，模拟曲率最大的地方把光「聚」起来。
+ *
+ * 性能约定：
+ *   - backdrop-filter ≈ 面板面积 × blur 半径，背景变化就要重新采样。
+ *   - 全部视觉都在 box-shadow / background-image 上，没有伪元素环、没有额外 filter。
+ *   - 不用 filter: drop-shadow。
+ */
+
+.glass {
+  --glass-radius: 24px;
+  --bevel: var(--glass-bevel, 1);
+
+  position: relative;
+  border-radius: var(--glass-radius);
+
+  /* 染色 + 角部曲面高光 + 纵向体积 */
+  background-color: rgba(var(--tint), var(--l4-alpha));
+  background-image:
+    radial-gradient(
+      140% 100% at 0% 0%,
+      rgba(var(--hair), calc(0.06 * var(--hl) * var(--bevel))),
+      rgba(var(--hair), 0) 42%
+    ),
+    radial-gradient(
+      120% 90% at 100% 0%,
+      rgba(var(--hair), calc(0.04 * var(--hl) * var(--bevel))),
+      rgba(var(--hair), 0) 38%
+    ),
+    radial-gradient(
+      120% 90% at 0% 100%,
+      rgba(0, 0, 0, calc(0.05 * var(--hl) * var(--bevel))),
+      rgba(var(--hair), 0) 46%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(var(--hair), calc(0.04 * var(--hl) * var(--bevel))) 0%,
+      rgba(var(--hair), calc(0.01 * var(--hl) * var(--bevel))) 24%,
+      rgba(var(--hair), 0) 56%,
+      rgba(0, 0, 0, calc(0.055 * var(--hl) * var(--bevel))) 100%
+    );
+
+  backdrop-filter: blur(var(--l4-blur)) saturate(130%);
+  -webkit-backdrop-filter: blur(var(--l4-blur)) saturate(130%);
+
+  box-shadow:
+    /* 极弱外轮廓 */
+    inset 0 0 0 1px rgba(var(--hair), calc(0.04 * var(--hl))),
+
+    /* 顶部曲面：切线暗边 → 亮带 → 长尾 */
+    inset 0 1px 0 rgba(0, 0, 0, calc(0.20 * var(--hl))),
+    inset 0 6px 11px -4px rgba(var(--hair), calc(0.17 * var(--hl) * var(--bevel))),
+    inset 0 15px 26px -19px rgba(var(--hair), calc(0.10 * var(--hl) * var(--bevel))),
+    inset 0 26px 42px -34px rgba(var(--hair), calc(0.06 * var(--hl) * var(--bevel))),
+
+    /* 底部曲面：切线暗边更沉，向内是暗带（背面） */
+    inset 0 -1px 0 rgba(0, 0, 0, calc(0.28 * var(--hl))),
+    inset 0 -7px 14px -5px rgba(0, 0, 0, calc(0.20 * var(--hl) * var(--bevel))),
+    inset 0 -18px 30px -23px rgba(0, 0, 0, calc(0.14 * var(--hl) * var(--bevel))),
+
+    /* 左右曲面：左受光、右背光 */
+    inset 1px 0 0 rgba(var(--hair), calc(0.04 * var(--hl))),
+    inset 3px 0 8px -5px rgba(var(--hair), calc(0.09 * var(--hl) * var(--bevel))),
+    inset -1px 0 0 rgba(0, 0, 0, calc(0.14 * var(--hl))),
+    inset -3px 0 8px -5px rgba(0, 0, 0, calc(0.10 * var(--hl))),
+
+    /* 外投影：让面板离背景有一段距离 */
+    0 28px 66px -26px rgba(0, 0, 0, 0.58);
+}
+
+/* 浮层：包边略强、投影更深，但同样不出亮线。 */
+.glass-raised {
+  --bevel: calc(var(--glass-bevel, 1) * 1.15);
+
+  background-color: rgba(var(--tint), calc(var(--l4-alpha) + 0.04));
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--hair), calc(0.05 * var(--hl))),
+    inset 0 1px 0 rgba(0, 0, 0, calc(0.26 * var(--hl))),
+    inset 0 5px 9px -4px rgba(var(--hair), calc(0.30 * var(--hl) * var(--bevel))),
+    inset 0 11px 19px -14px rgba(var(--hair), calc(0.16 * var(--hl) * var(--bevel))),
+    inset 0 23px 38px -31px rgba(var(--hair), calc(0.09 * var(--hl) * var(--bevel))),
+    inset 0 -1px 0 rgba(0, 0, 0, calc(0.34 * var(--hl))),
+    inset 0 -5px 11px -4px rgba(0, 0, 0, calc(0.25 * var(--hl) * var(--bevel))),
+    inset 0 -16px 29px -22px rgba(0, 0, 0, calc(0.18 * var(--hl) * var(--bevel))),
+    inset 1px 0 0 rgba(var(--hair), calc(0.045 * var(--hl))),
+    inset 3px 0 9px -5px rgba(var(--hair), calc(0.10 * var(--hl) * var(--bevel))),
+    inset -1px 0 0 rgba(0, 0, 0, calc(0.16 * var(--hl))),
+    inset -3px 0 9px -5px rgba(0, 0, 0, calc(0.11 * var(--hl))),
+    0 36px 82px -30px rgba(0, 0, 0, 0.64);
+}
+
+/* 不支持 backdrop-filter 时用更实的染色兜底。 */
+@supports not (
+  (backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))
+) {
+  .glass {
+    background-color: rgba(var(--tint), calc(var(--l4-alpha) + 0.25));
+  }
+
+  .glass-raised {
+    background-color: rgba(var(--tint), calc(var(--l4-alpha) + 0.3));
+  }
+}
+
+.bg-noise {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+  background-size: 160px 160px;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.bg-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 50% 40%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.28) 100%
+  );
+  pointer-events: none;
+}

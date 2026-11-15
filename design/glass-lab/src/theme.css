@@ -1,0 +1,102 @@
+:root {
+  color-scheme: dark;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #05070a;
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  --l3-blur: 36px;
+  --l3-alpha: 0.55;
+  --l4-blur: 20px;
+  --l4-alpha: 0.55;
+  --noise-opacity: 0.03;
+  --hl: 1;
+  --bw: 1px;
+}
+
+.stage {
+  --bg: #0e1622;
+  --ink: #e8eef6;
+  --ink-dim: #8a97a8;
+  --tint: 46, 60, 82;
+  --hair: 255, 255, 255;
+  --accent: #5ad1c0;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+.layer-bg {
+  z-index: 0;
+  background: var(--bg);
+}
+
+.layer-motion {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.layer-blur {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ui {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  padding: 22px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 20px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
