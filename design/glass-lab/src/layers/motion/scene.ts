@@ -1,5 +1,6 @@
 import type { AppState } from '../../types';
 import { type ShapeParams, shapeOf } from './morph';
+import { pointerAt } from './pointer';
 
 export interface ScenePalette {
   primary: string;
@@ -113,6 +114,32 @@ function drawShape(
 }
 
 /**
+ * 跟随指针的光源：一个柔和的高光斑，叠加在形状之上。
+ * L3 会用同一套 drawScene 重绘，所以玻璃面板下方也会出现跟随的光晕。
+ */
+function drawPointerLight(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  now: number,
+): void {
+  const p = pointerAt(now);
+  if (!p.active) return;
+
+  const lx = width * p.x;
+  const ly = height * p.y;
+  const radius = Math.min(width, height) * 0.5;
+
+  const glow = ctx.createRadialGradient(lx, ly, 0, lx, ly, radius);
+  glow.addColorStop(0, 'rgba(255,255,255,0.17)');
+  glow.addColorStop(0.3, 'rgba(255,255,255,0.07)');
+  glow.addColorStop(0.65, 'rgba(255,255,255,0.02)');
+  glow.addColorStop(1, TRANSPARENT);
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, width, height);
+}
+
+/**
  * 纯函数绘制：只依赖 timeMs 与 shape，因此多个 canvas 只要传同一时刻就能像素一致。
  * 坐标必须基于 width/height 归一化，才能让 1/N 分辨率的离屏画布放大后与主画布对齐。
  */
@@ -136,6 +163,7 @@ export function drawScene(
 
   drawAmbient(ctx, width, height, t, palette);
   drawShape(ctx, width, height, t, shape);
+  drawPointerLight(ctx, width, height, timeMs);
 
   ctx.restore();
 }

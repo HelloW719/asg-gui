@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import type { AppState } from '../../types';
 import { DARK_PALETTE, drawScene } from './scene';
 import { morphAt, requestMorph } from './morph';
+import { installPointerSource } from './pointer';
 
 export interface MotionLayerProps {
   state: AppState;
@@ -16,6 +17,9 @@ export function MotionLayer({ state, speed }: MotionLayerProps) {
   useEffect(() => {
     requestMorph(state);
   }, [state]);
+
+  // 指针光源只需要装一次监听，两个 canvas 共用同一份状态。
+  useEffect(() => installPointerSource(), []);
 
   useEffect(() => {
     const canvas = ref.current;
