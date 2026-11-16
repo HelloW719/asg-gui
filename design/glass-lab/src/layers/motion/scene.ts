@@ -26,6 +26,11 @@ export interface SceneOptions {
   shape?: ShapeParams;
   /** 是否允许走融合路径；L3 低分辨率层会关闭它，省掉一遍离屏合成 */
   fuse?: boolean;
+  /**
+   * 是否绘制跟随指针的圆。L3 低分辨率层会关闭它：
+   * 圆圈本身不外发光，但再被模糊一遍就会在圆外糊出一圈光，违背这条视觉约束。
+   */
+  pointer?: boolean;
 }
 
 const TAU = Math.PI * 2;
@@ -33,8 +38,12 @@ const TRANSPARENT = 'rgba(0,0,0,0)';
 
 /** 指针实体圆的半径（相对 minDim） */
 const POINTER_RADIUS = 0.055;
-/** 指针晕染半径（相对 minDim），比实体大很多 */
-const POINTER_GLOW = 0.27;
+/**
+ * 大几何、融合遮罩和跟随圆共用的主体明度。
+ * 三者必须完全一致：融合开关只改变边缘处理，不能再改动亮度，
+ * 否则快速靠近时会出现一次可见的明度跳变。
+ */
+const BODY_ALPHA = 0.84;
 /** 靠近到这个距离内开始做边缘融合 */
 const MERGE_RANGE = 0.11;
 const MB_SCALE = 3;
@@ -120,7 +129,7 @@ function drawHalo(
   ctx.fill();
 }
 
-/** 干净形状：真实路径 + 内部径向渐变，边缘就是路径本身。 */
+/** 干净形状：真实路径 + 统一明度，边缘就是路径本身。 */
 function drawShape(
   ctx: CanvasRenderingContext2D,
   width: number,
@@ -128,63 +137,18 @@ function drawShape(
   t: number,
   s: ShapeParams,
 ): void {
-  const { path, cx, cy, r } = shapeGeometry(width, height, t, s);
+  const { path } = shapeGeometry(width, height, t, s);
   const [cr, cg, cb] = s.color;
-  const col = (a: number) => `rgba(${cr | 0},${cg | 0},${cb | 0},${a})`;
-
-  const body = ctx.createRadialGradient(
-    cx - r * 0.28,
-    cy - r * 0.3,
-    r * 0.1,
-    cx,
-    cy,
-    r * 1.02,
-  );
-  body.addColorStop(0, col(0.96));
-  body.addColorStop(0.72, col(0.84));
-  body.addColorStop(1, col(0.68));
-  ctx.fillStyle = body;
+  ctx.fillStyle = `rgba(${cr | 0},${cg | 0},${cb | 0},${BODY_ALPHA})`;
   ctx.fill(path);
 }
 
 /* ---------------- 指针 ---------------- */
 
 /**
- * 大范围圆形晕染。画在形状之前，形状会把它重叠的部分整个盖住，
- * 所以不存在「两块半透明叠在一起变亮」的斑。
+ * 指针实体圆。明度与大几何完全一致（BODY_ALPHA），
+ * 边缘只留 1–2px 抗锯齿，半径之外直接透明，不向外晕。
  */
-function drawPointerGlow(
-  ctx: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  px: number,
-  py: number,
-  s: ShapeParams,
-): void {
-  const lx = px * width;
-  const ly = py * height;
-  const r = Math.min(width, height) * POINTER_GLOW;
-  const [cr, cg, cb] = s.color;
-  const col = (a: number) => `rgba(${cr | 0},${cg | 0},${cb | 0},${a})`;
-
-  const g = ctx.createRadialGradient(lx, ly, 0, lx, ly, r);
-  g.addColorStop(0, col(0.6));
-  g.addColorStop(0.18, col(0.5));
-  g.addColorStop(0.34, col(0.38));
-  g.addColorStop(0.52, col(0.26));
-  g.addColorStop(0.68, col(0.16));
-  g.addColorStop(0.82, col(0.08));
-  g.addColorStop(0.92, col(0.03));
-  g.addColorStop(0.98, col(0.008));
-  g.addColorStop(1, TRANSPARENT);
-
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(lx, ly, r, 0, TAU);
-  ctx.fill();
-}
-
-/** 指针实体圆，边缘留一点点软。 */
 function drawPointerCore(
   ctx: CanvasRenderingContext2D,
   width: number,
@@ -200,10 +164,9 @@ function drawPointerCore(
   const col = (a: number) => `rgba(${cr | 0},${cg | 0},${cb | 0},${a})`;
 
   const g = ctx.createRadialGradient(lx, ly, 0, lx, ly, r);
-  g.addColorStop(0, col(0.96));
-  g.addColorStop(0.6, col(0.93));
-  g.addColorStop(0.8, col(0.62));
-  g.addColorStop(0.92, col(0.24));
+  g.addColorStop(0, col(BODY_ALPHA));
+  g.addColorStop(0.9, col(BODY_ALPHA));
+  g.addColorStop(0.97, col(BODY_ALPHA * 0.45));
   g.addColorStop(1, col(0));
   ctx.fillStyle = g;
   ctx.beginPath();
@@ -231,8 +194,10 @@ function ensureCanvas(
 
 /**
  * 指针贴近时：形状 + 指针实体放进同一张遮罩，模糊 + 阈值后
- * 两者接触处的边缘会长出来连在一起（就是「边缘被吸过去」的变形），
- * 其余轮廓仍然贴着原路径。
+ * 两者接触处会长出连接（就是「边缘被吸过去」的变形）。
+ *
+ * 遮罩统一用 BODY_ALPHA 填充：大几何、独立小球、融合结果三者明度完全一致，
+ * 所以融合开关只改变边缘形态（由模糊盖过），不会再出现明度跳变。
  */
 function drawFusion(
   ctx: CanvasRenderingContext2D,
@@ -242,10 +207,8 @@ function drawFusion(
   s: ShapeParams,
   px: number,
   py: number,
-  merge: number,
 ): void {
-  const geo = shapeGeometry(width, height, t, s);
-  const coreR = Math.min(width, height) * POINTER_RADIUS * (1 + 0.18 * merge);
+  const coreR = Math.min(width, height) * POINTER_RADIUS;
   const coreX = px * width;
   const coreY = py * height;
 
@@ -300,21 +263,8 @@ function drawFusion(
   bctx.putImageData(img, 0, 0);
 
   const [cr, cg, cb] = s.color;
-  const k = MB_SCALE;
-  const tone = bctx.createRadialGradient(
-    (geo.cx - geo.r * 0.28 - gx) / k,
-    (geo.cy - geo.r * 0.3 - gy) / k,
-    (geo.r * 0.1) / k,
-    (geo.cx - gx) / k,
-    (geo.cy - gy) / k,
-    (geo.r * 1.02) / k,
-  );
-  tone.addColorStop(0, `rgba(${cr | 0},${cg | 0},${cb | 0},0.96)`);
-  tone.addColorStop(0.72, `rgba(${cr | 0},${cg | 0},${cb | 0},0.84)`);
-  tone.addColorStop(1, `rgba(${cr | 0},${cg | 0},${cb | 0},0.68)`);
-
   bctx.globalCompositeOperation = 'source-in';
-  bctx.fillStyle = tone;
+  bctx.fillStyle = `rgba(${cr | 0},${cg | 0},${cb | 0},${BODY_ALPHA})`;
   bctx.fillRect(0, 0, ow, oh);
   bctx.globalCompositeOperation = 'source-over';
 
@@ -341,6 +291,8 @@ export function drawScene(
   const t = timeMs * 0.001 * speed + (options.phase ?? 0);
   const shape = options.shape ?? shapeOf(state);
   const ptr = pointerAt(timeMs);
+  const allowPointer = options.pointer !== false;
+  const showPointer = allowPointer && ptr.active;
 
   ctx.clearRect(0, 0, width, height);
   ctx.save();
@@ -349,13 +301,9 @@ export function drawScene(
   ctx.globalCompositeOperation = 'lighter';
   drawAmbient(ctx, width, height, t, palette);
 
-  // 2) 之后全部 source-over：先晕后实体，重叠处被实体覆盖，不会叠出亮斑。
+  // 2) 之后全部 source-over：形状在前，指针圆在最上，光只落在圆内。
   ctx.globalCompositeOperation = 'source-over';
   drawHalo(ctx, width, height, t, shape);
-
-  if (ptr.active) {
-    drawPointerGlow(ctx, width, height, ptr.x, ptr.y, shape);
-  }
 
   const minDim = Math.min(width, height);
   const dist = Math.hypot(
@@ -367,14 +315,13 @@ export function drawScene(
 
   const allowFuse = options.fuse !== false;
 
-  if (allowFuse && ptr.active && gap < range) {
-    let merge = 1 - Math.max(0, gap) / range;
-    merge = merge < 0 ? 0 : merge > 1 ? 1 : merge;
-    merge = merge * merge * (3 - 2 * merge);
-    drawFusion(ctx, width, height, t, shape, ptr.x, ptr.y, merge);
+  // 融合路径和独立路径的明度已经统一为 BODY_ALPHA；
+  // 切换时只剩边缘形态差异，由融合自身的模糊盖过去，不再出现亮度跳变。
+  if (allowFuse && showPointer && gap < range) {
+    drawFusion(ctx, width, height, t, shape, ptr.x, ptr.y);
   } else {
     drawShape(ctx, width, height, t, shape);
-    if (ptr.active) {
+    if (showPointer) {
       drawPointerCore(ctx, width, height, ptr.x, ptr.y, shape);
     }
   }
