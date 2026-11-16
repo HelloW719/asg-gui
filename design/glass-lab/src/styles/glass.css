@@ -1,22 +1,24 @@
-/* L4 玻璃层：全应用唯一的 backdrop-filter 使用者。
+/* L4 玻璃层：整块磨砂覆盖整个 app，无边框、不分割。
  *
- * 边缘是「曲面」：
- *   切线暗边（1–2px）→ 曲面亮带（离边 2–7px）→ 长尾衰减。
- *   亮带不贴着边框，所以读起来是「凸起的曲面」，不是描边。
- *   底部反向：切线暗边更沉，亮带换成暗带（背面），面板因此有 2.5D 的厚度。
- *   四角用 radial-gradient 叠一层，模拟曲率最大的地方把光「聚」起来。
+ * 以前是每个面板各自一层 backdrop-filter（4 块玻璃、4 份边缘）；
+ * 现在是**一层**盖住整个舞台：一次采样、一次模糊，视觉上是「整屏玻璃」，
+ * 布局面板退化回纯容器。
  *
- * 性能约定：
- *   - backdrop-filter ≈ 面板面积 × blur 半径，背景变化就要重新采样。
- *   - 全部视觉都在 box-shadow / background-image 上，没有伪元素环、没有额外 filter。
- *   - 不用 filter: drop-shadow。
+ * 边缘严格沿用 README 的曲面定义，不另调数值：
+ *   切线暗边贴边（1px）→ 曲面亮带离边 2–7px → 长尾衰减；
+ *   底部反向成暗带，形成厚度；四角用 radial-gradient 补聚光。
+ * 整套结构在圆角处连续，没有「直角边框」的突变，
+ * 也没有任何一条能单独被看见的亮线。
  */
 
-.glass {
+.layer-frost {
   --glass-radius: 24px;
   --bevel: var(--glass-bevel, 1);
 
-  position: relative;
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
   border-radius: var(--glass-radius);
 
   /* 染色 + 角部曲面高光 + 纵向体积 */
@@ -46,7 +48,6 @@
     );
 
   backdrop-filter: blur(var(--l4-blur)) saturate(130%);
-  -webkit-backdrop-filter: blur(var(--l4-blur)) saturate(130%);
 
   box-shadow:
     /* 极弱外轮廓 */
@@ -67,43 +68,23 @@
     inset 1px 0 0 rgba(var(--hair), calc(0.04 * var(--hl))),
     inset 3px 0 8px -5px rgba(var(--hair), calc(0.09 * var(--hl) * var(--bevel))),
     inset -1px 0 0 rgba(0, 0, 0, calc(0.14 * var(--hl))),
-    inset -3px 0 8px -5px rgba(0, 0, 0, calc(0.10 * var(--hl))),
-
-    /* 外投影：让面板离背景有一段距离 */
-    0 28px 66px -26px rgba(0, 0, 0, 0.58);
+    inset -3px 0 8px -5px rgba(0, 0, 0, calc(0.10 * var(--hl)));
 }
 
-/* 浮层：包边略强、投影更深，但同样不出亮线。 */
-.glass-raised {
-  --bevel: calc(var(--glass-bevel, 1) * 1.15);
+/* 内容容器：只负责布局，不再自带玻璃质感。 */
+.glass {
+  position: relative;
+}
 
-  background-color: rgba(var(--tint), calc(var(--l4-alpha) + 0.04));
-  box-shadow:
-    inset 0 0 0 1px rgba(var(--hair), calc(0.05 * var(--hl))),
-    inset 0 1px 0 rgba(0, 0, 0, calc(0.26 * var(--hl))),
-    inset 0 5px 9px -4px rgba(var(--hair), calc(0.30 * var(--hl) * var(--bevel))),
-    inset 0 11px 19px -14px rgba(var(--hair), calc(0.16 * var(--hl) * var(--bevel))),
-    inset 0 23px 38px -31px rgba(var(--hair), calc(0.09 * var(--hl) * var(--bevel))),
-    inset 0 -1px 0 rgba(0, 0, 0, calc(0.34 * var(--hl))),
-    inset 0 -5px 11px -4px rgba(0, 0, 0, calc(0.25 * var(--hl) * var(--bevel))),
-    inset 0 -16px 29px -22px rgba(0, 0, 0, calc(0.18 * var(--hl) * var(--bevel))),
-    inset 1px 0 0 rgba(var(--hair), calc(0.045 * var(--hl))),
-    inset 3px 0 9px -5px rgba(var(--hair), calc(0.10 * var(--hl) * var(--bevel))),
-    inset -1px 0 0 rgba(0, 0, 0, calc(0.16 * var(--hl))),
-    inset -3px 0 9px -5px rgba(0, 0, 0, calc(0.11 * var(--hl))),
-    0 36px 82px -30px rgba(0, 0, 0, 0.64);
+/* 兼容旧类名：整块玻璃只有一个厚度。 */
+.glass-raised {
+  position: relative;
 }
 
 /* 不支持 backdrop-filter 时用更实的染色兜底。 */
-@supports not (
-  (backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))
-) {
-  .glass {
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .layer-frost {
     background-color: rgba(var(--tint), calc(var(--l4-alpha) + 0.25));
-  }
-
-  .glass-raised {
-    background-color: rgba(var(--tint), calc(var(--l4-alpha) + 0.3));
   }
 }
 

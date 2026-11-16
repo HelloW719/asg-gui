@@ -64,6 +64,14 @@ const FIELD_LABEL: Array<{ key: keyof LabParams; label: string; fmt: (v: LabPara
   { key: 'l4Alpha', label: 'L4 透明', fmt: (v) => `${Math.round(Number(v) * 100)}%` },
 ];
 
+/** 性能定位开关：?off=l3,bf,ui,l2,noise 直接关掉对应图层（只改 CSS 显隐，不改几何）。 */
+const PERF_OFF_CLASS = (QUERY.get('off') ?? '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter((s) => ['l3', 'l2', 'bf', 'ui', 'noise'].includes(s))
+  .map((s) => `stage-off-${s}`)
+  .join(' ');
+
 export default function App() {
   const [params, setParams] = useState<LabParams>(() => {
     // 支持 ?state=error&l3blur=48 直接定格，方便批量截图与回归。
@@ -189,7 +197,7 @@ export default function App() {
   }, [runMeasure]);
 
   return (
-    <div className="stage" style={style}>
+    <div className={`stage ${PERF_OFF_CLASS}`.trim()} style={style}>
       <BackgroundLayer noise={params.noise} />
       <MotionLayer state={state} speed={params.speed} />
       <BlurLayer
@@ -199,6 +207,9 @@ export default function App() {
         downsample={params.l3Downsample}
         alpha={params.l3Alpha}
       />
+
+      {/* 整块磨砂：一次覆盖全屏，不再分割成多个面板 */}
+      <div className="layer-frost" aria-hidden />
 
       <div className="ui">
         <div className="workspace">

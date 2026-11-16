@@ -18,13 +18,16 @@ body,
   height: 100%;
   margin: 0;
   overflow: hidden;
-  background: #05070a;
+  /* 圆角外必须透明：窗口本身是透明无边框的，页面不能再铺底色。 */
+  background: transparent;
 }
 
 .stage {
   position: relative;
   width: 100%;
   height: 100%;
+  /* 自己的 24px 圆角：圆角外裁掉，什么都不放，交给窗口透明区。 */
+  border-radius: 24px;
   overflow: hidden;
   isolation: isolate;
   --l3-blur: 36px;
@@ -67,7 +70,7 @@ body,
 
 .ui {
   position: relative;
-  z-index: 3;
+  z-index: 4;
   height: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
@@ -99,4 +102,17 @@ body,
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* 性能定位开关（?off=...），只用于判断成本落在哪一层。 */
+.stage-off-l3 .layer-blur,
+.stage-off-l2 .layer-motion,
+.stage-off-ui .ui,
+.stage-off-noise .bg-noise {
+  display: none;
+}
+
+.stage-off-bf .layer-frost {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }

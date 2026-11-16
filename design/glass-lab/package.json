@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "lab": "node scripts/run-lab.mjs",
-    "lab:direct": "electron electron/main.cjs --url http://127.0.0.1:5199"
+    "lab:direct": "electron electron/main.cjs --url http://127.0.0.1:5199",
+    "app": "electron electron/preview.cjs"
   },
   "keywords": [],
   "type": "module",

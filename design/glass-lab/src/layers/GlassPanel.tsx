@@ -7,13 +7,12 @@ export interface GlassPanelProps extends HTMLAttributes<HTMLElement> {
 }
 
 /**
- * L4 控件层：染色 + 单层 backdrop-filter + 边缘高光。
+ * 布局容器：只负责排版与语义，不再自带玻璃质感。
  *
- * 玻璃质感全部画在**这一个元素**上，内部不再嵌 `.glass`：
- * - 染色 + 内部体积渐变 → 元素自身的多层 background
- * - 10–20px 柔和内发光 / 顶部硬高光 / 底部反光 / 右下暗部 → inset box-shadow
- * - 1px 渐变描边（左上亮、右下近黑）→ ::before + mask-composite
- * 一个面板只有一个 backdrop-filter，避免同一块区域被重复采样成多层模糊。
+ * 磨砂是**整块**的（`.layer-frost` 一次性覆盖全 app），所以这里不写
+ * backdrop-filter / 圆角 / 描边 / 投影——否则又会退回到「多个面板各糊一遍」，
+ * 每个面板都要独立采样一次背景，成本随面板数量线性上升。
+ * `variant` 仅保留给调用方表达层次，视觉上已无差异。
  */
 export function GlassPanel({ children, className = '', variant = 'base', ...rest }: GlassPanelProps) {
   return (
