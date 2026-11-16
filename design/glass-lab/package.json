@@ -2,7 +2,7 @@
   "name": "asg-glass-lab",
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "electron/preview.cjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite",
@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lab": "node scripts/run-lab.mjs",
     "lab:direct": "electron electron/main.cjs --url http://127.0.0.1:5199",
-    "app": "electron electron/preview.cjs"
+    "app": "electron electron/preview.cjs",
+    "package:win": "npm run build && electron-packager . \"ASG Glass Lab\" --platform=win32 --arch=x64 --out=release --overwrite --asar --prune=true --icon=assets/icon.ico --ignore=^/release --ignore=^/scripts --ignore=^/electron/main.cjs --ignore=^/src --ignore=^/tests --ignore=^/test-results"
   },
   "keywords": [],
   "type": "module",
@@ -24,8 +25,12 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
     "electron": "^45.3.2",
+    "@electron/packager": "^19.0.2",
     "playwright-core": "^1.65.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.8"
+  },
+  "allowScripts": {
+    "electron@45.3.3": true
   }
 }

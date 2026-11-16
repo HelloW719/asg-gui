@@ -13,9 +13,11 @@
  */
 
 const { app, BrowserWindow } = require('electron');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const DEFAULTS = {
-  url: 'http://127.0.0.1:4173/?state=error',
+  url: null,
   width: 1440,
   height: 900,
 };
@@ -37,9 +39,13 @@ async function run() {
 
   await app.whenReady();
 
+  const builtIndex = path.join(__dirname, '..', 'dist', 'index.html');
+  const useBuiltPage = !args.url && fs.existsSync(builtIndex);
   const win = new BrowserWindow({
     width: args.width,
     height: args.height,
+    minWidth: 960,
+    minHeight: 640,
     show: true,
     // 无边框 + 透明：圆角由页面自己画（.stage 的 24px），圆角外保持透明。
     frame: false,
@@ -58,7 +64,13 @@ async function run() {
   });
 
   win.setMenuBarVisibility(false);
-  win.loadURL(args.url);
+  if (args.url) {
+    await win.loadURL(args.url);
+  } else if (useBuiltPage) {
+    await win.loadFile(builtIndex);
+  } else {
+    throw new Error('未找到 dist/index.html。请先执行 npm run build。');
+  }
   win.show();
   win.focus();
 
@@ -66,8 +78,8 @@ async function run() {
   win.setBounds({ width: args.width, height: args.height });
 
   win.webContents.on('did-fail-load', (_e, code, desc) => {
-    console.error(`[app] 加载失败 ${code} ${desc}：${args.url}`);
-    console.error('[app] 先跑 npm run build && npx vite preview --port 4173');
+    console.error(`[app] 加载失败 ${code} ${desc}：${args.url || builtIndex}`);
+    console.error('[app] 请先执行 npm run build。');
   });
 
   app.on('window-all-closed', () => app.quit());
