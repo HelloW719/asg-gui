@@ -32,6 +32,8 @@ const activePath = computed(() => route.path);
       :to="item.to"
       class="nav-item"
       :class="{ 'nav-item--active': activePath === item.to }"
+      :aria-label="item.label"
+      :title="item.label"
     >
       <component :is="item.icon" :size="19" :stroke-width="1.8" />
       <span>{{ item.label }}</span>

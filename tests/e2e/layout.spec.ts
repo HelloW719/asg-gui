@@ -24,10 +24,10 @@ test("switches between dark and light appearance", async ({ page }) => {
 test.describe("dashboard fixture", () => {
   test.use({
     colorScheme: "dark",
-    viewport: { width: 1280, height: 820 },
   });
 
   test("renders live status, service cards and visual state", async ({ page }) => {
+    const size = test.info().project.name === "minimum-window" ? "minimum" : "dark";
     await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
@@ -36,7 +36,30 @@ test.describe("dashboard fixture", () => {
     await expect(page.getByText("SearXNG", { exact: true })).toBeVisible();
     await expect(page.getByText("FlareSolverr", { exact: true })).toBeVisible();
     await expect(page.getByRole("status").filter({ hasText: "任务运行中" })).toBeHidden();
-    await page.screenshot({ path: "test-results/dashboard-dark.png", fullPage: true });
+    await expect(page.locator(".glass-scene canvas")).toHaveCount(2);
+    await page.waitForTimeout(1600);
+    await page.screenshot({ path: `test-results/dashboard-${size}.png`, fullPage: true });
+    await page.getByRole("button", { name: "切换到浅色主题" }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    await page.waitForTimeout(1600);
+    await page.screenshot({ path: `test-results/dashboard-${size}-light.png`, fullPage: true });
+  });
+});
+
+test.describe("glass shell navigation", () => {
+  test.use({ colorScheme: "dark" });
+
+  test("keeps the shared glass scene while navigating to search", async ({ page }) => {
+    const size = test.info().project.name === "minimum-window" ? "minimum" : "desktop";
+    await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
+    await page.getByRole("link", { name: "检索" }).click();
+    await expect(page.getByRole("heading", { name: "检索与抓取" })).toBeVisible();
+    await expect(page.getByPlaceholder("输入问题、关键词或站点范围")).toBeVisible();
+    await expect(page.locator(".glass-scene canvas")).toHaveCount(2);
+    await page.waitForTimeout(1600);
+    await page.screenshot({ path: `test-results/explorer-${size}.png`, fullPage: true });
   });
 });
 

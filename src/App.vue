@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { LoaderCircle } from "@lucide/vue";
 import AppSidebar from "./components/AppSidebar.vue";
 import AppTitleBar from "./components/AppTitleBar.vue";
+import GlassScene from "./components/GlassScene.vue";
 import InlineNotice from "./components/InlineNotice.vue";
 import SetupView from "./views/SetupView.vue";
 import { listenNavigate, listenQuitBlocked } from "./services/desktop";
@@ -40,13 +41,14 @@ watch(
 <template>
   <div class="app-root">
     <div class="background-layer" aria-hidden="true" />
-    <div class="ambient-layer" aria-hidden="true">
-      <span class="ambient-shape ambient-shape--one" />
-      <span class="ambient-shape ambient-shape--two" />
-      <span class="ambient-shape ambient-shape--three" />
-    </div>
+    <GlassScene
+      :visual-state="app.visualState"
+      :theme="app.resolvedTheme"
+      :reduced-motion="app.reducedMotion"
+    />
+    <div class="glass-frost-layer" aria-hidden="true" />
 
-    <div class="app-frame glass-surface">
+    <div class="app-frame">
       <AppTitleBar />
 
       <div v-if="!app.hydrated" class="app-loading">

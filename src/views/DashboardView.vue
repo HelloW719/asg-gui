@@ -12,7 +12,6 @@ import {
 import ConfirmDialog from "../components/ConfirmDialog.vue";
 import InlineNotice from "../components/InlineNotice.vue";
 import ServiceCard from "../components/ServiceCard.vue";
-import StatusGeometry from "../components/StatusGeometry.vue";
 import { useAppStore } from "../stores/app";
 import { useJobsStore } from "../stores/jobs";
 import type { CliResult, DoctorCheck, LogLine } from "../types/cli";
@@ -102,7 +101,7 @@ function confirmPending(): void {
       <div>
         <span class="eyebrow">实时控制面</span>
         <h1>系统状态</h1>
-        <p>{{ app.root }}</p>
+        <p class="path-copy status-hero__path">{{ app.root }}</p>
       </div>
       <button class="button button--ghost" type="button" :disabled="app.statusPending" @click="app.refreshStatus">
         <RefreshCcw :size="16" :class="{ spin: app.statusPending }" />
@@ -113,9 +112,6 @@ function confirmPending(): void {
     <InlineNotice v-if="actionError || jobs.lastError" tone="error" :message="actionError ?? jobs.lastError ?? ''" dismissible @dismiss="jobs.clearError" />
 
     <section class="status-hero glass-surface">
-      <div class="status-hero__visual">
-        <StatusGeometry :state="app.visualState" :reduced-motion="app.reducedMotion" />
-      </div>
       <div class="status-hero__copy">
         <span class="status-pill" :class="`status-pill--${app.visualState}`">
           <Activity :size="15" />
@@ -123,20 +119,6 @@ function confirmPending(): void {
         </span>
         <h2>{{ visualStateLabels[app.visualState] }}</h2>
         <p>{{ visualStateDescription(app.visualState) }}</p>
-        <dl class="status-summary">
-          <div>
-            <dt>在线服务</dt>
-            <dd>{{ app.serviceOnlineCount }} / 3</dd>
-          </div>
-          <div>
-            <dt>Supervisor</dt>
-            <dd>{{ app.status ? describeMode(app.status.supervisor.mode) : "—" }}</dd>
-          </div>
-          <div>
-            <dt>状态探测</dt>
-            <dd>{{ app.statusPending ? "进行中" : "已就绪" }}</dd>
-          </div>
-        </dl>
         <div class="action-row">
           <button class="button button--primary" type="button" :disabled="jobs.hasRunningOperation" @click="runLifecycle('start')">
             <Play :size="16" />
@@ -152,6 +134,20 @@ function confirmPending(): void {
           </button>
         </div>
       </div>
+      <dl class="status-summary">
+        <div>
+          <dt>在线服务</dt>
+          <dd><strong>{{ app.serviceOnlineCount }}</strong><span>/ 3</span></dd>
+        </div>
+        <div>
+          <dt>Supervisor</dt>
+          <dd>{{ app.status ? describeMode(app.status.supervisor.mode) : "—" }}</dd>
+        </div>
+        <div>
+          <dt>状态探测</dt>
+          <dd>{{ app.statusPending ? "进行中" : "已就绪" }}</dd>
+        </div>
+      </dl>
     </section>
 
     <section class="section-block">
