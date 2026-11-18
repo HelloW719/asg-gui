@@ -60,6 +60,43 @@
   letter-spacing: 0.06em;
 }
 
+.status-pill svg {
+  transform-origin: center;
+}
+
+.status-pill--stable svg {
+  animation: status-breathe 2.4s ease-in-out infinite;
+}
+
+.status-pill--starting svg,
+.status-pill--restarting svg,
+.status-pill--loading svg {
+  animation: status-breathe 0.9s ease-in-out infinite;
+}
+
+.status-pill--degraded svg,
+.status-pill--stopped svg,
+.status-pill--disconnected svg {
+  animation: status-breathe 3.2s ease-in-out infinite;
+}
+
+.status-pill--failed svg {
+  animation: status-breathe 0.5s ease-in-out infinite;
+}
+
+@keyframes status-breathe {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(0.85);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
 .status-pill--failed,
 .status-pill--degraded,
 .status-pill--disconnected {

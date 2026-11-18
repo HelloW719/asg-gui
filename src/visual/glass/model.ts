@@ -24,6 +24,8 @@ export interface ShapeParams {
   lobes: number;
   amp: number;
   spin: number;
+  /** morph 期间附加的整体扭转角，静止时为 0。 */
+  twist: number;
   color: [number, number, number];
   halo: number;
 }

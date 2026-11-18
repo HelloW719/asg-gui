@@ -1,11 +1,15 @@
 import {
+  createShapeGeometry,
+  type ShapeGeometry,
+} from "./geometry";
+import {
   paletteFor,
   type GlassPalette,
   type GlassSceneState,
   type ShapeParams,
   type ThemeMode,
 } from "./model";
-import { pointerAt, type PointerSample } from "./pointer";
+import type { PointerSample } from "./pointer";
 
 const TAU = Math.PI * 2;
 const TRANSPARENT = "rgba(0,0,0,0)";
@@ -14,38 +18,6 @@ const BODY_ALPHA_LIGHT = 0.68;
 const POINTER_RADIUS = 0.055;
 const MERGE_RANGE = 0.11;
 const MB_SCALE = 3;
-
-function shapeGeometry(
-  width: number,
-  height: number,
-  time: number,
-  shape: ShapeParams,
-): { path: Path2D; cx: number; cy: number; r: number } {
-  const minDim = Math.min(width, height);
-  const cx = width * shape.cx;
-  const cy = height * shape.cy;
-  const breathe = 1 + Math.sin(time * 0.8) * 0.015;
-  const radius = minDim * shape.r * breathe;
-  const spin = time * 0.55 * shape.spin;
-  const path = new Path2D();
-  const steps = 160;
-
-  for (let index = 0; index <= steps; index += 1) {
-    const angle = (index / steps) * TAU;
-    const ripple =
-      shape.amp *
-      (Math.sin(shape.lobes * angle + spin * 2) +
-        0.42 * Math.sin(shape.lobes * 0.5 * angle - spin * 3.1));
-    const currentRadius = radius * (1 + ripple);
-    const currentAngle = angle + spin * 0.35;
-    const x = cx + Math.cos(currentAngle) * currentRadius;
-    const y = cy + Math.sin(currentAngle) * currentRadius;
-    if (index === 0) path.moveTo(x, y);
-    else path.lineTo(x, y);
-  }
-  path.closePath();
-  return { path, cx, cy, r: radius };
-}
 
 function drawAmbient(
   context: CanvasRenderingContext2D,
@@ -67,6 +39,7 @@ function drawAmbient(
       0.06,
     ],
   ];
+
   for (const [x, y, alpha] of spots) {
     const px = width * x;
     const py = height * y;
@@ -82,12 +55,9 @@ function drawAmbient(
 
 function drawHalo(
   context: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  time: number,
+  geometry: ShapeGeometry,
   shape: ShapeParams,
 ): void {
-  const geometry = shapeGeometry(width, height, time, shape);
   const [red, green, blue] = shape.color;
   const halo = context.createRadialGradient(
     geometry.cx,
@@ -110,29 +80,28 @@ function drawHalo(
 
 function drawShape(
   context: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  time: number,
+  geometry: ShapeGeometry,
   shape: ShapeParams,
   alpha: number,
 ): void {
-  const { path } = shapeGeometry(width, height, time, shape);
   const [red, green, blue] = shape.color;
   context.fillStyle = `rgba(${red | 0},${green | 0},${blue | 0},${alpha})`;
-  context.fill(path);
+  context.fill(geometry.path);
 }
 
-function drawPointer(
+function drawPointerCore(
   context: CanvasRenderingContext2D,
   width: number,
   height: number,
   pointer: PointerSample,
   shape: ShapeParams,
   alpha: number,
+  time: number,
 ): void {
   const x = pointer.x * width;
   const y = pointer.y * height;
-  const radius = Math.min(width, height) * POINTER_RADIUS;
+  const pulse = 1 + Math.sin(time * 1.45) * 0.025;
+  const radius = Math.min(width, height) * POINTER_RADIUS * pulse;
   const [red, green, blue] = shape.color;
   const color = (value: number) =>
     `rgba(${red | 0},${green | 0},${blue | 0},${value})`;
@@ -163,22 +132,30 @@ function ensureCanvas(
   return canvas;
 }
 
+/**
+ * Glass Lab 的 metaball 融合：形状与指针放进同一张低分辨率遮罩，
+ * 模糊后做阈值化，小球靠近时会连续长出被大几何吸附的连接。
+ */
 function drawFusion(
   context: CanvasRenderingContext2D,
   width: number,
   height: number,
   time: number,
+  geometry: ShapeGeometry,
   shape: ShapeParams,
   pointer: PointerSample,
   alpha: number,
 ): void {
-  const coreRadius = Math.min(width, height) * POINTER_RADIUS;
+  const coreRadius =
+    Math.min(width, height) *
+    POINTER_RADIUS *
+    (1 + Math.sin(time * 1.45) * 0.025);
   const coreX = pointer.x * width;
   const coreY = pointer.y * height;
   const minDim = Math.min(width, height);
   const reach = minDim * (shape.r + MERGE_RANGE + POINTER_RADIUS) + 32;
-  const centerX = shape.cx * width;
-  const centerY = shape.cy * height;
+  const centerX = geometry.cx;
+  const centerY = geometry.cy;
   const left = Math.max(0, Math.floor((centerX - reach) / 64) * 64);
   const top = Math.max(0, Math.floor((centerY - reach) / 64) * 64);
   const right = Math.min(width, Math.ceil((centerX + reach) / 64) * 64);
@@ -205,7 +182,7 @@ function drawFusion(
     -top / MB_SCALE,
   );
   source.fillStyle = "#fff";
-  source.fill(shapeGeometry(width, height, time, shape).path);
+  source.fill(geometry.path);
   source.beginPath();
   source.arc(coreX, coreY, coreRadius, 0, TAU);
   source.fill();
@@ -231,6 +208,10 @@ function drawFusion(
   blur.fillStyle = `rgba(${red | 0},${green | 0},${blue | 0},${alpha})`;
   blur.fillRect(0, 0, scaledWidth, scaledHeight);
   blur.globalCompositeOperation = "source-over";
+
+  context.save();
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
   context.drawImage(
     fusionBlur,
     0,
@@ -242,6 +223,7 @@ function drawFusion(
     boxWidth,
     boxHeight,
   );
+  context.restore();
 }
 
 export interface DrawSceneOptions {
@@ -249,8 +231,8 @@ export interface DrawSceneOptions {
   theme: ThemeMode;
   shape: ShapeParams;
   speed?: number;
-  pointer?: boolean;
-  fuse?: boolean;
+  geometry?: ShapeGeometry;
+  pointer?: PointerSample | null;
 }
 
 export function drawScene(
@@ -261,43 +243,56 @@ export function drawScene(
   options: DrawSceneOptions,
 ): void {
   const speed = options.speed ?? 1;
-  const time = (timeMs * 0.001 * speed) % 1000;
+  const time = timeMs * 0.001 * speed;
   const palette = paletteFor(options.state, options.theme);
-  const bodyAlpha =
+  const alpha =
     options.theme === "dark" ? BODY_ALPHA_DARK : BODY_ALPHA_LIGHT;
-  const pointer = pointerAt(timeMs);
-  const showPointer = options.pointer !== false && pointer.active;
-  const canFuse = options.fuse !== false;
+  const geometry =
+    options.geometry ??
+    createShapeGeometry(width, height, time, options.shape);
 
   context.clearRect(0, 0, width, height);
   context.save();
   context.globalCompositeOperation = "lighter";
   drawAmbient(context, width, height, time, palette);
   context.globalCompositeOperation = "source-over";
-  drawHalo(context, width, height, time, options.shape);
+  drawHalo(context, geometry, options.shape);
 
+  const pointer = options.pointer;
   const minDim = Math.min(width, height);
-  const distance = Math.hypot(
-    pointer.x * width - options.shape.cx * width,
-    pointer.y * height - options.shape.cy * height,
-  );
+  const distance = pointer
+    ? Math.hypot(
+        pointer.x * width - geometry.cx,
+        pointer.y * height - geometry.cy,
+      )
+    : Number.POSITIVE_INFINITY;
   const gap = distance - minDim * options.shape.r;
-  const mergeRange = minDim * MERGE_RANGE;
+  const canFuse =
+    pointer?.phase === "tracking" && gap < minDim * MERGE_RANGE;
 
-  if (canFuse && showPointer && gap < mergeRange) {
+  if (pointer && canFuse) {
     drawFusion(
       context,
       width,
       height,
       time,
+      geometry,
       options.shape,
       pointer,
-      bodyAlpha,
+      alpha,
     );
   } else {
-    drawShape(context, width, height, time, options.shape, bodyAlpha);
-    if (showPointer) {
-      drawPointer(context, width, height, pointer, options.shape, bodyAlpha);
+    drawShape(context, geometry, options.shape, alpha);
+    if (pointer?.phase === "tracking") {
+      drawPointerCore(
+        context,
+        width,
+        height,
+        pointer,
+        options.shape,
+        alpha,
+        time,
+      );
     }
   }
   context.restore();

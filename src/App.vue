@@ -38,6 +38,7 @@ useAppBootstrap({
       :visual-state="appStatus.visualState.value"
       :theme="appearance.resolvedTheme"
       :reduced-motion="appearance.reducedMotion"
+      :frame-rate="appearance.glassFrameRate"
     >
       <div class="app-frame">
         <AppTitleBar />

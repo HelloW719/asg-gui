@@ -18,6 +18,7 @@ export function shapeOf(
         lobes: 6,
         amp: 0,
         spin: 1,
+        twist: 0,
         color: dark ? [52, 211, 153] : [39, 148, 121],
         halo: 0.26,
       };
@@ -30,6 +31,7 @@ export function shapeOf(
         lobes: 6,
         amp: 0,
         spin: 1,
+        twist: 0,
         color: dark ? [245, 196, 81] : [184, 132, 29],
         halo: 0.26,
       };
@@ -41,6 +43,7 @@ export function shapeOf(
         lobes: 6,
         amp: 0.13,
         spin: 1,
+        twist: 0,
         color: dark ? [99, 164, 255] : [57, 123, 208],
         halo: 0.2,
       };
@@ -52,6 +55,7 @@ export function shapeOf(
         lobes: 6,
         amp: 0.13,
         spin: 1,
+        twist: 0,
         color: dark ? [255, 190, 99] : [186, 124, 34],
         halo: 0.2,
       };
@@ -63,6 +67,7 @@ export function shapeOf(
         lobes: 6,
         amp: 0.13,
         spin: 1,
+        twist: 0,
         color: dark ? [138, 163, 196] : [97, 116, 139],
         halo: 0.2,
       };
@@ -83,6 +88,14 @@ export function morphShape(
     shapeProgress *
     shapeProgress *
     (shapeProgress * (shapeProgress * 6 - 15) + 10);
+  const fromCurve = from.amp > 0.01;
+  const toCurve = to.amp > 0.01;
+  const twistDirection =
+    fromCurve && !toCurve ? 1 : !fromCurve && toCurve ? -1 : 1;
+  const twistProgress =
+    twistDirection > 0
+      ? Math.pow(progress, 1.5)
+      : 1 - Math.pow(1 - progress, 1.5);
   const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
   return {
     cx: lerp(from.cx, to.cx, smooth),
@@ -91,6 +104,7 @@ export function morphShape(
     lobes: to.lobes,
     amp: lerp(from.amp, to.amp, shapeSmooth),
     spin: to.spin,
+    twist: twistDirection * Math.PI * 2 * twistProgress,
     color: [
       lerp(from.color[0], to.color[0], shapeSmooth),
       lerp(from.color[1], to.color[1], shapeSmooth),

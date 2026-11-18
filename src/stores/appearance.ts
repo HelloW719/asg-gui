@@ -2,15 +2,21 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import { inTauri, setDesktopTheme } from "../services/desktop";
 import type { ThemePreference } from "../types/cli";
+import {
+  isGlassFrameRate,
+  type GlassFrameRate,
+} from "../types/appearance";
 
 const SYSTEM_THEME_QUERY = "(prefers-color-scheme: dark)";
 const REDUCED_TRANSPARENCY_KEY = "asg-gui-reduced-transparency";
+const GLASS_FRAME_RATE_KEY = "asg-gui-glass-frame-rate";
 
 export const useAppearanceStore = defineStore("appearance", () => {
   const themePreference = ref<ThemePreference>("system");
   const systemDark = ref(window.matchMedia(SYSTEM_THEME_QUERY).matches);
   const reducedMotion = ref(false);
   const reducedTransparency = ref(false);
+  const glassFrameRate = ref<GlassFrameRate>("auto");
   let initialized = false;
 
   const resolvedTheme = computed<"dark" | "light">(() =>
@@ -30,6 +36,12 @@ export const useAppearanceStore = defineStore("appearance", () => {
     reducedMotion.value = motionMedia.matches;
     reducedTransparency.value =
       localStorage.getItem(REDUCED_TRANSPARENCY_KEY) === "true";
+    const rawFrameRate = localStorage.getItem(GLASS_FRAME_RATE_KEY);
+    const savedFrameRate =
+      rawFrameRate === "auto" || rawFrameRate === "display"
+        ? rawFrameRate
+        : Number(rawFrameRate);
+    if (isGlassFrameRate(savedFrameRate)) glassFrameRate.value = savedFrameRate;
 
     themeMedia.addEventListener("change", (event) => {
       systemDark.value = event.matches;
@@ -61,16 +73,23 @@ export const useAppearanceStore = defineStore("appearance", () => {
     localStorage.setItem(REDUCED_TRANSPARENCY_KEY, String(value));
   }
 
+  function setGlassFrameRate(value: GlassFrameRate): void {
+    glassFrameRate.value = value;
+    localStorage.setItem(GLASS_FRAME_RATE_KEY, String(value));
+  }
+
   return {
     themePreference,
     resolvedTheme,
     reducedMotion,
     reducedTransparency,
+    glassFrameRate,
     initialize,
     applyPreference,
     setTheme,
     toggleTheme,
     setReducedMotion,
     setReducedTransparency,
+    setGlassFrameRate,
   };
 });

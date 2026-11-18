@@ -355,7 +355,10 @@
 
 .glass-scene__blur {
   z-index: 1;
-  opacity: 0.45;
+}
+
+.glass-scene__particles {
+  z-index: 2;
 }
 
 .glass-frost-layer {
@@ -695,7 +698,10 @@
 
 @media (max-width: 900px) {
   .app-frame { inset: 0; border-radius: 0; }
-  .background-layer, .glass-scene, .glass-frost-layer { inset: 0; border-radius: 0; }
+  .background-layer, .glass-scene, .glass-frost-layer {
+    inset: 0;
+    border-radius: 0;
+  }
   .page { padding-inline: 19px; }
 }
 

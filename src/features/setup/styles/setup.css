@@ -48,7 +48,13 @@
   margin-bottom: 24px;
   border: 1px solid color-mix(in srgb, var(--sage) 30%, transparent);
   border-radius: 50%;
-  animation: ambient-turn 20s linear infinite;
+  animation: setup-orbit-turn 20s linear infinite;
+}
+
+@keyframes setup-orbit-turn {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .setup-orbit span {

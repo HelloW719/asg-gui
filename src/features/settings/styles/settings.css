@@ -24,6 +24,11 @@
   font-size: 0.7rem;
 }
 
+.glass-frame-rate-select {
+  width: 170px;
+  flex: 0 0 170px;
+}
+
 .settings-install {
   display: flex;
   position: relative;
@@ -141,4 +146,5 @@
   .config-field { grid-template-columns: minmax(0, 1fr) 22px; }
   .config-field code { display: none; }
   .settings-row { align-items: flex-start; flex-direction: column; }
+  .glass-frame-rate-select { width: 100%; flex-basis: auto; }
 }
