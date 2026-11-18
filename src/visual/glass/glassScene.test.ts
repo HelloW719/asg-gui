@@ -31,6 +31,8 @@ describe("glass scene state mapping", () => {
     expect(failed.cy).toBeLessThan(0.5);
     expect(healthy.amp).toBe(0);
     expect(failed.amp).toBe(0);
+    expect(healthy.twist).toBe(0);
+    expect(failed.twist).toBe(0);
   });
 
   it("morphs position before shape amplitude", () => {
@@ -42,5 +44,16 @@ describe("glass scene state mapping", () => {
     expect(early.amp).toBe(0);
     expect(late.amp).toBeGreaterThan(0);
     expect(early.cx).toBeLessThan(circle.cx);
+  });
+
+  it("adds a full mirrored turn to the state morph", () => {
+    const circle = shapeOf("healthy", "dark");
+    const cookie = shapeOf("working", "dark");
+    const early = morphShape(circle, cookie, 0.2);
+    const late = morphShape(circle, cookie, 0.8);
+
+    expect(early.twist).toBeLessThan(0);
+    expect(Math.abs(late.twist)).toBeGreaterThan(Math.abs(early.twist));
+    expect(morphShape(circle, cookie, 1).twist).toBeCloseTo(-Math.PI * 2);
   });
 });
