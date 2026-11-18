@@ -4,9 +4,9 @@ import {
   closeWindow,
   minimizeWindow,
   toggleMaximizeWindow,
-} from "../services/desktop";
-import { useAppearanceStore } from "../stores/appearance";
-import { useSessionStore } from "../stores/session";
+} from "@/services/desktop";
+import { useAppearanceStore } from "@/stores/appearance";
+import { useSessionStore } from "@/stores/session";
 
 const session = useSessionStore();
 const appearance = useAppearanceStore();

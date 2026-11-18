@@ -2,16 +2,16 @@
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { LoaderCircle } from "@lucide/vue";
-import { useAppBootstrap } from "./app/useAppBootstrap";
-import { useAppStatus } from "./app/useAppStatus";
-import AppSidebar from "./components/AppSidebar.vue";
-import AppTitleBar from "./components/AppTitleBar.vue";
-import GlassScene from "./components/GlassScene.vue";
-import InlineNotice from "./components/InlineNotice.vue";
-import SetupView from "./views/SetupView.vue";
-import { useAppearanceStore } from "./stores/appearance";
-import { useJobsStore } from "./stores/jobs";
-import { useSessionStore } from "./stores/session";
+import { useAppBootstrap } from "@/app/useAppBootstrap";
+import { useAppStatus } from "@/app/useAppStatus";
+import AppSidebar from "@/app/components/AppSidebar.vue";
+import AppTitleBar from "@/app/components/AppTitleBar.vue";
+import InlineNotice from "@/shared/ui/InlineNotice.vue";
+import GlassScene from "@/visual/glass/GlassScene.vue";
+import SetupPage from "@/features/setup/SetupPage.vue";
+import { useAppearanceStore } from "@/stores/appearance";
+import { useJobsStore } from "@/stores/jobs";
+import { useSessionStore } from "@/stores/session";
 
 const session = useSessionStore();
 const appearance = useAppearanceStore();
@@ -56,7 +56,7 @@ useAppBootstrap({
             tone="error"
             message="当前是浏览器预览。请在 Tauri 桌面窗口中运行以调用本机 ASG CLI：npm run tauri dev"
           />
-          <SetupView preview />
+          <SetupPage preview />
         </div>
       </div>
 
@@ -68,7 +68,7 @@ useAppBootstrap({
               <component :is="Component" />
             </Transition>
           </RouterView>
-          <SetupView v-else />
+          <SetupPage v-else />
         </main>
       </div>
 

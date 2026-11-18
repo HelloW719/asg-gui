@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { FolderSearch, Link2, ShieldCheck } from "@lucide/vue";
-import { useSessionStore } from "../stores/session";
-import InlineNotice from "../components/InlineNotice.vue";
+import { useSessionStore } from "@/stores/session";
+import InlineNotice from "@/shared/ui/InlineNotice.vue";
 
 const session = useSessionStore();
 const props = withDefaults(defineProps<{ preview?: boolean }>(), { preview: false });

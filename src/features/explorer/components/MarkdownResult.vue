@@ -2,8 +2,8 @@
 import { computed, ref } from "vue";
 import { Copy } from "@lucide/vue";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { renderSafeMarkdown } from "../utils/markdown";
-import { inTauri } from "../services/desktop";
+import { renderSafeMarkdown } from "@/utils/markdown";
+import { inTauri } from "@/services/desktop";
 
 const props = defineProps<{
   text: string;

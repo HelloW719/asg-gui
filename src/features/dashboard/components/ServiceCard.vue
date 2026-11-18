@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { CircleCheck, CircleX, Gauge } from "@lucide/vue";
-import type { ServiceProbe } from "../types/cli";
+import type { ServiceProbe } from "@/types/cli";
 
 const props = defineProps<{
   name: string;

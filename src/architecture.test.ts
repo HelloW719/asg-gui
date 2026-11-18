@@ -45,8 +45,26 @@ describe("frontend architecture boundaries", () => {
     );
   });
 
-  it("does not expose low-level tasks or CLI arguments to route pages", () => {
-    const violations = filesIn("views").flatMap(([path, source]) => {
+  it("keeps shared UI free from stores, services and feature code", () => {
+    expectNoImports(
+      filesIn("shared"),
+      /(^|\/)(stores|services|features)(\/|$)/,
+      "共享 UI 只能依赖自身、类型和纯工具",
+    );
+  });
+
+  it("keeps feature modules from reaching into each other", () => {
+    expectNoImports(
+      filesIn("features"),
+      /(^|\/)features\/(dashboard|explorer|sources|settings|logs|maintenance|setup)(\/|$)/,
+      "功能模块只能通过 app 层或共享 UI 进行跨模块协作",
+    );
+  });
+
+  it("does not expose low-level tasks or CLI arguments to pages", () => {
+    const violations = filesIn("features")
+      .filter(([path]) => path.endsWith("Page.vue"))
+      .flatMap(([path, source]) => {
       const patterns = [
         /services\/desktop/,
         /\bjobClient\b/,
@@ -55,7 +73,7 @@ describe("frontend architecture boundaries", () => {
         /\[\s*["'](status|logs|doctor|engines|plugins|extensions|config|browser|adlist|update)["']/,
       ];
       return patterns.some((pattern) => pattern.test(source)) ? [path] : [];
-    });
+      });
     expect(violations, "页面必须通过 useAsgServices 或功能组合式函数访问能力").toEqual([]);
   });
 });

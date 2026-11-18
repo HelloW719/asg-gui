@@ -1,0 +1,108 @@
+<script setup lang="ts">
+import { RefreshCw } from "@lucide/vue";
+import BaseButton from "@/shared/ui/BaseButton.vue";
+import type { EngineInfo, EngineRouteDraft } from "@/types/cli";
+
+defineProps<{
+  engines: EngineInfo[];
+  loading: boolean;
+  busy: boolean;
+  routeDrafts: Record<string, EngineRouteDraft>;
+}>();
+
+const emit = defineEmits<{
+  refresh: [includeRemote: boolean];
+  toggle: [engine: EngineInfo];
+  routeChange: [engine: EngineInfo, route: string];
+  saveRoute: [engine: EngineInfo];
+  secret: [engine: EngineInfo];
+}>();
+
+function currentRoute(engine: EngineInfo): string {
+  return ["resident", "rotating"].find((route) => engine.routing.includes(route)) ?? "none";
+}
+</script>
+
+<template>
+  <section class="source-toolbar glass-surface">
+    <span>{{ engines.length }} 个本地引擎</span>
+    <div class="action-row">
+      <BaseButton size="compact" @click="emit('refresh', false)">
+        <template #icon><RefreshCw :size="15" /></template>
+        本地
+      </BaseButton>
+      <BaseButton size="compact" variant="secondary" @click="emit('refresh', true)">
+        包含远端目录
+      </BaseButton>
+    </div>
+  </section>
+
+  <p v-if="loading" class="empty-copy">正在读取引擎…</p>
+  <p v-else-if="engines.length === 0" class="empty-copy">没有可显示的搜索引擎。</p>
+  <div v-else class="engine-grid">
+    <article
+      v-for="engine in engines"
+      :key="engine.id"
+      class="engine-card glass-surface"
+    >
+      <header>
+        <div>
+          <span class="eyebrow">{{ engine.group }}</span>
+          <h2>{{ engine.name }}</h2>
+        </div>
+        <label class="switch">
+          <input
+            type="checkbox"
+            :checked="engine.enabled"
+            :disabled="busy"
+            @change="emit('toggle', engine)"
+          />
+          <span aria-hidden="true" />
+        </label>
+      </header>
+      <div class="token-row">
+        <span :class="engine.available ? 'token token--ok' : 'token token--warn'">
+          {{ engine.available ? "可用" : "缺依赖" }}
+        </span>
+        <span v-for="route in engine.routing" :key="route" class="token">
+          {{ route }}
+        </span>
+      </div>
+      <p v-if="engine.requires?.length" class="field-note">
+        依赖：{{ engine.requires.join(" · ") }}
+      </p>
+      <div v-if="engine.group === 'searxng'" class="inline-field">
+        <select
+          :value="currentRoute(engine)"
+          :disabled="busy"
+          @change="emit('routeChange', engine, ($event.target as HTMLSelectElement).value)"
+        >
+          <option value="none">none</option>
+          <option value="resident">resident</option>
+          <option value="rotating">rotating</option>
+        </select>
+      </div>
+      <details v-else-if="engine.group === 'gateway.search'" class="route-editor">
+        <summary>编辑类别路由</summary>
+        <label class="field">
+          <span>Category</span>
+          <input v-model="routeDrafts[engine.id]!.category" placeholder="news" />
+        </label>
+        <label class="field">
+          <span>Hot category</span>
+          <input v-model="routeDrafts[engine.id]!.hotCategory" placeholder="news_hot" />
+        </label>
+        <BaseButton size="compact" variant="secondary" @click="emit('saveRoute', engine)">
+          保存路由
+        </BaseButton>
+      </details>
+      <BaseButton
+        v-if="engine.requires?.length"
+        size="compact"
+        @click="emit('secret', engine)"
+      >
+        设置密钥
+      </BaseButton>
+    </article>
+  </div>
+</template>

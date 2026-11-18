@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
-import type { VisualState } from "../types/cli";
+import type { VisualState } from "@/types/cli";
 import {
   drawScene,
   installPointerSource,
@@ -8,7 +8,7 @@ import {
   sceneStateForVisual,
   shapeOf,
   type ShapeParams,
-} from "../utils/glassScene";
+} from "@/utils/glassScene";
 
 const props = defineProps<{
   visualState: VisualState;
