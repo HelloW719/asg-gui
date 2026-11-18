@@ -9,24 +9,14 @@ import {
   ShieldAlert,
   Stethoscope,
 } from "@lucide/vue";
+import { useAsgServices } from "../app/useAsgServices";
 import ConfirmDialog from "../components/ConfirmDialog.vue";
 import InlineNotice from "../components/InlineNotice.vue";
 import { useJobsStore } from "../stores/jobs";
-import type { CliResult, DoctorCheck } from "../types/cli";
-
-interface BrowserStatus {
-  path: string;
-  headless_shell: boolean;
-  chromium: boolean;
-}
-
-interface UpdateStatus {
-  current_version?: string;
-  version?: string;
-  up_to_date?: boolean;
-}
+import type { BrowserStatus, DoctorCheck, UpdateStatus } from "../types/cli";
 
 const jobs = useJobsStore();
+const serviceClient = useAsgServices();
 const checks = ref<DoctorCheck[]>([]);
 const doctorLoaded = ref(false);
 const browser = ref<BrowserStatus | null>(null);
@@ -49,15 +39,8 @@ function setError(cause: unknown): void {
 async function runDoctor(): Promise<void> {
   error.value = null;
   try {
-    const result: CliResult<{ checks: DoctorCheck[] }> = await jobs.execute(["doctor"], {
-      label: "运行环境诊断",
-    });
-    if (result.data?.checks) {
-      checks.value = result.data.checks;
-      doctorLoaded.value = true;
-    } else if (result.error) {
-      error.value = result.error.message;
-    }
+    checks.value = await serviceClient.maintenance.doctor();
+    doctorLoaded.value = true;
   } catch (cause) {
     setError(cause);
   }
@@ -65,10 +48,7 @@ async function runDoctor(): Promise<void> {
 
 async function loadBrowser(): Promise<void> {
   try {
-    const result: CliResult<BrowserStatus> = await jobs.execute(["browser", "status"], {
-      label: "检查浏览器",
-    });
-    if (result.data) browser.value = result.data;
+    browser.value = await serviceClient.maintenance.browserStatus();
   } catch {
     // Diagnostic cards remain usable if this optional read fails.
   }
@@ -78,13 +58,8 @@ async function installBrowser(full: boolean): Promise<void> {
   error.value = null;
   success.value = null;
   try {
-    const result: CliResult<BrowserStatus> = await jobs.execute(
-      full ? ["browser", "install", "--full"] : ["browser", "install"],
-      { label: full ? "安装完整 Chromium" : "安装 headless Chromium", visualState: "loading" },
-    );
-    if (result.data) browser.value = result.data;
-    if (result.ok) success.value = "Playwright 浏览器安装完成。";
-    else error.value = result.error?.message ?? "浏览器安装失败。";
+    browser.value = await serviceClient.maintenance.installBrowser(full);
+    success.value = "Playwright 浏览器安装完成。";
   } catch (cause) {
     setError(cause);
   }
@@ -94,12 +69,8 @@ async function updateAdlist(): Promise<void> {
   error.value = null;
   success.value = null;
   try {
-    const result = await jobs.execute(["adlist", "update", "--level", adLevel.value], {
-      label: "更新广告列表",
-      visualState: "restarting",
-    });
-    if (result.ok) success.value = "广告过滤列表已更新，整栈已重启。";
-    else error.value = result.error?.message ?? "广告列表更新失败。";
+    await serviceClient.maintenance.updateAdlist(adLevel.value);
+    success.value = "广告过滤列表已更新，整栈已重启。";
   } catch (cause) {
     setError(cause);
   }
@@ -109,11 +80,7 @@ async function checkUpdate(): Promise<void> {
   error.value = null;
   success.value = null;
   try {
-    const result: CliResult<UpdateStatus> = await jobs.execute(["update", "check"], {
-      label: "检查 ASG 更新",
-    });
-    if (result.data) update.value = result.data;
-    if (!result.ok) error.value = result.error?.message ?? "更新检查失败。";
+    update.value = await serviceClient.maintenance.checkUpdate();
   } catch (cause) {
     setError(cause);
   }
@@ -124,16 +91,9 @@ async function applyUpdate(): Promise<void> {
   error.value = null;
   success.value = null;
   try {
-    const result = await jobs.execute(["update", "apply"], {
-      label: "下载并应用更新",
-      visualState: "restarting",
-    });
-    if (result.ok) {
-      success.value = "ASG 已更新，整栈已重启。";
-      await checkUpdate();
-    } else {
-      error.value = result.error?.message ?? "更新失败。";
-    }
+    await serviceClient.maintenance.applyUpdate();
+    success.value = "ASG 已更新，整栈已重启。";
+    await checkUpdate();
   } catch (cause) {
     setError(cause);
   }

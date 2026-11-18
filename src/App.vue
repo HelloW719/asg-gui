@@ -1,62 +1,56 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { LoaderCircle } from "@lucide/vue";
+import { useAppBootstrap } from "./app/useAppBootstrap";
+import { useAppStatus } from "./app/useAppStatus";
 import AppSidebar from "./components/AppSidebar.vue";
 import AppTitleBar from "./components/AppTitleBar.vue";
 import GlassScene from "./components/GlassScene.vue";
 import InlineNotice from "./components/InlineNotice.vue";
 import SetupView from "./views/SetupView.vue";
-import { listenNavigate, listenQuitBlocked } from "./services/desktop";
-import { inTauri } from "./services/desktop";
-import { useAppStore } from "./stores/app";
+import { useAppearanceStore } from "./stores/appearance";
 import { useJobsStore } from "./stores/jobs";
+import { useSessionStore } from "./stores/session";
 
-const app = useAppStore();
+const session = useSessionStore();
+const appearance = useAppearanceStore();
 const jobs = useJobsStore();
+const appStatus = useAppStatus();
 const router = useRouter();
 const quitBlockedMessage = ref<string | null>(null);
 
-const showShell = computed(() => app.rootValid);
+const showShell = computed(() => session.rootValid);
 
-onMounted(async () => {
-  await app.initialize();
-  if (inTauri) {
-    await listenNavigate((route) => {
-      void router.push(route === "logs" ? "/logs" : "/status");
-    });
-    await listenQuitBlocked((payload) => {
-      quitBlockedMessage.value =
-        payload.message ?? "写操作尚未完成，暂时不能退出 GUI。";
-    });
-  }
+useAppBootstrap({
+  onNavigate: (route) => {
+    void router.push(route);
+  },
+  onQuitBlocked: (message) => {
+    quitBlockedMessage.value = message;
+  },
 });
-
-watch(
-  () => app.resolvedTheme,
-  () => app.applyTheme(),
-);
 </script>
 
 <template>
   <div class="app-root">
     <div class="background-layer" aria-hidden="true" />
     <GlassScene
-      :visual-state="app.visualState"
-      :theme="app.resolvedTheme"
-      :reduced-motion="app.reducedMotion"
+      :visual-state="appStatus.visualState.value"
+      :theme="appearance.resolvedTheme"
+      :reduced-motion="appearance.reducedMotion"
     />
     <div class="glass-frost-layer" aria-hidden="true" />
 
     <div class="app-frame">
       <AppTitleBar />
 
-      <div v-if="!app.hydrated" class="app-loading">
+      <div v-if="!session.hydrated" class="app-loading">
         <LoaderCircle class="spin" :size="28" />
         <span>正在连接到桌面桥接…</span>
       </div>
 
-      <div v-else-if="!app.bridgeAvailable" class="setup-wrap setup-wrap--preview">
+      <div v-else-if="!session.bridgeAvailable" class="setup-wrap setup-wrap--preview">
         <div class="browser-preview">
           <InlineNotice
             tone="error"

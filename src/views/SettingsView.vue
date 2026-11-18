@@ -12,9 +12,12 @@ import {
 import ConfirmDialog from "../components/ConfirmDialog.vue";
 import InlineNotice from "../components/InlineNotice.vue";
 import SecretDialog from "../components/SecretDialog.vue";
-import { useAppStore } from "../stores/app";
+import { useAppStatus } from "../app/useAppStatus";
+import { useAsgServices } from "../app/useAsgServices";
+import { useAppearanceStore } from "../stores/appearance";
 import { useJobsStore } from "../stores/jobs";
-import type { CliResult, ThemePreference } from "../types/cli";
+import { useSessionStore } from "../stores/session";
+import type { ThemePreference } from "../types/cli";
 
 interface ConfigLeaf {
   path: string;
@@ -23,7 +26,10 @@ interface ConfigLeaf {
   secret: boolean;
 }
 
-const app = useAppStore();
+const session = useSessionStore();
+const appearance = useAppearanceStore();
+const appStatus = useAppStatus();
+const serviceClient = useAsgServices();
 const jobs = useJobsStore();
 const config = ref<Record<string, unknown> | null>(null);
 const loading = ref(false);
@@ -108,12 +114,7 @@ async function loadConfig(): Promise<void> {
   loading.value = true;
   error.value = null;
   try {
-    const result: CliResult<Record<string, unknown>> = await jobs.execute(
-      ["config", "get", "--all"],
-      { label: "读取配置" },
-    );
-    if (result.ok && result.data) config.value = result.data;
-    else error.value = result.error?.message ?? "配置读取失败。";
+    config.value = await serviceClient.config.getAll();
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
   } finally {
@@ -139,11 +140,7 @@ async function saveSecret(payload: { secret: string }): Promise<void> {
   if (!secretField.value) return;
   error.value = null;
   try {
-    const result = await jobs.execute(
-      ["config", "set", secretField.value.path, "--stdin"],
-      { label: "保存密钥", stdin: payload.secret, visualState: "restarting" },
-    );
-    if (!result.ok) error.value = result.error?.message ?? "密钥保存失败。";
+    await serviceClient.config.setSecret(secretField.value.path, payload.secret);
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
   } finally {
@@ -158,20 +155,11 @@ async function saveField(): Promise<void> {
   if (!row) return;
   error.value = null;
   const originalIsString = typeof row.value === "string";
-  const args = ["config", "set", row.path, editValue.value];
-  if (originalIsString) args.push("--string");
   try {
-    const result = await jobs.execute(args, {
-      label: `保存 ${row.path}`,
-      visualState: "restarting",
-    });
-    if (!result.ok) {
-      error.value = result.error?.message ?? "配置保存失败。";
-      return;
-    }
+    await serviceClient.config.set(row.path, editValue.value, originalIsString);
     cancelEdit();
     validated.value = null;
-    await app.refreshStatus();
+    await appStatus.refresh();
     await loadConfig();
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
@@ -182,9 +170,8 @@ async function validate(): Promise<void> {
   error.value = null;
   validated.value = null;
   try {
-    const result = await jobs.execute(["config", "validate"], { label: "校验配置" });
-    validated.value = result.ok;
-    if (!result.ok) error.value = result.error?.message ?? "配置校验失败。";
+    await serviceClient.config.validate();
+    validated.value = true;
   } catch (cause) {
     validated.value = false;
     error.value = cause instanceof Error ? cause.message : String(cause);
@@ -193,11 +180,11 @@ async function validate(): Promise<void> {
 
 async function forgetRoot(): Promise<void> {
   forgetOpen.value = false;
-  await app.forgetRoot();
+  await session.forgetRoot();
 }
 
 function themeChoice(theme: ThemePreference): void {
-  void app.setTheme(theme);
+  void appearance.setTheme(theme);
 }
 </script>
 
@@ -238,9 +225,9 @@ function themeChoice(theme: ThemePreference): void {
           <p>默认跟随系统，也可以固定为深色或浅色。</p>
         </div>
         <div class="segmented-control">
-          <button type="button" :class="{ active: app.themePreference === 'system' }" @click="themeChoice('system')">跟随系统</button>
-          <button type="button" :class="{ active: app.themePreference === 'dark' }" @click="themeChoice('dark')">深色</button>
-          <button type="button" :class="{ active: app.themePreference === 'light' }" @click="themeChoice('light')">浅色</button>
+          <button type="button" :class="{ active: appearance.themePreference === 'system' }" @click="themeChoice('system')">跟随系统</button>
+          <button type="button" :class="{ active: appearance.themePreference === 'dark' }" @click="themeChoice('dark')">深色</button>
+          <button type="button" :class="{ active: appearance.themePreference === 'light' }" @click="themeChoice('light')">浅色</button>
         </div>
       </div>
       <div class="settings-row">
@@ -249,7 +236,7 @@ function themeChoice(theme: ThemePreference): void {
           <p>关闭状态几何的呼吸、旋转和轨迹动画。</p>
         </div>
         <label class="switch">
-          <input :checked="app.reducedMotion" type="checkbox" @change="app.setReducedMotion(($event.target as HTMLInputElement).checked)" />
+          <input :checked="appearance.reducedMotion" type="checkbox" @change="appearance.setReducedMotion(($event.target as HTMLInputElement).checked)" />
           <span />
         </label>
       </div>
@@ -259,7 +246,7 @@ function themeChoice(theme: ThemePreference): void {
           <p>使用更不透明的玻璃表面，降低 WebView 合成开销。</p>
         </div>
         <label class="switch">
-          <input :checked="app.reducedTransparency" type="checkbox" @change="app.setReducedTransparency(($event.target as HTMLInputElement).checked)" />
+          <input :checked="appearance.reducedTransparency" type="checkbox" @change="appearance.setReducedTransparency(($event.target as HTMLInputElement).checked)" />
           <span />
         </label>
       </div>
@@ -269,10 +256,10 @@ function themeChoice(theme: ThemePreference): void {
       <FolderCog :size="21" />
       <div>
         <span class="eyebrow">ASG 安装</span>
-        <strong>{{ app.root }}</strong>
+        <strong>{{ session.root }}</strong>
         <p>切换安装根会停止 GUI 的状态轮询，但不会停止已有服务。</p>
       </div>
-      <button class="button button--secondary button--compact" type="button" @click="app.chooseRoot">
+      <button class="button button--secondary button--compact" type="button" @click="session.chooseRoot">
         切换目录
       </button>
       <button class="button button--ghost button--compact button--danger-text" type="button" @click="forgetOpen = true">

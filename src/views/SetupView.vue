@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { FolderSearch, Link2, ShieldCheck } from "@lucide/vue";
-import { useAppStore } from "../stores/app";
+import { useSessionStore } from "../stores/session";
 import InlineNotice from "../components/InlineNotice.vue";
 
-const app = useAppStore();
+const session = useSessionStore();
 const props = withDefaults(defineProps<{ preview?: boolean }>(), { preview: false });
 const manualPath = ref("");
 const checking = ref(false);
@@ -14,7 +14,7 @@ async function choose(): Promise<void> {
   checking.value = true;
   error.value = null;
   try {
-    const selection = await app.chooseRoot();
+    const selection = await session.chooseRoot();
     if (selection && !selection.valid) error.value = selection.reason ?? "目录校验失败。";
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
@@ -28,7 +28,7 @@ async function usePath(): Promise<void> {
   checking.value = true;
   error.value = null;
   try {
-    const selection = await app.chooseRootPath(manualPath.value.trim());
+    const selection = await session.chooseRootPath(manualPath.value.trim());
     if (!selection.valid) error.value = selection.reason ?? "目录校验失败。";
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
@@ -91,7 +91,7 @@ async function usePath(): Promise<void> {
           </button>
         </div>
       </label>
-      <p v-if="app.invalidReason && !error" class="field-note">{{ app.invalidReason }}</p>
+      <p v-if="session.invalidReason && !error" class="field-note">{{ session.invalidReason }}</p>
       <InlineNotice v-if="error" tone="error" :message="error" />
     </aside>
   </div>

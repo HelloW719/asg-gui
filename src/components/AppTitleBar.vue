@@ -1,22 +1,26 @@
 <script setup lang="ts">
 import { Minus, Moon, Square, Sun, X } from "@lucide/vue";
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import { inTauri } from "../services/desktop";
-import { useAppStore } from "../stores/app";
+import {
+  closeWindow,
+  minimizeWindow,
+  toggleMaximizeWindow,
+} from "../services/desktop";
+import { useAppearanceStore } from "../stores/appearance";
+import { useSessionStore } from "../stores/session";
 
-const app = useAppStore();
-const desktopWindow = inTauri ? getCurrentWindow() : null;
+const session = useSessionStore();
+const appearance = useAppearanceStore();
 
 async function minimize(): Promise<void> {
-  await desktopWindow?.minimize();
+  await minimizeWindow();
 }
 
 async function maximize(): Promise<void> {
-  await desktopWindow?.toggleMaximize();
+  await toggleMaximizeWindow();
 }
 
 async function close(): Promise<void> {
-  await desktopWindow?.close();
+  await closeWindow();
 }
 </script>
 
@@ -29,20 +33,20 @@ async function close(): Promise<void> {
         <i />
       </span>
       <span class="app-titlebar__name">Agent Search Gateway</span>
-      <span class="app-titlebar__version">{{ app.guiVersion }}</span>
+      <span class="app-titlebar__version">{{ session.guiVersion }}</span>
     </div>
 
     <div class="app-titlebar__actions">
       <button
         class="icon-button titlebar-tool"
         type="button"
-        :aria-label="app.resolvedTheme === 'dark' ? '切换到浅色主题' : '切换到深色主题'"
-        @click="app.toggleTheme"
+        :aria-label="appearance.resolvedTheme === 'dark' ? '切换到浅色主题' : '切换到深色主题'"
+        @click="appearance.toggleTheme"
       >
-        <Sun v-if="app.resolvedTheme === 'dark'" :size="16" />
+        <Sun v-if="appearance.resolvedTheme === 'dark'" :size="16" />
         <Moon v-else :size="16" />
       </button>
-      <div v-if="app.platform !== 'macos'" class="window-controls">
+      <div v-if="session.platform !== 'macos'" class="window-controls">
         <button type="button" aria-label="最小化" @click="minimize">
           <Minus :size="16" />
         </button>

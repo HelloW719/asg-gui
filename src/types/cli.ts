@@ -143,3 +143,41 @@ export interface DoctorCheck {
   message?: string;
 }
 
+export interface ConfigFieldInfo {
+  key: string;
+  type: "string" | "number" | "boolean" | "object" | "array";
+  required: boolean;
+  default?: unknown;
+  description?: string;
+}
+
+export interface BrowserStatus {
+  path: string;
+  headless_shell: boolean;
+  chromium: boolean;
+}
+
+export interface UpdateStatus {
+  current_version?: string;
+  version?: string;
+  up_to_date?: boolean;
+}
+
+export interface CommandTextResult {
+  text?: string;
+  elapsed_ms?: number;
+  code?: string | null;
+}
+
+export type LifecycleAction = "start" | "stop" | "restart";
+
+export interface EngineRouteDraft {
+  category: string;
+  hotCategory: string;
+}
+
+export interface SecretPayload {
+  name?: string;
+  secret: string;
+}
+

@@ -2,17 +2,18 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { Download, Pause, Play, Search, Trash2 } from "@lucide/vue";
 import InlineNotice from "../components/InlineNotice.vue";
-import { useJobsStore } from "../stores/jobs";
-import type { CliResult, JobEvent, LogLine } from "../types/cli";
+import { useAsgServices } from "../app/useAsgServices";
+import type { FollowLogHandle } from "../services/asg";
+import type { JobEvent, LogLine } from "../types/cli";
 
-const jobs = useJobsStore();
+const serviceClient = useAsgServices();
 const selectedServices = ref<string[]>(["gateway", "supervisor"]);
 const lines = ref<LogLine[]>([]);
 const query = ref("");
 const following = ref(false);
 const autoScroll = ref(true);
 const jobId = ref<string | null>(null);
-const cancelCurrent = ref<(() => Promise<void>) | null>(null);
+const followHandle = ref<FollowLogHandle | null>(null);
 const error = ref<string | null>(null);
 const logBox = ref<HTMLElement | null>(null);
 
@@ -38,7 +39,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  void cancelCurrent.value?.();
+  void followHandle.value?.cancel();
 });
 
 watch(
@@ -53,12 +54,7 @@ watch(
 async function loadHistory(): Promise<void> {
   error.value = null;
   try {
-    const result: CliResult<{ lines?: LogLine[] }> = await jobs.execute(
-      ["logs", ...selectedServices.value, "--lines", "400"],
-      { label: "读取日志" },
-    );
-    if (result.ok) lines.value = result.data?.lines ?? [];
-    else error.value = result.error?.message ?? "日志读取失败。";
+    lines.value = await serviceClient.logs.read(400, selectedServices.value);
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
   }
@@ -89,19 +85,19 @@ async function toggleFollow(): Promise<void> {
   }
   error.value = null;
   try {
-    const running = await jobs.stream(
-      ["logs", ...selectedServices.value, "-f"],
-      { label: "跟随日志", onEvent: handleEvent, mode: "jsonl" },
+    const running = await serviceClient.logs.follow(
+      selectedServices.value,
+      handleEvent,
     );
     jobId.value = running.jobId;
-    cancelCurrent.value = running.cancel;
+    followHandle.value = running;
     following.value = true;
     void running.done
       .catch(() => undefined)
       .finally(() => {
         following.value = false;
         jobId.value = null;
-        cancelCurrent.value = null;
+        followHandle.value = null;
       });
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
@@ -109,10 +105,10 @@ async function toggleFollow(): Promise<void> {
 }
 
 async function stopFollow(): Promise<void> {
-  await cancelCurrent.value?.();
+  await followHandle.value?.cancel();
   following.value = false;
   jobId.value = null;
-  cancelCurrent.value = null;
+  followHandle.value = null;
 }
 
 async function downloadLogs(): Promise<void> {

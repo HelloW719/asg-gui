@@ -15,11 +15,12 @@ import {
 } from "reka-ui";
 import InlineNotice from "../components/InlineNotice.vue";
 import MarkdownResult from "../components/MarkdownResult.vue";
+import { useAsgServices } from "../app/useAsgServices";
 import { useJobsStore } from "../stores/jobs";
-import type { CliResult } from "../types/cli";
-import { buildFetchArgs, buildSearchArgs } from "../utils/args";
+import type { CommandTextResult } from "../types/cli";
 
 const jobs = useJobsStore();
+const serviceClient = useAsgServices();
 const searchForm = reactive({
   query: "",
   categories: "",
@@ -52,8 +53,7 @@ async function chooseImage(): Promise<void> {
   if (typeof selected === "string") searchForm.imagePath = selected;
 }
 
-function applyResult(result: CliResult<{ text?: string; elapsed_ms?: number; code?: string | null }>): void {
-  const data = result.data;
+function applyResult(data: CommandTextResult): void {
   if (data?.text) resultText.value = data.text;
   if (data) {
     resultMeta.value = [
@@ -63,7 +63,6 @@ function applyResult(result: CliResult<{ text?: string; elapsed_ms?: number; cod
       .filter(Boolean)
       .join(" · ");
   }
-  if (!result.ok) error.value = result.error?.message ?? "检索失败。";
 }
 
 async function search(): Promise<void> {
@@ -74,11 +73,7 @@ async function search(): Promise<void> {
     return;
   }
   try {
-    const result = await jobs.execute(buildSearchArgs(searchForm), {
-      label: "执行搜索",
-      visualState: "loading",
-    });
-    applyResult(result as CliResult<{ text?: string; elapsed_ms?: number; code?: string | null }>);
+    applyResult(await serviceClient.explorer.search(searchForm));
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
   }
@@ -92,11 +87,7 @@ async function fetchPage(): Promise<void> {
     return;
   }
   try {
-    const result = await jobs.execute(buildFetchArgs(fetchForm), {
-      label: "执行抓取",
-      visualState: "loading",
-    });
-    applyResult(result as CliResult<{ text?: string; elapsed_ms?: number; code?: string | null }>);
+    applyResult(await serviceClient.explorer.fetch(fetchForm));
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
   }

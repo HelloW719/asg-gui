@@ -16,28 +16,24 @@ import {
   TabsRoot,
   TabsTrigger,
 } from "reka-ui";
+import { useAppStatus } from "../app/useAppStatus";
+import { useAsgServices } from "../app/useAsgServices";
 import ConfirmDialog from "../components/ConfirmDialog.vue";
 import InlineNotice from "../components/InlineNotice.vue";
 import SecretDialog from "../components/SecretDialog.vue";
-import { useAppStore } from "../stores/app";
 import { useJobsStore } from "../stores/jobs";
 import type {
-  CliResult,
+  ConfigFieldInfo,
   EngineInfo,
+  EngineRouteDraft,
   ExtensionInfo,
   ExtensionSearchItem,
   PluginInfo,
+  SecretPayload,
 } from "../types/cli";
 
-interface ConfigFieldInfo {
-  key: string;
-  type: "string" | "number" | "boolean" | "object" | "array";
-  required: boolean;
-  default?: unknown;
-  description?: string;
-}
-
-const app = useAppStore();
+const appStatus = useAppStatus();
+const serviceClient = useAsgServices();
 const jobs = useJobsStore();
 const engines = ref<EngineInfo[]>([]);
 const plugins = ref<PluginInfo[]>([]);
@@ -60,7 +56,7 @@ const extensionFields = ref<ConfigFieldInfo[]>([]);
 const extensionConfigText = ref("");
 const extensionConfigRawMode = ref(false);
 const extensionSaveOpen = ref(false);
-const routeDrafts = reactive<Record<string, { category: string; hotCategory: string }>>({});
+const routeDrafts = reactive<Record<string, EngineRouteDraft>>({});
 
 onMounted(() => {
   void Promise.all([loadEngines(), loadPlugins(), loadExtensions()]);
@@ -71,20 +67,15 @@ function setError(cause: unknown): void {
 }
 
 async function runAndRefresh(
-  args: string[],
-  label: string,
+  action: () => Promise<void>,
   successMessage: string,
 ): Promise<void> {
   error.value = null;
   success.value = null;
   try {
-    const result = await jobs.execute(args, { label, visualState: "restarting" });
-    if (!result.ok) {
-      error.value = result.error?.message ?? `${label}失败。`;
-      return;
-    }
+    await action();
     success.value = successMessage;
-    await app.refreshStatus();
+    await appStatus.refresh();
   } catch (cause) {
     setError(cause);
   }
@@ -94,14 +85,8 @@ async function loadEngines(all = false): Promise<void> {
   loading.engines = true;
   error.value = null;
   try {
-    const result: CliResult<{ engines: EngineInfo[] }> = await jobs.execute(
-      all ? ["engines", "list", "--all"] : ["engines", "list"],
-      { label: "读取引擎" },
-    );
-    if (result.data?.engines) {
-      engines.value = result.data.engines;
-      syncRouteDrafts();
-    } else if (result.error) error.value = result.error.message;
+    engines.value = await serviceClient.sources.listEngines(all);
+    syncRouteDrafts();
   } catch (cause) {
     setError(cause);
   } finally {
@@ -123,10 +108,10 @@ function syncRouteDrafts(): void {
 }
 
 async function toggleEngine(engine: EngineInfo): Promise<void> {
+  const enabled = !engine.enabled;
   await runAndRefresh(
-    ["engines", engine.enabled ? "disable" : "enable", engine.id],
-    engine.enabled ? `禁用 ${engine.name}` : `启用 ${engine.name}`,
-    `${engine.name} 已${engine.enabled ? "禁用" : "启用"}。`,
+    () => serviceClient.sources.setEngineEnabled(engine.id, enabled),
+    `${engine.name} 已${enabled ? "启用" : "禁用"}。`,
   );
   await loadEngines();
 }
@@ -138,8 +123,7 @@ function currentSearxngRoute(engine: EngineInfo): string {
 async function changeSearxngRoute(engine: EngineInfo, event: Event): Promise<void> {
   const route = (event.target as HTMLSelectElement).value;
   await runAndRefresh(
-    ["engines", "route", engine.id, route],
-    `设置 ${engine.name} 路由`,
+    () => serviceClient.sources.setSearxngRoute(engine.id, route),
     `${engine.name} 路由已设置为 ${route}。`,
   );
   await loadEngines();
@@ -148,32 +132,27 @@ async function changeSearxngRoute(engine: EngineInfo, event: Event): Promise<voi
 async function saveGatewayRoute(engine: EngineInfo): Promise<void> {
   const draft = routeDrafts[engine.id];
   if (!draft) return;
-  const args = ["engines", "route", engine.id];
-  if (draft.category.trim()) args.push("--category", draft.category.trim());
-  if (draft.hotCategory.trim()) args.push("--hot-category", draft.hotCategory.trim());
-  if (args.length === 3) args.push("--clear");
-  await runAndRefresh(args, `设置 ${engine.name} 路由`, `${engine.name} 路由已更新。`);
+  await runAndRefresh(
+    () => serviceClient.sources.setGatewayRoute(engine.id, draft),
+    `${engine.name} 路由已更新。`,
+  );
   await loadEngines();
 }
 
-async function saveEngineSecret(payload: { name?: string; secret: string }): Promise<void> {
+async function saveEngineSecret(payload: SecretPayload): Promise<void> {
   const engine = engineSecret.value;
   engineSecret.value = null;
   if (!engine) return;
-  const args = ["engines", "secret", engine.id];
-  if (payload.name) args.push("--name", payload.name);
-  args.push("--stdin");
-  await runAndRefresh(args, `更新 ${engine.name} 密钥`, `${engine.name} 密钥已更新。`);
+  await runAndRefresh(
+    () => serviceClient.sources.setEngineSecret(engine, payload),
+    `${engine.name} 密钥已更新。`,
+  );
 }
 
 async function loadPlugins(): Promise<void> {
   loading.plugins = true;
   try {
-    const result: CliResult<{ plugins: PluginInfo[] }> = await jobs.execute(
-      ["plugins", "list"],
-      { label: "读取内置插件" },
-    );
-    if (result.data?.plugins) plugins.value = result.data.plugins;
+    plugins.value = await serviceClient.sources.listPlugins();
   } catch (cause) {
     setError(cause);
   } finally {
@@ -184,8 +163,7 @@ async function loadPlugins(): Promise<void> {
 async function installPlugin(): Promise<void> {
   if (!pluginName.value.trim()) return;
   await runAndRefresh(
-    ["plugins", "install", pluginName.value.trim()],
-    "安装内置插件",
+    () => serviceClient.sources.installPlugin(pluginName.value.trim()),
     `${pluginName.value.trim()} 已安装。`,
   );
   await loadPlugins();
@@ -196,8 +174,7 @@ async function removePlugin(): Promise<void> {
   pluginToRemove.value = null;
   if (!plugin) return;
   await runAndRefresh(
-    ["plugins", "remove", plugin.channel_id || plugin.name],
-    `卸载 ${plugin.name}`,
+    () => serviceClient.sources.removePlugin(plugin),
     `${plugin.name} 已卸载。`,
   );
   await loadPlugins();
@@ -206,11 +183,7 @@ async function removePlugin(): Promise<void> {
 async function loadExtensions(): Promise<void> {
   loading.extensions = true;
   try {
-    const result: CliResult<{ extensions: ExtensionInfo[] }> = await jobs.execute(
-      ["extensions", "list"],
-      { label: "读取第三方扩展" },
-    );
-    if (result.data?.extensions) extensions.value = result.data.extensions;
+    extensions.value = await serviceClient.sources.listExtensions();
   } catch (cause) {
     setError(cause);
   } finally {
@@ -221,12 +194,9 @@ async function loadExtensions(): Promise<void> {
 async function searchExtensions(): Promise<void> {
   error.value = null;
   try {
-    const result: CliResult<{ results: ExtensionSearchItem[] }> = await jobs.execute(
-      ["extensions", "search", ...(extensionQuery.value.trim() ? [extensionQuery.value.trim()] : [])],
-      { label: "搜索第三方扩展", visualState: "loading" },
+    extensionResults.value = await serviceClient.sources.searchExtensions(
+      extensionQuery.value,
     );
-    if (result.data?.results) extensionResults.value = result.data.results;
-    else error.value = result.error?.message ?? "扩展搜索失败。";
   } catch (cause) {
     setError(cause);
   }
@@ -236,8 +206,7 @@ async function installExtension(repo?: string): Promise<void> {
   const target = repo ?? extensionRepo.value.trim();
   if (!target) return;
   await runAndRefresh(
-    ["extensions", "install", target],
-    "安装第三方扩展",
+    () => serviceClient.sources.installExtension(target),
     `${target} 已安装。重启网关后生效。`,
   );
   extensionRepo.value = "";
@@ -249,8 +218,7 @@ async function removeExtension(): Promise<void> {
   extensionToRemove.value = null;
   if (!extension) return;
   await runAndRefresh(
-    ["extensions", "remove", extension.id],
-    `卸载扩展 ${extension.id}`,
+    () => serviceClient.sources.removeExtension(extension),
     `${extension.id} 已卸载。`,
   );
   await loadExtensions();
@@ -259,23 +227,12 @@ async function removeExtension(): Promise<void> {
 async function openExtensionConfig(extension: ExtensionInfo): Promise<void> {
   error.value = null;
   try {
-    const [configResult, describeResult] = await Promise.all([
-      jobs.execute(["extensions", "config", extension.id], { label: "读取扩展配置" }),
-      jobs.execute(["extensions", "config", extension.id, "--describe"], {
-        label: "读取扩展字段",
-      }),
-    ]);
-    if (!configResult.ok) {
-      error.value = configResult.error?.message ?? "扩展配置读取失败。";
-      return;
-    }
-    const data = configResult.data as { config?: Record<string, unknown> };
-    const description = describeResult.data as { fields?: ConfigFieldInfo[] };
-    extensionConfigId.value = extension.id;
-    extensionConfig.value = structuredClone(data.config ?? {});
-    extensionOriginal.value = structuredClone(data.config ?? {});
-    extensionFields.value = description?.fields ?? [];
-    extensionConfigText.value = JSON.stringify(data.config ?? {}, null, 2);
+    const snapshot = await serviceClient.sources.loadExtensionConfig(extension);
+    extensionConfigId.value = snapshot.id;
+    extensionConfig.value = structuredClone(snapshot.config);
+    extensionOriginal.value = structuredClone(snapshot.config);
+    extensionFields.value = snapshot.fields;
+    extensionConfigText.value = JSON.stringify(snapshot.config, null, 2);
     extensionConfigRawMode.value = extensionFields.value.length === 0;
   } catch (cause) {
     setError(cause);
@@ -314,35 +271,30 @@ async function saveExtensionConfig(): Promise<void> {
   if (extensionConfigRawMode.value && !syncRawConfig()) return;
   if (!extensionConfig.value) return;
 
-  const args = ["extensions", "config", id];
-  const changedKeys = new Set([
-    ...Object.keys(current),
-    ...Object.keys(original),
-  ]);
-  for (const key of changedKeys) {
-    const before = original[key];
-    const after = current[key];
-    if (after === undefined && before !== undefined) {
-      args.push("--unset", key);
-    } else if (JSON.stringify(before) !== JSON.stringify(after) && after !== undefined) {
-      args.push("--set", `${key}=${JSON.stringify(after)}`);
-    }
-  }
-  if (args.length === 3) {
+  const changed = await serviceClient.sources.saveExtensionConfig(
+    id,
+    extensionConfig.value,
+    original,
+  );
+  if (!changed) {
     success.value = "扩展配置没有变化。";
     return;
   }
-  await runAndRefresh(args, `保存扩展 ${id} 配置`, `${id} 配置已保存。`);
+  success.value = `${id} 配置已保存。`;
+  await appStatus.refresh();
   closeExtensionEditor();
 }
 
-async function saveExtensionSecret(payload: { name?: string; secret: string }): Promise<void> {
+async function saveExtensionSecret(payload: SecretPayload): Promise<void> {
   const extension = extensionSecret.value;
   extensionSecret.value = null;
   if (!extension || !payload.name) return;
   await runAndRefresh(
-    ["extensions", "secret", extension.id, "--name", payload.name, "--stdin"],
-    `更新扩展 ${extension.id} 密钥`,
+    () =>
+      serviceClient.sources.setExtensionSecret(extension, {
+        name: payload.name!,
+        secret: payload.secret,
+      }),
     `${extension.id} 的 ${payload.name} 已更新。`,
   );
 }

@@ -1,80 +1,6 @@
-import { invoke } from "@tauri-apps/api/core";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { isTauri } from "@tauri-apps/api/core";
-import type {
-  CliResult,
-  DesktopAppState,
-  JobEvent,
-  JobStart,
-  RootSelection,
-  ThemePreference,
-} from "../types/cli";
-
-export const inTauri = isTauri();
-
-export async function getDesktopAppState(): Promise<DesktopAppState> {
-  return invoke<DesktopAppState>("get_app_state");
-}
-
-export async function chooseAsgRoot(): Promise<RootSelection | null> {
-  return invoke<RootSelection | null>("choose_asg_root");
-}
-
-export async function setAsgRoot(path: string): Promise<RootSelection> {
-  return invoke<RootSelection>("set_asg_root", { path });
-}
-
-export async function clearAsgRoot(): Promise<void> {
-  await invoke("clear_asg_root");
-}
-
-export async function setDesktopTheme(theme: ThemePreference): Promise<void> {
-  await invoke("set_theme", { theme });
-}
-
-export async function startCliJob(
-  args: string[],
-  stdin: string | null,
-  mode: "json" | "jsonl",
-): Promise<JobStart> {
-  return invoke<JobStart>("run_cli", { args, stdin, mode });
-}
-
-export async function cancelCliJob(jobId: string): Promise<void> {
-  await invoke("cancel_cli", { jobId });
-}
-
-export async function revealWindow(): Promise<void> {
-  if (inTauri) await invoke("show_window");
-}
-
-export async function hideWindow(): Promise<void> {
-  if (inTauri) await invoke("hide_window");
-}
-
-export async function quitGui(): Promise<void> {
-  if (inTauri) await invoke("quit_gui");
-}
-
-export async function listenJobEvents(
-  handler: (event: JobEvent) => void,
-): Promise<UnlistenFn> {
-  return listen<JobEvent>("asg://job", (event) => handler(event.payload));
-}
-
-export async function listenNavigate(
-  handler: (route: string) => void,
-): Promise<UnlistenFn> {
-  return listen<string>("asg://navigate", (event) => handler(event.payload));
-}
-
-export async function listenQuitBlocked(
-  handler: (payload: { message?: string; jobId?: string }) => void,
-): Promise<UnlistenFn> {
-  return listen<{ message?: string; jobId?: string }>("asg://quit-blocked", (event) =>
-    handler(event.payload),
-  );
-}
+import type { CliResult, JobEvent, JobStart } from "../../types/cli";
+import { cancelCliJob, inTauri, startCliJob } from "./api";
+import { listenJobEvents } from "./events";
 
 export interface RunningJob {
   jobId: string;
@@ -101,7 +27,7 @@ class JobClient {
   initialize(): Promise<void> {
     if (!this.initialization) {
       this.initialization = listenJobEvents((event) => this.handleEvent(event)).then(() => {
-        // The promise resolves to the unlisten function; it lives for the app lifetime.
+        // The unlisten callback lives for the app lifetime.
       });
     }
     return this.initialization;
@@ -119,7 +45,11 @@ class JobClient {
       throw new Error("CLI 桥接只在 Tauri 桌面窗口中可用。");
     }
     await this.initialize();
-    const started = await startCliJob(args, options.stdin ?? null, options.mode ?? "json");
+    const started: JobStart = await startCliJob(
+      args,
+      options.stdin ?? null,
+      options.mode ?? "json",
+    );
     const job = this.ensure(started.jobId);
     if (options.onEvent) job.listeners.add(options.onEvent);
     return {
@@ -200,4 +130,3 @@ class JobClient {
 }
 
 export const jobClient = new JobClient();
-

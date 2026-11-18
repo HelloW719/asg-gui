@@ -12,22 +12,26 @@ import {
 import ConfirmDialog from "../components/ConfirmDialog.vue";
 import InlineNotice from "../components/InlineNotice.vue";
 import ServiceCard from "../components/ServiceCard.vue";
-import { useAppStore } from "../stores/app";
+import { useAppStatus } from "../app/useAppStatus";
+import { useAsgServices } from "../app/useAsgServices";
 import { useJobsStore } from "../stores/jobs";
-import type { CliResult, DoctorCheck, LogLine } from "../types/cli";
+import { useSessionStore } from "../stores/session";
+import type { DoctorCheck, LogLine } from "../types/cli";
 import { describeMode } from "../utils/cli";
 import { visualStateDescription, visualStateLabels } from "../utils/state";
 
-const app = useAppStore();
+const session = useSessionStore();
+const appStatus = useAppStatus();
 const jobs = useJobsStore();
+const serviceClient = useAsgServices();
 const pendingAction = ref<"stop" | "restart" | null>(null);
 const recentLogs = ref<LogLine[]>([]);
 const doctorChecks = ref<DoctorCheck[]>([]);
 const diagnosticsLoaded = ref(false);
 const actionError = ref<string | null>(null);
 
-const services = computed(() => {
-  const data = app.status?.services;
+const serviceCards = computed(() => {
+  const data = appStatus.status.value?.services;
   return [
     { name: "gateway", displayName: "Gateway", probe: data?.gateway },
     { name: "searxng", displayName: "SearXNG", probe: data?.searxng },
@@ -38,18 +42,12 @@ const services = computed(() => {
 const failingChecks = computed(() => doctorChecks.value.filter((check) => !check.ok));
 
 onMounted(async () => {
-  await Promise.all([loadRecentLogs(), app.refreshStatus()]);
+  await Promise.all([loadRecentLogs(), appStatus.refresh()]);
 });
 
 async function loadRecentLogs(): Promise<void> {
   try {
-    const result = await jobs.execute(["logs", "--lines", "8"], {
-      label: "读取最近日志",
-    });
-    if (result.ok) {
-      const data = result.data as { lines?: LogLine[] };
-      recentLogs.value = data.lines?.slice(-8) ?? [];
-    }
+    recentLogs.value = (await serviceClient.logs.read(8)).slice(-8);
   } catch {
     // Dashboard remains usable when logs are absent.
   }
@@ -58,12 +56,8 @@ async function loadRecentLogs(): Promise<void> {
 async function runLifecycle(action: "start" | "stop" | "restart"): Promise<void> {
   actionError.value = null;
   try {
-    const result = await jobs.execute([action], {
-      label: action === "start" ? "启动整栈" : action === "stop" ? "停止整栈" : "重启整栈",
-      visualState: action === "start" ? "starting" : action === "restart" ? "restarting" : "loading",
-    });
-    if (!result.ok) actionError.value = result.error?.message ?? "服务操作失败。";
-    await app.refreshStatus();
+    await serviceClient.lifecycle.run(action);
+    await appStatus.refresh();
     await loadRecentLogs();
   } catch (error) {
     actionError.value = error instanceof Error ? error.message : String(error);
@@ -73,15 +67,8 @@ async function runLifecycle(action: "start" | "stop" | "restart"): Promise<void>
 async function runDoctor(): Promise<void> {
   actionError.value = null;
   try {
-    const result: CliResult<{ checks: DoctorCheck[] }> = await jobs.execute(["doctor"], {
-      label: "运行诊断",
-    });
-    if (result.data?.checks) {
-      doctorChecks.value = result.data.checks;
-      diagnosticsLoaded.value = true;
-    } else if (result.error) {
-      actionError.value = result.error.message;
-    }
+    doctorChecks.value = await serviceClient.maintenance.doctor();
+    diagnosticsLoaded.value = true;
   } catch (error) {
     actionError.value = error instanceof Error ? error.message : String(error);
   }
@@ -101,10 +88,10 @@ function confirmPending(): void {
       <div>
         <span class="eyebrow">实时控制面</span>
         <h1>系统状态</h1>
-        <p class="path-copy status-hero__path">{{ app.root }}</p>
+        <p class="path-copy status-hero__path">{{ session.root }}</p>
       </div>
-      <button class="button button--ghost" type="button" :disabled="app.statusPending" @click="app.refreshStatus">
-        <RefreshCcw :size="16" :class="{ spin: app.statusPending }" />
+      <button class="button button--ghost" type="button" :disabled="appStatus.statusPending.value" @click="appStatus.refresh">
+        <RefreshCcw :size="16" :class="{ spin: appStatus.statusPending.value }" />
         刷新状态
       </button>
     </header>
@@ -113,12 +100,12 @@ function confirmPending(): void {
 
     <section class="status-hero glass-surface">
       <div class="status-hero__copy">
-        <span class="status-pill" :class="`status-pill--${app.visualState}`">
+        <span class="status-pill" :class="`status-pill--${appStatus.visualState.value}`">
           <Activity :size="15" />
-          {{ visualStateLabels[app.visualState] }}
+          {{ visualStateLabels[appStatus.visualState.value] }}
         </span>
-        <h2>{{ visualStateLabels[app.visualState] }}</h2>
-        <p>{{ visualStateDescription(app.visualState) }}</p>
+        <h2>{{ visualStateLabels[appStatus.visualState.value] }}</h2>
+        <p>{{ visualStateDescription(appStatus.visualState.value) }}</p>
         <div class="action-row">
           <button class="button button--primary" type="button" :disabled="jobs.hasRunningOperation" @click="runLifecycle('start')">
             <Play :size="16" />
@@ -137,15 +124,15 @@ function confirmPending(): void {
       <dl class="status-summary">
         <div>
           <dt>在线服务</dt>
-          <dd><strong>{{ app.serviceOnlineCount }}</strong><span>/ 3</span></dd>
+          <dd><strong>{{ appStatus.serviceOnlineCount.value }}</strong><span>/ 3</span></dd>
         </div>
         <div>
           <dt>Supervisor</dt>
-          <dd>{{ app.status ? describeMode(app.status.supervisor.mode) : "—" }}</dd>
+          <dd>{{ appStatus.status.value ? describeMode(appStatus.status.value.supervisor.mode) : "—" }}</dd>
         </div>
         <div>
           <dt>状态探测</dt>
-          <dd>{{ app.statusPending ? "进行中" : "已就绪" }}</dd>
+          <dd>{{ appStatus.statusPending.value ? "进行中" : "已就绪" }}</dd>
         </div>
       </dl>
     </section>
@@ -160,7 +147,7 @@ function confirmPending(): void {
       </div>
       <div class="service-grid">
         <ServiceCard
-          v-for="service in services"
+          v-for="service in serviceCards"
           :key="service.name"
           :name="service.name"
           :display-name="service.displayName"
