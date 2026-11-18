@@ -1,0 +1,129 @@
+/* Sources feature styles */
+.source-toolbar {
+  justify-content: flex-start;
+}
+
+.source-toolbar > span {
+  margin-right: auto;
+  color: var(--text-soft);
+}
+
+.engine-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.engine-card {
+  position: relative;
+  padding: 17px;
+  border-radius: var(--radius-md);
+}
+
+.engine-card > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.engine-card h2 {
+  font-size: 1.22rem;
+}
+
+.token-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 11px 0;
+}
+
+.token {
+  padding: 3px 7px;
+  border: 1px solid var(--glass-border);
+  border-radius: 99px;
+  color: var(--text-faint);
+  font-size: 0.59rem;
+}
+
+.token--ok {
+  border-color: color-mix(in srgb, var(--success) 30%, transparent);
+  color: var(--success);
+}
+
+.token--warn {
+  border-color: color-mix(in srgb, var(--ochre) 30%, transparent);
+  color: var(--ochre);
+}
+
+.route-editor {
+  margin: 10px 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.route-editor .field {
+  margin-bottom: 8px;
+}
+
+.source-list,
+.extension-results {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.source-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 17px;
+  border-radius: var(--radius-md);
+}
+
+.source-row__main {
+  min-width: 0;
+}
+
+.source-row__main h2 {
+  margin-bottom: 3px;
+}
+
+.source-row__main p {
+  overflow: hidden;
+  margin: 0;
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.extension-toolbar {
+  flex-wrap: wrap;
+}
+
+.extension-toolbar .inline-field {
+  flex: 1;
+  min-width: 260px;
+}
+
+.extension-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.extension-editor {
+  margin-top: 15px;
+  padding: 20px;
+}
+
+.token,
+.chip {
+  border-radius: 8px;
+}
+
+@media (max-width: 900px) {
+  .engine-grid { grid-template-columns: 1fr; }
+  .source-row, .extension-row { grid-template-columns: 1fr; }
+  .source-row__actions { justify-self: start; }
+}

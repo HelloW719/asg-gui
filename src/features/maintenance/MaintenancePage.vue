@@ -170,3 +170,5 @@ const maintenance = useMaintenance();
     />
   </div>
 </template>
+
+<style src="./styles/maintenance.css"></style>

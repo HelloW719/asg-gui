@@ -144,3 +144,5 @@ const sources = useSources();
     />
   </div>
 </template>
+
+<style src="./styles/sources.css"></style>

@@ -107,3 +107,5 @@ const settings = useSettings();
     />
   </div>
 </template>
+
+<style src="./styles/settings.css"></style>

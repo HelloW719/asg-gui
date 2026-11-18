@@ -7,7 +7,7 @@ import { useAppStatus } from "@/app/useAppStatus";
 import AppSidebar from "@/app/components/AppSidebar.vue";
 import AppTitleBar from "@/app/components/AppTitleBar.vue";
 import InlineNotice from "@/shared/ui/InlineNotice.vue";
-import GlassScene from "@/visual/glass/GlassScene.vue";
+import GlassShell from "@/visual/glass/GlassShell.vue";
 import SetupPage from "@/features/setup/SetupPage.vue";
 import { useAppearanceStore } from "@/stores/appearance";
 import { useJobsStore } from "@/stores/jobs";
@@ -34,63 +34,61 @@ useAppBootstrap({
 
 <template>
   <div class="app-root">
-    <div class="background-layer" aria-hidden="true" />
-    <GlassScene
+    <GlassShell
       :visual-state="appStatus.visualState.value"
       :theme="appearance.resolvedTheme"
       :reduced-motion="appearance.reducedMotion"
-    />
-    <div class="glass-frost-layer" aria-hidden="true" />
+    >
+      <div class="app-frame">
+        <AppTitleBar />
 
-    <div class="app-frame">
-      <AppTitleBar />
+        <div v-if="!session.hydrated" class="app-loading">
+          <LoaderCircle class="spin" :size="28" />
+          <span>正在连接到桌面桥接…</span>
+        </div>
 
-      <div v-if="!session.hydrated" class="app-loading">
-        <LoaderCircle class="spin" :size="28" />
-        <span>正在连接到桌面桥接…</span>
-      </div>
+        <div v-else-if="!session.bridgeAvailable" class="setup-wrap setup-wrap--preview">
+          <div class="browser-preview">
+            <InlineNotice
+              tone="error"
+              message="当前是浏览器预览。请在 Tauri 桌面窗口中运行以调用本机 ASG CLI：npm run tauri dev"
+            />
+            <SetupPage preview />
+          </div>
+        </div>
 
-      <div v-else-if="!session.bridgeAvailable" class="setup-wrap setup-wrap--preview">
-        <div class="browser-preview">
+        <div v-else class="app-workspace">
+          <AppSidebar v-if="showShell" />
+          <main class="app-content">
+            <RouterView v-if="showShell" v-slot="{ Component }">
+              <Transition name="page" mode="out-in">
+                <component :is="Component" />
+              </Transition>
+            </RouterView>
+            <SetupPage v-else />
+          </main>
+        </div>
+
+        <Transition name="activity">
+          <div v-if="jobs.hasRunningOperation" class="activity-strip" role="status">
+            <LoaderCircle class="spin" :size="15" />
+            <span>{{ jobs.busyLabel }}</span>
+            <span class="activity-strip__detail">任务运行中</span>
+          </div>
+        </Transition>
+
+        <Transition name="activity">
           <InlineNotice
+            v-if="quitBlockedMessage"
+            class="global-toast"
             tone="error"
-            message="当前是浏览器预览。请在 Tauri 桌面窗口中运行以调用本机 ASG CLI：npm run tauri dev"
+            :message="quitBlockedMessage"
+            dismissible
+            @dismiss="quitBlockedMessage = null"
           />
-          <SetupPage preview />
-        </div>
+        </Transition>
       </div>
-
-      <div v-else class="app-workspace">
-        <AppSidebar v-if="showShell" />
-        <main class="app-content">
-          <RouterView v-if="showShell" v-slot="{ Component }">
-            <Transition name="page" mode="out-in">
-              <component :is="Component" />
-            </Transition>
-          </RouterView>
-          <SetupPage v-else />
-        </main>
-      </div>
-
-      <Transition name="activity">
-        <div v-if="jobs.hasRunningOperation" class="activity-strip" role="status">
-          <LoaderCircle class="spin" :size="15" />
-          <span>{{ jobs.busyLabel }}</span>
-          <span class="activity-strip__detail">任务运行中</span>
-        </div>
-      </Transition>
-
-      <Transition name="activity">
-        <InlineNotice
-          v-if="quitBlockedMessage"
-          class="global-toast"
-          tone="error"
-          :message="quitBlockedMessage"
-          dismissible
-          @dismiss="quitBlockedMessage = null"
-        />
-      </Transition>
-    </div>
+    </GlassShell>
   </div>
 </template>
 

@@ -1,0 +1,144 @@
+/* Settings feature styles */
+.settings-appearance {
+  position: relative;
+  padding: 20px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+}
+
+.settings-row strong,
+.settings-install strong {
+  font-size: 0.82rem;
+}
+
+.settings-row p,
+.settings-install p {
+  margin: 4px 0 0;
+  font-size: 0.7rem;
+}
+
+.settings-install {
+  display: flex;
+  position: relative;
+  align-items: center;
+  gap: 13px;
+  margin-top: 13px;
+  padding: 17px 20px;
+}
+
+.settings-install > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.settings-install strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-section {
+  margin-top: 27px;
+}
+
+.config-search {
+  width: min(300px, 45vw);
+}
+
+.config-group {
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.config-group > header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.config-group > header h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.config-group > header span {
+  color: var(--text-faint);
+  font-size: 0.64rem;
+}
+
+.config-table {
+  display: grid;
+}
+
+.config-field {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.9fr) minmax(120px, 1.1fr) 24px;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 7px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.config-field:last-child {
+  border-bottom: 0;
+}
+
+.config-field:hover {
+  background: color-mix(in srgb, var(--sage) 8%, transparent);
+}
+
+.config-field__path {
+  overflow: hidden;
+  color: var(--text-soft);
+  font-family: "SFMono-Regular", monospace;
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-field code {
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-field svg {
+  color: var(--text-faint);
+}
+
+.editor-drawer {
+  position: sticky;
+  bottom: 14px;
+  z-index: 10;
+  margin-top: 18px;
+  padding: 20px;
+  background: var(--glass-bg-strong);
+}
+
+.editor-drawer .field {
+  margin-bottom: 14px;
+}
+
+@media (max-width: 720px) {
+  .config-field { grid-template-columns: minmax(0, 1fr) 22px; }
+  .config-field code { display: none; }
+  .settings-row { align-items: flex-start; flex-direction: column; }
+}

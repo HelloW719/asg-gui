@@ -80,3 +80,5 @@ const dashboard = useDashboard();
     />
   </div>
 </template>
+
+<style src="./styles/dashboard.css"></style>

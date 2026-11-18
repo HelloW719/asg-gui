@@ -1,0 +1,140 @@
+/* Explorer feature styles */
+.query-card {
+  position: relative;
+  padding: 22px;
+}
+
+.query-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.field--hero input {
+  height: 52px;
+  padding: 0 16px;
+  border-radius: 14px;
+  font-size: 1rem;
+}
+
+.advanced-fields {
+  margin-top: 17px;
+  border-top: 1px solid var(--line);
+}
+
+.advanced-fields summary,
+.route-editor summary {
+  padding: 13px 0 6px;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 0.69rem;
+}
+
+.advanced-fields .form-grid {
+  margin-top: 10px;
+}
+
+.file-picker {
+  margin-top: 13px;
+}
+
+.result-panel {
+  margin-top: 14px;
+  padding: 22px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--glass-bg-strong) 72%, transparent);
+}
+
+.result-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.raw-output {
+  overflow: auto;
+  max-height: 60vh;
+  margin: 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.14);
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.markdown-body {
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  line-height: 1.72;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  margin-top: 1.5em;
+  color: var(--text);
+}
+
+.markdown-body h1 {
+  font-size: 1.7rem;
+}
+
+.markdown-body h2 {
+  font-size: 1.15rem;
+}
+
+.markdown-body a {
+  color: var(--sage-strong);
+}
+
+.markdown-body code {
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.1);
+  font-size: 0.9em;
+}
+
+.markdown-body pre {
+  overflow: auto;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.13);
+}
+
+.markdown-body blockquote {
+  margin-left: 0;
+  padding-left: 13px;
+  border-left: 2px solid var(--clay);
+}
+
+.result-meta {
+  margin-top: 14px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--text-soft);
+  font-size: 0.72rem;
+}
+.query-card {
+  padding: 24px;
+}
+
+.field--hero input {
+  border-radius: 12px;
+  background: rgba(5, 13, 23, 0.27);
+}
+
+.result-panel {
+  border-color: rgba(224, 237, 249, 0.075);
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: none;
+}
+
+
+@media (max-width: 720px) {
+  .query-hero { grid-template-columns: 1fr; }
+}

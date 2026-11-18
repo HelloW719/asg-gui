@@ -73,3 +73,5 @@ const explorer = useExplorer();
     </TabsRoot>
   </div>
 </template>
+
+<style src="./styles/explorer.css"></style>

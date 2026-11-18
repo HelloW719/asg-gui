@@ -1,0 +1,108 @@
+/* Maintenance feature styles */
+.maintenance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.maintenance-card {
+  position: relative;
+  min-height: 220px;
+  padding: 19px;
+  border-radius: var(--radius-lg);
+}
+
+.maintenance-card__icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 18px;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sage) 10%, transparent);
+  color: var(--sage-strong);
+  place-items: center;
+}
+
+.maintenance-card h2 {
+  font-size: 1.4rem;
+}
+
+.maintenance-card > p {
+  font-size: 0.73rem;
+}
+
+.compact-list {
+  display: grid;
+  gap: 7px;
+  padding: 0;
+  color: var(--text-soft);
+  font-size: 0.69rem;
+  list-style: none;
+}
+
+.compact-list li {
+  display: flex;
+  gap: 6px;
+}
+
+.compact-list svg {
+  flex: 0 0 auto;
+  color: var(--danger);
+}
+
+.diagnostic-table {
+  margin-top: 13px;
+  padding: 19px;
+}
+
+.check-list {
+  display: grid;
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: 20px 120px minmax(0, 1fr) 46px;
+  align-items: center;
+  gap: 9px;
+  min-height: 39px;
+  padding: 7px 3px;
+  border-top: 1px solid var(--line);
+  font-size: 0.7rem;
+}
+
+.check-row strong {
+  font-family: "SFMono-Regular", monospace;
+  font-size: 0.68rem;
+}
+
+.check-row span {
+  overflow: hidden;
+  color: var(--text-faint);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.check-row em {
+  color: var(--text-faint);
+  font-size: 0.6rem;
+  font-style: normal;
+  text-align: right;
+}
+
+.ok {
+  color: var(--success);
+}
+
+.error {
+  color: var(--danger);
+}
+
+.warn {
+  color: var(--ochre);
+}
+
+
+@media (max-width: 900px) {
+  .maintenance-grid { grid-template-columns: 1fr; }
+}

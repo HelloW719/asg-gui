@@ -37,6 +37,14 @@ test.describe("dashboard fixture", () => {
     await expect(page.getByText("FlareSolverr", { exact: true })).toBeVisible();
     await expect(page.getByRole("status").filter({ hasText: "任务运行中" })).toBeHidden();
     await expect(page.locator(".glass-scene canvas")).toHaveCount(2);
+    await expect(
+      page.evaluate(() =>
+        [...document.querySelectorAll("*")].filter((element) => {
+          const filter = getComputedStyle(element).backdropFilter;
+          return Boolean(filter && filter !== "none");
+        }).length,
+      ),
+    ).resolves.toBe(1);
     await page.waitForTimeout(1600);
     await page.screenshot({ path: `test-results/dashboard-${size}.png`, fullPage: true });
     await page.getByRole("button", { name: "切换到浅色主题" }).click();

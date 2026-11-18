@@ -1,0 +1,61 @@
+:root {
+  font-family:
+    "Epilogue", "PingFang SC", "Microsoft YaHei UI", "Noto Sans CJK SC",
+    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  color-scheme: dark;
+  --background: #0e1622;
+  --background-raised: #172235;
+  --text: #e9f0f8;
+  --text-soft: #b4c0ce;
+  --text-faint: #7f8da1;
+  --sage: #5ad1c0;
+  --sage-strong: #8be1d2;
+  --moss: #4eaa9d;
+  --clay: #82a8df;
+  --terracotta: #de786f;
+  --ochre: #e2bd62;
+  --danger: #ef7774;
+  --success: #55d6a8;
+  --glass-tint: 46, 60, 82;
+  --glass-bg: rgba(20, 31, 46, 0.22);
+  --glass-bg-strong: rgba(18, 29, 43, 0.78);
+  --glass-border: rgba(224, 237, 249, 0.1);
+  --glass-highlight: rgba(235, 247, 255, 0.18);
+  --glass-shadow: rgba(2, 8, 16, 0.25);
+  --field-bg: rgba(8, 17, 29, 0.34);
+  --field-border: rgba(219, 235, 250, 0.12);
+  --line: rgba(219, 235, 250, 0.08);
+  --radius-xl: 24px;
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --ease-organic: cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --background: #e5ebf1;
+  --background-raised: #f3f6f9;
+  --text: #172332;
+  --text-soft: #4d5e70;
+  --text-faint: #718093;
+  --sage: #287f70;
+  --sage-strong: #1b6e60;
+  --moss: #3f756a;
+  --clay: #557fba;
+  --terracotta: #a6534d;
+  --ochre: #8d681e;
+  --danger: #a84f4b;
+  --success: #26795f;
+  --glass-tint: 222, 231, 239;
+  --glass-bg: rgba(255, 255, 255, 0.24);
+  --glass-bg-strong: rgba(246, 249, 251, 0.9);
+  --glass-border: rgba(36, 54, 72, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.72);
+  --glass-shadow: rgba(44, 63, 82, 0.12);
+  --field-bg: rgba(255, 255, 255, 0.34);
+  --field-border: rgba(39, 57, 75, 0.13);
+  --line: rgba(39, 57, 75, 0.09);
+}

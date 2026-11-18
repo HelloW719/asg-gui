@@ -6,8 +6,10 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 import router from "./router";
-import "./styles/main.css";
-import "./styles/glass.css";
+import "./styles/tokens.css";
+import "./styles/base.css";
+import "./styles/controls.css";
+import "./styles/shell.css";
 
 createApp(App).use(createPinia()).use(router).mount("#app");
 

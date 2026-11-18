@@ -5,7 +5,6 @@ const sourceFiles = import.meta.glob("/src/**/*.{ts,vue}", {
   import: "default",
   eager: true,
 }) as Record<string, string>;
-
 function filesIn(folder: string): Array<[string, string]> {
   return Object.entries(sourceFiles).filter(
     ([path]) => path.startsWith(`/src/${folder}/`) && !path.endsWith(".test.ts"),

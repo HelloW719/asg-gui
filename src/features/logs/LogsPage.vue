@@ -69,3 +69,5 @@ const autoScroll = ref(true);
     />
   </div>
 </template>
+
+<style src="./styles/logs.css"></style>

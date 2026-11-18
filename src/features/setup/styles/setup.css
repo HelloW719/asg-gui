@@ -1,0 +1,131 @@
+/* Setup feature styles */
+.setup-wrap {
+  display: grid;
+  min-height: 0;
+  padding: 30px;
+  place-items: center;
+}
+
+.setup-wrap--preview {
+  align-items: start;
+  overflow: auto;
+}
+
+.browser-preview {
+  width: min(1120px, 100%);
+}
+
+.setup-view {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(330px, 0.9fr);
+  align-items: center;
+  gap: clamp(24px, 5vw, 70px);
+  width: min(1040px, 100%);
+  min-height: calc(100vh - 150px);
+  margin: auto;
+  padding: 30px clamp(20px, 4vw, 60px);
+}
+
+.setup-hero {
+  position: relative;
+}
+
+.setup-hero h1 {
+  max-width: 620px;
+  font-size: clamp(2.8rem, 5.5vw, 6.2rem);
+  font-weight: 500;
+}
+
+.setup-hero > p {
+  max-width: 620px;
+  margin-bottom: 28px;
+}
+
+.setup-orbit {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin-bottom: 24px;
+  border: 1px solid color-mix(in srgb, var(--sage) 30%, transparent);
+  border-radius: 50%;
+  animation: ambient-turn 20s linear infinite;
+}
+
+.setup-orbit span {
+  position: absolute;
+  border: 1px solid var(--clay);
+  border-radius: 50%;
+}
+
+.setup-orbit span:nth-child(1) {
+  inset: 20px;
+}
+
+.setup-orbit span:nth-child(2) {
+  top: 64px;
+  left: -4px;
+  width: 20px;
+  height: 20px;
+  background: var(--sage);
+}
+
+.setup-orbit span:nth-child(3) {
+  right: 21px;
+  bottom: 25px;
+  width: 9px;
+  height: 9px;
+  background: var(--clay);
+}
+
+.setup-card {
+  position: relative;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+}
+
+.setup-card__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  margin-bottom: 18px;
+}
+
+.setup-card__item > svg {
+  flex: 0 0 auto;
+  color: var(--sage-strong);
+}
+
+.setup-card__item h2 {
+  margin-bottom: 5px;
+  font-size: 0.88rem;
+}
+
+.setup-card__item p {
+  margin: 0;
+  font-size: 0.7rem;
+}
+
+.divider {
+  height: 1px;
+  margin: 20px 0;
+  background: var(--line);
+}
+
+.setup-orbit {
+  border-color: rgba(124, 233, 213, 0.22);
+}
+
+.setup-orbit span {
+  border-color: rgba(245, 196, 81, 0.35);
+}
+
+.setup-orbit span:nth-child(2) {
+  background: var(--sage);
+}
+
+@media (max-width: 720px) {
+  .setup-view { grid-template-columns: 1fr; padding-top: 10px; }
+  .setup-orbit { width: 92px; height: 92px; }
+  .setup-orbit span:nth-child(1) { inset: 13px; }
+  .setup-orbit span:nth-child(2) { top: 38px; }
+}

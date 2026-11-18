@@ -97,3 +97,5 @@ async function usePath(): Promise<void> {
   </div>
 </template>
 
+<style src="./styles/setup.css"></style>
+

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { VisualState } from "../types/cli";
-import { sceneStateForVisual, shapeOf } from "./glassScene";
+import type { VisualState } from "@/types/cli";
+import { sceneStateForVisual } from "./model";
+import { morphShape, shapeOf } from "./shapes";
 
 describe("glass scene state mapping", () => {
   it.each([
@@ -20,7 +21,7 @@ describe("glass scene state mapping", () => {
     },
   );
 
-  it("keeps the stable and failed geometries in opposite corners", () => {
+  it("keeps stable and failed geometries in opposite corners", () => {
     const healthy = shapeOf("healthy", "dark");
     const failed = shapeOf("error", "dark");
 
@@ -30,5 +31,16 @@ describe("glass scene state mapping", () => {
     expect(failed.cy).toBeLessThan(0.5);
     expect(healthy.amp).toBe(0);
     expect(failed.amp).toBe(0);
+  });
+
+  it("morphs position before shape amplitude", () => {
+    const circle = shapeOf("healthy", "dark");
+    const cookie = shapeOf("working", "dark");
+    const early = morphShape(circle, cookie, 0.2);
+    const late = morphShape(circle, cookie, 0.8);
+
+    expect(early.amp).toBe(0);
+    expect(late.amp).toBeGreaterThan(0);
+    expect(early.cx).toBeLessThan(circle.cx);
   });
 });
