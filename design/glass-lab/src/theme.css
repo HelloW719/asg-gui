@@ -18,7 +18,7 @@ body,
   height: 100%;
   margin: 0;
   overflow: hidden;
-  /* 圆角外必须透明：窗口本身是透明无边框的，页面不能再铺底色。 */
+  /* 原生窗口透明，只绘制连续曲率窗口自身。 */
   background: transparent;
 }
 
@@ -26,8 +26,9 @@ body,
   position: relative;
   width: 100%;
   height: 100%;
-  /* 自己的 24px 圆角：圆角外裁掉，什么都不放，交给窗口透明区。 */
-  border-radius: 24px;
+  /* 连续曲率窗口：从直边开始缓慢弯折，再平滑过渡到最弯处。 */
+  border-radius: 32px;
+  corner-shape: squircle;
   overflow: hidden;
   isolation: isolate;
   --l3-blur: 36px;

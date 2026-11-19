@@ -46,7 +46,7 @@ async function close(): Promise<void> {
         <Sun v-if="appearance.resolvedTheme === 'dark'" :size="16" />
         <Moon v-else :size="16" />
       </button>
-      <div v-if="session.platform !== 'macos'" class="window-controls">
+      <div class="window-controls">
         <button type="button" aria-label="最小化" @click="minimize">
           <Minus :size="16" />
         </button>

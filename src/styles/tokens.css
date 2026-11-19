@@ -27,6 +27,7 @@
   --field-bg: rgba(8, 17, 29, 0.34);
   --field-border: rgba(219, 235, 250, 0.12);
   --line: rgba(219, 235, 250, 0.08);
+  --window-radius: 32px;
   --radius-xl: 24px;
   --radius-lg: 18px;
   --radius-md: 14px;

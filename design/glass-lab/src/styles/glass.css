@@ -5,14 +5,14 @@
  * 布局面板退化回纯容器。
  *
  * 边缘严格沿用 README 的曲面定义，不另调数值：
- *   切线暗边贴边（1px）→ 曲面亮带离边 2–7px → 长尾衰减；
+ *   曲面亮带离边 2–7px → 长尾衰减；
  *   底部反向成暗带，形成厚度；四角用 radial-gradient 补聚光。
- * 整套结构在圆角处连续，没有「直角边框」的突变，
- * 也没有任何一条能单独被看见的亮线。
+ * 整套结构使用不透明底填满圆角外侧，没有任何一条能单独被看见的亮线。
  */
 
 .layer-frost {
-  --glass-radius: 24px;
+  --glass-radius: 32px;
+  corner-shape: squircle;
   --bevel: var(--glass-bevel, 1);
 
   position: absolute;
@@ -50,24 +50,17 @@
   backdrop-filter: blur(var(--l4-blur)) saturate(130%);
 
   box-shadow:
-    /* 极弱外轮廓 */
-    inset 0 0 0 1px rgba(var(--hair), calc(0.04 * var(--hl))),
-
-    /* 顶部曲面：切线暗边 → 亮带 → 长尾 */
-    inset 0 1px 0 rgba(0, 0, 0, calc(0.20 * var(--hl))),
+    /* 顶部曲面：柔和亮带 → 长尾，不使用可单独看见的描边。 */
     inset 0 6px 11px -4px rgba(var(--hair), calc(0.17 * var(--hl) * var(--bevel))),
     inset 0 15px 26px -19px rgba(var(--hair), calc(0.10 * var(--hl) * var(--bevel))),
     inset 0 26px 42px -34px rgba(var(--hair), calc(0.06 * var(--hl) * var(--bevel))),
 
-    /* 底部曲面：切线暗边更沉，向内是暗带（背面） */
-    inset 0 -1px 0 rgba(0, 0, 0, calc(0.28 * var(--hl))),
+    /* 底部曲面使用向内衰减的暗带表现厚度。 */
     inset 0 -7px 14px -5px rgba(0, 0, 0, calc(0.20 * var(--hl) * var(--bevel))),
     inset 0 -18px 30px -23px rgba(0, 0, 0, calc(0.14 * var(--hl) * var(--bevel))),
 
-    /* 左右曲面：左受光、右背光 */
-    inset 1px 0 0 rgba(var(--hair), calc(0.04 * var(--hl))),
+    /* 左右曲面：左受光、右背光，仍保持无描边。 */
     inset 3px 0 8px -5px rgba(var(--hair), calc(0.09 * var(--hl) * var(--bevel))),
-    inset -1px 0 0 rgba(0, 0, 0, calc(0.14 * var(--hl))),
     inset -3px 0 8px -5px rgba(0, 0, 0, calc(0.10 * var(--hl)));
 }
 

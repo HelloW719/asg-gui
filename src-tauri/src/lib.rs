@@ -15,6 +15,37 @@ use tauri_plugin_dialog::DialogExt;
 use crate::models::{DesktopAppState, RootSelection};
 use crate::state::DesktopState;
 
+#[cfg(windows)]
+fn configure_native_window<R: Runtime>(window: &WebviewWindow<R>) {
+    use windows_sys::Win32::Graphics::Dwm::{
+        DwmSetWindowAttribute, DWMWA_BORDER_COLOR, DWMWA_COLOR_NONE,
+        DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_DONOTROUND,
+    };
+
+    let Ok(hwnd) = window.hwnd() else {
+        return;
+    };
+    let border_color = DWMWA_COLOR_NONE;
+    let corner_preference = DWMWCP_DONOTROUND;
+    unsafe {
+        let _ = DwmSetWindowAttribute(
+            hwnd.0,
+            DWMWA_BORDER_COLOR as u32,
+            (&border_color as *const u32).cast(),
+            std::mem::size_of_val(&border_color) as u32,
+        );
+        let _ = DwmSetWindowAttribute(
+            hwnd.0,
+            DWMWA_WINDOW_CORNER_PREFERENCE as u32,
+            (&corner_preference as *const i32).cast(),
+            std::mem::size_of_val(&corner_preference) as u32,
+        );
+    }
+}
+
+#[cfg(not(windows))]
+fn configure_native_window<R: Runtime>(_window: &WebviewWindow<R>) {}
+
 fn tray_image() -> Image<'static> {
     let size = 32u32;
     let mut rgba = vec![0u8; (size * size * 4) as usize];
@@ -261,6 +292,7 @@ pub fn run() {
                 .build(app)?;
 
             if let Some(window) = app.get_webview_window("main") {
+                configure_native_window(&window);
                 let window_for_events = window.clone();
                 let quitting_for_events = state_for_setup.quitting.clone();
                 window.on_window_event(move |event| {

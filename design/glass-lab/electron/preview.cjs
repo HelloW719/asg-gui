@@ -47,7 +47,7 @@ async function run() {
     minWidth: 960,
     minHeight: 640,
     show: true,
-    // 无边框 + 透明：圆角由页面自己画（.stage 的 24px），圆角外保持透明。
+    // 无边框透明窗口：由页面绘制 32px 连续曲率圆角。
     frame: false,
     transparent: true,
     backgroundColor: '#00000000',

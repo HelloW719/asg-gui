@@ -104,6 +104,11 @@ stores -> services
 - `services/desktop` 是前端访问 Tauri IPC、窗口和任务事件的唯一入口。
 - Tauri/Rust 只处理安装目录校验、窗口/托盘、主题持久化、CLI 子进程启动、命令
   白名单、stdin、任务取消、写操作互斥和退出保护；不得复制 ASG 业务规则。
+- 桌面窗口使用透明、无边框、无系统阴影配置，由页面绘制连续曲率圆角；不得额外
+  增加内缩留白或第二层窗口外壳。Windows 必须关闭 DWM 自带圆角与边框，避免与
+  页面圆角叠加。相关 DWM 能力只能通过 Windows 目标依赖引入。
+- Windows、macOS、Linux 都使用页面内窗口按钮。调整原生窗口装饰或标题栏策略时，
+  必须同时核对 `tauri.*.conf.json` 与 `AppTitleBar`，不能只改单个平台。
 - 调用 CLI 必须使用参数数组，不经过 shell。密钥只通过 stdin 传递，不进入 argv、
   GUI 日志或持久化页面状态。
 - `src/visual/glass` 只接收视觉状态、主题、减少动态和帧率参数，不导入 services
@@ -149,6 +154,9 @@ stores -> services
 - 整个应用只能有一层全屏毛玻璃：`GlassShell` 中的 `.glass-frost-layer`。
 - 内容面板使用染色、边框和内阴影，不能分别再次添加 `backdrop-filter`。
 - 保持四层结构：L1 背景与噪声、L2 动态几何、L3 降采样模糊、L4 全屏磨砂。
+- 顶层窗口使用 `--window-radius` 的 `squircle` 连续曲率圆角，L1-L4 与
+  `.app-frame` 必须共享同一轮廓；不得改回仅用普通 `border-radius` 的圆弧。
+  旧 WebView 不支持 `corner-shape` 时，才允许由普通圆角渐进降级。
 - 必须兼容深色、浅色、减少动态、减少透明和 960×640 最小窗口。
 - 跨顶层模块使用 `@/` 别名，同一个 feature 内可以使用相对路径。
 
