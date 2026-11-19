@@ -9,6 +9,30 @@ GUI 使用 Vue 3 和 Tauri 构建。界面的业务操作必须通过 ASG CLI �
 除非任务明确要求重新设计，否则必须保留四层玻璃视觉；材质和动效以
 `design/glass-lab` 为参考。
 
+## 架构定位与驱动
+
+本 GUI 是 **分层、按功能切片的桌面控制面 SPA**：
+
+- Vue 3 Composition API 负责视图和页面组合；
+- feature composable 承担页面级状态、交互编排和类似 view-model 的职责；
+- Pinia 保存跨页面运行状态；
+- `services/asg` 是类型化 CLI 命令适配层；
+- `services/desktop` 是 Tauri IPC 和任务传输层；
+- Tauri/Rust 是薄桌面桥，ASG CLI 是业务能力边界；
+- 玻璃引擎是独立的、状态驱动的视觉子系统。
+
+架构主要由以下因素驱动：
+
+1. **ASG CLI 能力契约**决定 GUI 能提供哪些业务动作和数据结构；
+2. **JSON/JSONL 与任务生命周期**决定任务执行、流式事件、取消和错误处理模型；
+3. **桌面控制面的操作域**决定 status、explore、sources、logs、settings、
+   maintenance 等 feature 切片；
+4. **Tauri 桌面约束**决定窗口、托盘、目录选择、主题和子进程桥接；
+5. **运行状态的视觉表达**决定四层玻璃场景，但视觉层不能接触业务服务。
+
+不要把页面数量、组件库或玻璃效果本身当作业务架构。页面只负责组装，状态和
+能力应位于约定层次。
+
 ## 常用命令
 
 - `npm run dev`：启动浏览器预览，地址为 `127.0.0.1:1420`。
@@ -29,6 +53,8 @@ GUI 使用 Vue 3 和 Tauri 构建。界面的业务操作必须通过 ASG CLI �
 - `src/services/desktop`：Tauri IPC、窗口、事件和任务传输。
 - `src/services/asg`：类型化 CLI 服务，前端只有这一层可以拼装 ASG 参数。
 - `src/stores`：Pinia 领域状态，禁止导入页面或组件。
+- `src/types/cli.ts`：GUI 消费的 ASG CLI 线协议与 Tauri 任务桥类型；它必须与
+  ASG core 的机器契约保持一致，不能自行定义后端字段语义。
 - `src/visual/glass`：玻璃场景引擎和四层外壳。
 - `src/styles`：全局设计令牌、基础样式、通用控件和外壳样式。
 
@@ -43,6 +69,65 @@ stores -> services
 `services` 和 `shared/ui` 不得导入业务界面模块。不同 feature 之间不得直接互相导入；
 需要协作时通过 `src/app`、共享组件或领域服务完成。
 
+## 运行链路与状态归属
+
+典型业务调用链为：
+
+```text
+页面交互
+-> feature composable
+-> src/app 服务访问与状态组合
+-> src/services/asg 类型化命令适配
+-> jobs store 的 AsgCommandRunner
+-> services/desktop JobClient
+-> Tauri IPC / Rust 子进程桥
+-> ASG CLI
+-> result / JSONL event
+-> JobClient -> Pinia / feature 状态 -> 页面反馈
+```
+
+- 页面和 feature 不得直接启动任务、调用 `jobClient`、拼装业务 CLI 参数或执行
+  `jobs.execute` / `jobs.stream`。
+- `src/services/asg` 只负责命令语义、参数和结构化结果；不得实现文件、进程、
+  网络、搜索或抓取逻辑。
+- `jobs` store 负责运行中任务、并发标签、最后结果/错误和命令运行器接口。
+  结构化失败必须保留 CLI result 中的 `data`，供功能层继续展示。
+- session、jobs、status、appearance 等跨页面运行状态放在 Pinia；仅在单个页面
+  使用的表单、加载、弹窗和结果状态放在对应 feature composable。
+- `useAppBootstrap` 是初始化、主题应用、状态轮询、导航事件和原生事件监听的唯一
+  所有者。store 和组件不得建立重复的轮询或监听。
+- 页面视觉状态通过 `useAppStatus` 等 app 层组合函数派生；feature 不得各自维护
+  一套服务健康状态机。
+
+## 桌面桥与视觉边界
+
+- `services/desktop` 是前端访问 Tauri IPC、窗口和任务事件的唯一入口。
+- Tauri/Rust 只处理安装目录校验、窗口/托盘、主题持久化、CLI 子进程启动、命令
+  白名单、stdin、任务取消、写操作互斥和退出保护；不得复制 ASG 业务规则。
+- 调用 CLI 必须使用参数数组，不经过 shell。密钥只通过 stdin 传递，不进入 argv、
+  GUI 日志或持久化页面状态。
+- `src/visual/glass` 只接收视觉状态、主题、减少动态和帧率参数，不导入 services
+  stores 或 feature。业务状态先在 app 层映射为 `VisualState`，再由视觉层表现。
+- 路由页面必须能在 960×640 最小窗口中工作，四层玻璃和页面内容不得产生横向
+  溢出；原生程序更新必须通过 `npm run tauri build`。
+
+## 数据契约
+
+- ASG core 的 `src/cli/contract.ts` 和 `docs/cli-contract.md` 是机器数据契约的
+  权威来源。GUI 只消费契约，不在本仓库重新解释命令输出或复制业务规则。
+- `schema_version` 标识 CLI 数据协议版本，与 ASG core 版本、GUI 版本相互独立。
+- CLI result 中，`ok:true` 必须包含 `data` 且不能包含 `error`；`ok:false` 必须包含
+  `error`。只有 `search` / `fetch` 的数据面失败可以同时保留 `data`，GUI 必须继续
+  展示其中的 `text`，不能因抛错丢弃 CLI 返回的错误正文。
+- `ok` 只表示命令是否返回有效结果，不等同于服务健康或进程退出码。例如 `doctor`
+  即使存在 error 级检查并以非零退出码结束，result 仍可为 `ok:true`。
+- CLI event 的公共外壳是 `type`、`schema_version` 和 `event`；GUI 必须忽略未知
+  event 类型。Tauri 的 `jobId`、`kind`、`started`、`exit`、`cancelled` 属于任务桥，
+  不是 ASG CLI 的业务数据契约。
+- `CliResult`、`CliEvent` 和 `JobEvent` 使用判别联合表达。新增或修改命令字段时，
+  先更新 ASG core 契约和契约测试，再同步 `src/types/cli.ts`，禁止以 `any` 或
+  无约束的 `unknown` 掩盖漂移。
+
 ## 组件与状态规范
 
 - 路由页面负责组装，不应继续堆叠大量业务和交互代码。
@@ -56,8 +141,6 @@ stores -> services
 - ASG 命令应放入 `src/services/asg/*`，页面通过 `useAsgServices` 或功能组合式函数
   访问，并保留结构化错误、stdin 密钥保护和任务取消能力。
 - 所有异步操作都应提供加载或禁用反馈，并处理错误、成功、空数据和确认状态。
-- `useAppBootstrap` 是初始化、主题应用、状态轮询和原生事件监听的唯一所有者，
-  不要在 store 或组件里重复。
 
 ## 样式与玻璃效果
 
@@ -77,10 +160,13 @@ stores -> services
 2. `npm test -- --run`
 3. 路由、交互或样式发生变化时执行 `npm run test:e2e`
 4. 需要更新桌面程序时执行 `npm run tauri build`
-5. 使用 `git diff --check` 检查格式问题
+5. 数据契约发生变化时，还应在 ASG 仓库执行 `npm run build`、契约测试和受影响
+   CLI 测试，再回到本仓库执行构建与测试
+6. 使用 `git diff --check` 检查格式问题
 
 提交信息使用中文并准确概括实际改动。无关重构、格式化和其他功能修改不要混入同一个
 提交。测试和 fixture 可以使用模拟状态，但不要把演示数据写进产品界面。
 
-只要目录职责、常用命令、依赖方向、组件约定、样式边界或完成标准发生变化，就应在
-同一次改动中同步更新本文件。不要把已经失效的架构说明留在 `AGENTS.md` 中。
+只要目录职责、常用命令、依赖方向、数据契约、组件约定、样式边界或完成标准发生
+变化，就应在同一次改动中同步更新本文件。不要把已经失效的架构说明留在
+`AGENTS.md` 中。
