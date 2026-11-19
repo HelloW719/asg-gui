@@ -1,7 +1,8 @@
 import type {
+  BrowserInstallStatus,
   BrowserStatus,
   DoctorCheck,
-  UpdateStatus,
+  UpdateCheckStatus,
 } from "../../types/cli";
 import type { AsgCommandRunner } from "./command";
 
@@ -20,8 +21,8 @@ export function createMaintenanceService(runner: AsgCommandRunner) {
       });
     },
 
-    installBrowser(full: boolean): Promise<BrowserStatus> {
-      return runner.run<BrowserStatus>(
+    installBrowser(full: boolean): Promise<BrowserInstallStatus> {
+      return runner.run<BrowserInstallStatus>(
         full ? ["browser", "install", "--full"] : ["browser", "install"],
         {
           label: full ? "安装完整 Chromium" : "安装 headless Chromium",
@@ -37,8 +38,8 @@ export function createMaintenanceService(runner: AsgCommandRunner) {
       });
     },
 
-    checkUpdate(): Promise<UpdateStatus> {
-      return runner.run<UpdateStatus>(["update", "check"], {
+    checkUpdate(): Promise<UpdateCheckStatus> {
+      return runner.run<UpdateCheckStatus>(["update", "check"], {
         label: "检查 ASG 更新",
       });
     },

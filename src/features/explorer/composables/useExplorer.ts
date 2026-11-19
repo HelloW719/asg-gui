@@ -4,6 +4,7 @@ import { useAsgServices } from "@/app/useAsgServices";
 import { useJobsStore } from "@/stores/jobs";
 import type { CommandTextResult } from "@/types/cli";
 import type { FetchForm, SearchForm } from "@/utils/args";
+import { commandTextResultFromError } from "@/utils/cli";
 
 export function useExplorer() {
   const jobs = useJobsStore();
@@ -67,6 +68,8 @@ export function useExplorer() {
     try {
       applyResult(await serviceClient.explorer.search(searchForm));
     } catch (cause) {
+      const failedResult = commandTextResultFromError(cause);
+      if (failedResult) applyResult(failedResult);
       error.value = cause instanceof Error ? cause.message : String(cause);
     }
   }
@@ -82,6 +85,8 @@ export function useExplorer() {
     try {
       applyResult(await serviceClient.explorer.fetch(fetchForm));
     } catch (cause) {
+      const failedResult = commandTextResultFromError(cause);
+      if (failedResult) applyResult(failedResult);
       error.value = cause instanceof Error ? cause.message : String(cause);
     }
   }

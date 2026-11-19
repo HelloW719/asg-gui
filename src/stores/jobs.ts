@@ -53,6 +53,7 @@ export const useJobsStore = defineStore("jobs", () => {
           result.error ?? { code: "unknown", message: `${options.label}失败。` },
           result.command,
           `${options.label}失败。`,
+          result.data,
         );
         lastError.value = error.message;
         throw error;
@@ -85,6 +86,7 @@ export const useJobsStore = defineStore("jobs", () => {
               result.error ?? { code: "unknown", message: `${options.label}失败。` },
               result.command,
               `${options.label}失败。`,
+              result.data,
             );
             lastError.value = error.message;
             throw error;

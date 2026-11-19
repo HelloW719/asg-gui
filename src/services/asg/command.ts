@@ -28,16 +28,19 @@ export class AsgCommandError extends Error {
   readonly code: string;
   readonly details?: unknown;
   readonly command?: string;
+  readonly data?: unknown;
 
   constructor(
     payload: CliErrorPayload,
     command?: string,
     fallback = "ASG 命令执行失败。",
+    data?: unknown,
   ) {
     super(payload.message || fallback);
     this.name = "AsgCommandError";
     this.code = payload.code;
     this.details = payload.details;
     this.command = command;
+    this.data = data;
   }
 }

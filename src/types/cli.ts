@@ -17,20 +17,44 @@ export interface CliErrorPayload {
   details?: unknown;
 }
 
-export interface CliResult<T = unknown> {
+interface CliResultBase {
   schema_version: 1;
-  ok: boolean;
   command: string;
-  data?: T;
-  error?: CliErrorPayload;
 }
 
-export interface CliEvent {
+export type CliResult<T = unknown> = CliResultBase &
+  (
+    | {
+        ok: true;
+        data: T;
+        error?: never;
+      }
+    | {
+        ok: false;
+        data?: T;
+        error: CliErrorPayload;
+      }
+  );
+
+export interface CliEvent<E extends string = string> {
   type: "event";
   schema_version: 1;
-  event: string;
+  event: E;
   [key: string]: unknown;
 }
+
+export type LogCliEvent = CliEvent<"log"> & {
+  service: string;
+  at?: string;
+  line: string;
+  message?: string;
+};
+
+export type ProgressCliEvent = CliEvent<"progress"> & {
+  job?: string;
+  percent?: number;
+  message?: string;
+};
 
 export interface ServiceProbe {
   up: boolean;
@@ -75,22 +99,24 @@ export interface JobStart {
   mutating: boolean;
 }
 
-export type JobEventKind =
-  | "started"
-  | "stdout"
-  | "stderr"
-  | "result"
-  | "exit"
-  | "cancelled";
-
-export interface JobEvent {
+interface JobEventBase<K extends string> {
   jobId: string;
-  kind: JobEventKind;
-  data?: unknown;
+  kind: K;
 }
+
+export type JobEvent =
+  | (JobEventBase<"started"> & { data?: never })
+  | (JobEventBase<"stdout"> & { data: CliEvent | string })
+  | (JobEventBase<"stderr"> & { data: string })
+  | (JobEventBase<"result"> & { data: CliResult })
+  | (JobEventBase<"exit"> & { data: number | null })
+  | (JobEventBase<"cancelled"> & { data?: never });
+
+export type JobEventKind = JobEvent["kind"];
 
 export interface EngineInfo {
   id: string;
+  pluginId?: string;
   group: "searxng" | "gateway.search" | "gateway.reverse_image";
   name: string;
   kind: "searxng" | "gateway";
@@ -98,27 +124,27 @@ export interface EngineInfo {
   available: boolean;
   routing: string[];
   requires?: string[];
-  source?: string;
+  source?: "default" | "local";
 }
 
 export interface PluginInfo {
-  name: string;
+  name: "bili" | "ytdlp" | "opencli" | "article";
   platform: string;
   channel: string;
   channel_id: string;
   installed: boolean;
-  version?: string | null;
+  version?: string;
   enabled: boolean;
-  path: string;
+  path?: string;
 }
 
 export interface ExtensionInfo {
   id: string;
   name?: string;
   version?: string;
-  provides?: string[];
+  provides?: Array<"search" | "fetch">;
   entry?: string;
-  path?: string;
+  path: string;
   error?: string;
 }
 
@@ -127,6 +153,7 @@ export interface ExtensionSearchItem {
   description: string;
   stars: number;
   url: string;
+  updated_at: string;
 }
 
 export interface LogLine {
@@ -145,7 +172,7 @@ export interface DoctorCheck {
 
 export interface ConfigFieldInfo {
   key: string;
-  type: "string" | "number" | "boolean" | "object" | "array";
+  type: string;
   required: boolean;
   default?: unknown;
   description?: string;
@@ -157,16 +184,35 @@ export interface BrowserStatus {
   chromium: boolean;
 }
 
-export interface UpdateStatus {
-  current_version?: string;
-  version?: string;
+export interface BrowserInstallStatus extends BrowserStatus {
+  full: boolean;
+}
+
+interface UpdateStatusBase {
+  version: string | null;
+  restarted: boolean;
+}
+
+export interface UpdateCheckStatus extends UpdateStatusBase {
+  action: "check";
+  current_version?: string | null;
   up_to_date?: boolean;
 }
 
+export interface UpdateApplyStatus extends UpdateStatusBase {
+  action: "apply";
+}
+
+export type UpdateStatus = UpdateCheckStatus | UpdateApplyStatus;
+
 export interface CommandTextResult {
-  text?: string;
-  elapsed_ms?: number;
-  code?: string | null;
+  tool: "search" | "fetch";
+  endpoint: string;
+  elapsed_ms: number;
+  ok: boolean;
+  code: string | null;
+  text: string;
+  render?: "auto" | "always" | "never";
 }
 
 export type LifecycleAction = "start" | "stop" | "restart";

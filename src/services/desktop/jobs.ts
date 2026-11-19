@@ -1,4 +1,5 @@
 import type { CliResult, JobEvent, JobStart } from "../../types/cli";
+import { isCliResult } from "../../utils/cli";
 import { cancelCliJob, inTauri, startCliJob } from "./api";
 import { listenJobEvents } from "./events";
 
@@ -101,13 +102,7 @@ class JobClient {
 
     if (event.kind === "result") {
       const candidate = event.data;
-      if (
-        candidate &&
-        typeof candidate === "object" &&
-        (candidate as { schema_version?: unknown }).schema_version === 1
-      ) {
-        job.result = candidate as CliResult;
-      }
+      if (isCliResult(candidate)) job.result = candidate;
     }
 
     if (event.kind === "cancelled") {

@@ -1,7 +1,11 @@
 import { computed, onMounted, ref } from "vue";
 import { useAsgServices } from "@/app/useAsgServices";
 import { useJobsStore } from "@/stores/jobs";
-import type { BrowserStatus, DoctorCheck, UpdateStatus } from "@/types/cli";
+import type {
+  BrowserStatus,
+  DoctorCheck,
+  UpdateCheckStatus,
+} from "@/types/cli";
 
 export function useMaintenance() {
   const jobs = useJobsStore();
@@ -9,7 +13,7 @@ export function useMaintenance() {
   const checks = ref<DoctorCheck[]>([]);
   const doctorLoaded = ref(false);
   const browser = ref<BrowserStatus | null>(null);
-  const update = ref<UpdateStatus | null>(null);
+  const update = ref<UpdateCheckStatus | null>(null);
   const adLevel = ref("ads");
   const error = ref<string | null>(null);
   const success = ref<string | null>(null);
