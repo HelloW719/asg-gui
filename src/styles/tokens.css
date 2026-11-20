@@ -18,6 +18,14 @@
   --ochre: #e2bd62;
   --danger: #ef7774;
   --success: #55d6a8;
+  --m3e-fallback-on-surface: #e9f0f8;
+  --m3e-fallback-on-surface-variant: #b4c0ce;
+  --m3e-fallback-primary: #5ad1c0;
+  --m3e-fallback-secondary: #4eaa9d;
+  --m3e-fallback-tertiary: #82a8df;
+  --m3e-fallback-error: #ef7774;
+  --m3e-fallback-error-container: #de786f;
+  --m3e-fallback-line: rgba(219, 235, 250, 0.08);
   --glass-tint: 46, 60, 82;
   --glass-bg: rgba(20, 31, 46, 0.22);
   --glass-bg-strong: rgba(18, 29, 43, 0.78);
@@ -35,7 +43,11 @@
   --radius-lg: 18px;
   --radius-md: 14px;
   --radius-sm: 10px;
-  --ease-organic: cubic-bezier(0.22, 0.8, 0.3, 1);
+  --motion-fast-spatial: 350ms cubic-bezier(0.42, 1.67, 0.21, 0.9);
+  --motion-default-spatial: 500ms cubic-bezier(0.38, 1.21, 0.22, 1);
+  --motion-fast-effects: 150ms cubic-bezier(0.31, 0.94, 0.34, 1);
+  --motion-default-effects: 200ms cubic-bezier(0.34, 0.8, 0.34, 1);
+  --ease-organic: cubic-bezier(0.38, 1.21, 0.22, 1);
 }
 
 :root[data-theme="light"] {
@@ -53,6 +65,14 @@
   --ochre: #8d681e;
   --danger: #a84f4b;
   --success: #26795f;
+  --m3e-fallback-on-surface: #172332;
+  --m3e-fallback-on-surface-variant: #4d5e70;
+  --m3e-fallback-primary: #287f70;
+  --m3e-fallback-secondary: #3f756a;
+  --m3e-fallback-tertiary: #557fba;
+  --m3e-fallback-error: #a84f4b;
+  --m3e-fallback-error-container: #a6534d;
+  --m3e-fallback-line: rgba(39, 57, 75, 0.09);
   --glass-tint: 222, 231, 239;
   --glass-bg: rgba(255, 255, 255, 0.24);
   --glass-bg-strong: rgba(246, 249, 251, 0.9);
@@ -63,4 +83,81 @@
   --field-bg: rgba(255, 255, 255, 0.34);
   --field-border: rgba(39, 57, 75, 0.13);
   --line: rgba(39, 57, 75, 0.09);
+}
+
+/*
+ * M3E tokens are injected inside <m3e-theme>. Resolve the existing app
+ * vocabulary there so the glass engine and feature styles share one palette.
+ */
+.app-root {
+  --text: var(--md-sys-color-on-surface, var(--m3e-fallback-on-surface));
+  --text-soft: var(--md-sys-color-on-surface-variant, var(--m3e-fallback-on-surface-variant));
+  --text-faint: color-mix(
+    in srgb,
+    var(--md-sys-color-on-surface-variant, var(--m3e-fallback-on-surface-variant)) 72%,
+    transparent
+  );
+  --sage: var(--md-sys-color-primary, var(--m3e-fallback-primary));
+  --sage-strong: var(--md-sys-color-primary, var(--m3e-fallback-primary));
+  --moss: var(--md-sys-color-secondary, var(--m3e-fallback-secondary));
+  --clay: var(--md-sys-color-tertiary, var(--m3e-fallback-tertiary));
+  --terracotta: var(--md-sys-color-error-container, var(--m3e-fallback-error-container));
+  --ochre: var(--md-sys-color-secondary, var(--m3e-fallback-secondary));
+  --danger: var(--md-sys-color-error, var(--m3e-fallback-error));
+  --glass-bg: color-mix(
+    in srgb,
+    var(--md-sys-color-surface-container, var(--background-raised)) 45%,
+    transparent
+  );
+  --glass-bg-strong: color-mix(
+    in srgb,
+    var(--md-sys-color-surface-container-high, var(--background-raised)) 78%,
+    transparent
+  );
+  --glass-border: color-mix(
+    in srgb,
+    var(--md-sys-color-outline-variant, var(--m3e-fallback-line)) 62%,
+    transparent
+  );
+  --glass-highlight: color-mix(
+    in srgb,
+    var(--md-sys-color-on-surface, var(--m3e-fallback-on-surface)) 12%,
+    transparent
+  );
+  --glass-shadow: color-mix(
+    in srgb,
+    var(--md-sys-color-shadow, #000) 28%,
+    transparent
+  );
+  --field-bg: color-mix(
+    in srgb,
+    var(--md-sys-color-surface-container-high, var(--background-raised)) 52%,
+    transparent
+  );
+  --field-border: color-mix(
+    in srgb,
+    var(--md-sys-color-outline, var(--m3e-fallback-line)) 48%,
+    transparent
+  );
+  --line: color-mix(
+    in srgb,
+    var(--md-sys-color-outline-variant, var(--m3e-fallback-line)) 58%,
+    transparent
+  );
+  --motion-fast-spatial: var(
+    --md-sys-motion-spring-fast-spatial,
+    350ms cubic-bezier(0.42, 1.67, 0.21, 0.9)
+  );
+  --motion-default-spatial: var(
+    --md-sys-motion-spring-default-spatial,
+    500ms cubic-bezier(0.38, 1.21, 0.22, 1)
+  );
+  --motion-fast-effects: var(
+    --md-sys-motion-spring-fast-effects,
+    150ms cubic-bezier(0.31, 0.94, 0.34, 1)
+  );
+  --motion-default-effects: var(
+    --md-sys-motion-spring-default-effects,
+    200ms cubic-bezier(0.34, 0.8, 0.34, 1)
+  );
 }

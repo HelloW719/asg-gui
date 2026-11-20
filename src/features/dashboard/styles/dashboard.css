@@ -132,50 +132,70 @@
   font-weight: 600;
 }
 
+.service-board {
+  --m3e-card-padding: 6px;
+  --m3e-card-shape: var(--radius-xl);
+  --m3e-filled-card-container-color: color-mix(
+    in srgb,
+    var(--md-sys-color-surface-container-high) 46%,
+    transparent
+  );
+
+  position: relative;
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 28%, transparent);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--md-sys-color-on-surface) 7%, transparent),
+      transparent 42%,
+      color-mix(in srgb, var(--md-sys-color-shadow) 8%, transparent)
+    ),
+    color-mix(in srgb, var(--md-sys-color-surface-container-high) 46%, transparent);
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, var(--md-sys-color-on-surface) 9%, transparent),
+    inset -1px -1px 0 color-mix(in srgb, var(--md-sys-color-shadow) 18%, transparent);
+}
+
 .service-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  min-width: 0;
 }
 
 .service-card {
-  --md-comp-card-container-color: rgba(42, 56, 75, 0.82);
-  --md-comp-card-on-surface: #edf4fb;
-  --md-comp-card-on-surface-variant: #aebdcc;
-  --md-comp-card-service-color: 90, 209, 192;
-  --md-comp-card-shape: 12px;
-  --md-comp-card-status-color: var(--success);
-  --md-comp-card-status-container: rgba(85, 214, 168, 0.14);
+  --service-accent: var(--md-sys-color-primary);
+  --service-status: var(--success);
 
   position: relative;
   display: flex;
   min-width: 0;
   min-height: 200px;
   flex-direction: column;
-  overflow: hidden;
-  padding: 20px;
-  border: 0;
-  border-radius: var(--md-comp-card-shape);
-  background: var(--md-comp-card-container-color);
-  color: var(--md-comp-card-on-surface);
-  box-shadow: none;
+  padding: 20px 22px;
+  border-radius: 0;
+  color: var(--md-sys-color-on-surface);
+}
+
+.service-card + .service-card {
+  border-left: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 44%, transparent);
 }
 
 .service-card--searxng {
-  --md-comp-card-service-color: 130, 168, 223;
+  --service-accent: var(--md-sys-color-secondary);
 }
 
 .service-card--flaresolverr {
-  --md-comp-card-service-color: 226, 189, 98;
+  --service-accent: var(--md-sys-color-tertiary);
 }
 
 .service-card--down {
-  --md-comp-card-status-color: var(--danger);
-  --md-comp-card-status-container: rgba(239, 119, 116, 0.14);
+  --service-status: var(--md-sys-color-error);
 
-  background:
-    linear-gradient(rgba(239, 119, 116, 0.045), rgba(239, 119, 116, 0.045)),
-    var(--md-comp-card-container-color);
+  background: color-mix(in srgb, var(--md-sys-color-error-container) 9%, transparent);
 }
 
 .service-card__heading {
@@ -191,9 +211,12 @@
   height: 44px;
   flex: 0 0 44px;
   border-radius: 14px;
-  background: rgba(var(--md-comp-card-service-color), 0.14);
-  color: rgb(var(--md-comp-card-service-color));
+  background: color-mix(in srgb, var(--service-accent) 16%, transparent);
+  color: var(--service-accent);
   place-items: center;
+  transition:
+    background-color var(--motion-fast-effects),
+    color var(--motion-fast-effects);
 }
 
 .service-card__identity {
@@ -205,7 +228,7 @@
   display: block;
   overflow: hidden;
   margin-top: 2px;
-  color: var(--md-comp-card-on-surface-variant);
+  color: var(--md-sys-color-on-surface-variant);
   font-size: 0.7rem;
   font-weight: 500;
   letter-spacing: 0.01em;
@@ -216,7 +239,7 @@
 .service-card__heading h3 {
   overflow: hidden;
   margin: 0;
-  color: var(--md-comp-card-on-surface);
+  color: var(--md-sys-color-on-surface);
   font-size: 1.06rem;
   font-weight: 600;
   letter-spacing: -0.025em;
@@ -233,12 +256,15 @@
   gap: 5px;
   margin-left: auto;
   padding: 5px 10px 5px 8px;
-  border-radius: 99px;
-  background: var(--md-comp-card-status-container);
-  color: var(--md-comp-card-status-color);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--service-status) 14%, transparent);
+  color: var(--service-status);
   font-size: 0.7rem;
   font-weight: 600;
   line-height: 1;
+  transition:
+    background-color var(--motion-fast-effects),
+    color var(--motion-fast-effects);
 }
 
 .service-card__latency {
@@ -248,7 +274,7 @@
 .service-card__latency > span {
   display: block;
   margin-bottom: 3px;
-  color: var(--md-comp-card-on-surface-variant);
+  color: var(--md-sys-color-on-surface-variant);
   font-size: 0.72rem;
   font-weight: 500;
   letter-spacing: 0.015em;
@@ -261,7 +287,7 @@
 }
 
 .service-card__latency strong {
-  color: var(--md-comp-card-on-surface);
+  color: var(--md-sys-color-on-surface);
   font-family: "SFMono-Regular", "Cascadia Code", monospace;
   font-size: 2rem;
   font-weight: 500;
@@ -271,7 +297,7 @@
 }
 
 .service-card__latency small {
-  color: var(--md-comp-card-on-surface-variant);
+  color: var(--md-sys-color-on-surface-variant);
   font-family: "SFMono-Regular", "Cascadia Code", monospace;
   font-size: 0.75rem;
 }
@@ -282,7 +308,7 @@
   gap: 14px;
   margin: auto 0 0;
   padding-top: 14px;
-  border-top: 1px solid rgba(224, 237, 249, 0.09);
+  border-top: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 42%, transparent);
 }
 
 .service-card__meta div {
@@ -291,7 +317,7 @@
 
 .service-card__meta dt {
   margin-bottom: 3px;
-  color: var(--md-comp-card-on-surface-variant);
+  color: var(--md-sys-color-on-surface-variant);
   font-size: 0.7rem;
   font-weight: 500;
   line-height: 1.2;
@@ -300,7 +326,7 @@
 .service-card__meta dd {
   overflow: hidden;
   margin: 0;
-  color: var(--md-comp-card-on-surface);
+  color: var(--md-sys-color-on-surface);
   font-size: 0.78rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -316,8 +342,8 @@
   margin: 12px 0 0;
   padding: 10px 11px;
   border-radius: 10px;
-  background: rgba(239, 119, 116, 0.1);
-  color: var(--danger);
+  background: color-mix(in srgb, var(--md-sys-color-error-container) 24%, transparent);
+  color: var(--md-sys-color-on-error-container);
   font-size: 0.65rem;
   line-height: 1.45;
 }
@@ -326,7 +352,6 @@
   flex: 0 0 auto;
   margin-top: 1px;
 }
-
 .dashboard-columns {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
@@ -415,7 +440,7 @@
   gap: 34px;
   padding: clamp(26px, 3.2vw, 42px);
   overflow: hidden;
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
 }
 
 .status-hero::before {
@@ -476,7 +501,7 @@
   align-self: stretch;
   margin: 0;
   border: 1px solid rgba(224, 237, 249, 0.075);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background:
     linear-gradient(145deg, rgba(8, 18, 29, 0.14), rgba(255, 255, 255, 0.018));
 }
@@ -519,10 +544,6 @@
   color: var(--text-faint);
 }
 
-.service-grid {
-  gap: 10px;
-}
-
 .dashboard-columns {
   gap: 10px;
   margin-top: 10px;
@@ -530,7 +551,7 @@
 
 .content-card {
   padding: 17px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
 }
 
 .glass-surface.content-card {
@@ -548,16 +569,15 @@
     linear-gradient(145deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.12));
 }
 
-:root[data-theme="light"] .service-card {
-  --md-comp-card-container-color: rgba(238, 243, 247, 0.78);
-  --md-comp-card-on-surface: #172332;
-  --md-comp-card-on-surface-variant: #5c6b7a;
+:root[data-reduced-transparency="true"] .service-board {
+  --m3e-filled-card-container-color: color-mix(
+    in srgb,
+    var(--md-sys-color-surface-container-high) 82%,
+    transparent
+  );
 
-  box-shadow: none;
-}
-
-:root[data-theme="light"] .service-card__meta {
-  border-top-color: rgba(39, 57, 75, 0.1);
+  background:
+    color-mix(in srgb, var(--md-sys-color-surface-container-high) 82%, transparent);
 }
 @media (max-width: 1120px) {
   .app-workspace {
@@ -567,18 +587,15 @@
   .status-hero {
     grid-template-columns: minmax(0, 1fr) 240px;
   }
+}
 
 @media (max-width: 900px) {
-  .status-hero { grid-template-columns: 1fr; }
-  .dashboard-columns { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 720px) {
-  .service-grid { grid-template-columns: 1fr; }
-  .service-card:last-child { grid-column: auto; }
-}
-  .status-hero {
+  .status-hero,
+  .dashboard-columns {
     grid-template-columns: 1fr;
+  }
+
+  .status-hero {
     gap: 24px;
   }
 
@@ -589,7 +606,7 @@
   .status-summary div {
     display: grid;
     justify-content: start;
-    border-right: 1px solid rgba(224, 237, 249, 0.065);
+    border-right: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 36%, transparent);
     border-bottom: 0;
   }
 
@@ -603,6 +620,15 @@
 }
 
 @media (max-width: 720px) {
+  .service-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .service-card + .service-card {
+    border-top: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 44%, transparent);
+    border-left: 0;
+  }
+
   .status-summary {
     grid-template-columns: 1fr;
   }
@@ -611,7 +637,7 @@
     display: flex;
     justify-content: space-between;
     border-right: 0;
-    border-bottom: 1px solid rgba(224, 237, 249, 0.065);
+    border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 36%, transparent);
   }
 
   .status-summary div:last-child {

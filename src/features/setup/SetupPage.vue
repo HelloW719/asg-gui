@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import BaseButton from "@/shared/ui/BaseButton.vue";
 import { FolderSearch, Link2, ShieldCheck } from "@lucide/vue";
 import { useSessionStore } from "@/stores/session";
 import InlineNotice from "@/shared/ui/InlineNotice.vue";
@@ -52,10 +53,15 @@ async function usePath(): Promise<void> {
         GUI 只读取安装目录中的 CLI 入口，并通过结构化输出管理系统。配置文件、密钥、进程和日志仍由同一个
         <code>asg</code> 入口管理。
       </p>
-      <button class="button button--primary button--large" type="button" :disabled="checking || props.preview" @click="choose">
-        <FolderSearch :size="19" />
+      <BaseButton
+        variant="primary"
+        size="large"
+        :disabled="checking || props.preview"
+        @click="choose"
+      >
+        <template #icon><FolderSearch :size="19" /></template>
         选择 ASG 安装目录
-      </button>
+      </BaseButton>
     </section>
 
     <aside class="setup-card glass-surface">
@@ -86,9 +92,13 @@ async function usePath(): Promise<void> {
             autocomplete="off"
             @keydown.enter.prevent="usePath"
           />
-          <button class="button button--secondary" type="button" :disabled="!manualPath.trim() || checking || props.preview" @click="usePath">
+          <BaseButton
+            variant="secondary"
+            :disabled="!manualPath.trim() || checking || props.preview"
+            @click="usePath"
+          >
             连接
-          </button>
+          </BaseButton>
         </div>
       </label>
       <p v-if="session.invalidReason && !error" class="field-note">{{ session.invalidReason }}</p>

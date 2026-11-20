@@ -19,85 +19,98 @@
 
 .content-card,
 .editor-drawer {
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
 }
 
-.button {
+m3e-button.button {
   display: inline-flex;
-  min-height: 38px;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 8px 14px;
-  border: 1px solid transparent;
-  border-radius: 99px;
-  cursor: pointer;
-  font-size: 0.79rem;
-  font-weight: 600;
-  text-decoration: none;
+  min-width: 0;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  --m3e-filled-button-container-color: color-mix(
+    in srgb,
+    var(--md-sys-color-primary-container) 86%,
+    transparent
+  );
+  --m3e-filled-button-label-text-color: var(--md-sys-color-on-primary-container);
+  --m3e-filled-button-icon-color: var(--md-sys-color-on-primary-container);
+  --m3e-tonal-button-container-color: color-mix(
+    in srgb,
+    var(--md-sys-color-secondary-container) 82%,
+    transparent
+  );
+  --m3e-tonal-button-label-text-color: var(--md-sys-color-on-secondary-container);
+  --m3e-tonal-button-icon-color: var(--md-sys-color-on-secondary-container);
+  --m3e-text-button-label-text-color: var(--text-soft);
+  --m3e-text-button-icon-color: var(--text-soft);
+  filter:
+    drop-shadow(0 8px 14px color-mix(in srgb, var(--md-sys-color-shadow) 24%, transparent))
+    drop-shadow(0 -2px 4px color-mix(in srgb, var(--md-sys-color-surface-bright) 18%, transparent));
   transition:
-    transform 160ms ease,
-    background 160ms ease,
-    color 160ms ease,
-    border-color 160ms ease;
+    filter var(--motion-fast-spatial),
+    transform var(--motion-fast-spatial);
 }
 
-.button:hover:not(:disabled) {
+m3e-button.button[size="extra-small"] {
+  --m3e-button-extra-small-container-height: 34px;
+  --m3e-button-extra-small-label-text-font-size: 0.72rem;
+}
+
+m3e-button.button[size="small"] {
+  --m3e-button-small-container-height: 40px;
+  --m3e-button-small-label-text-font-size: 0.76rem;
+}
+
+m3e-button.button[size="large"] {
+  --m3e-button-large-container-height: 50px;
+  --m3e-button-large-label-text-font-size: 0.9rem;
+  --m3e-button-large-icon-size: 20px;
+}
+
+m3e-button.button:hover:not([disabled]) {
+  filter:
+    drop-shadow(0 11px 18px color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent))
+    drop-shadow(0 -2px 5px color-mix(in srgb, var(--md-sys-color-surface-bright) 22%, transparent));
   transform: translateY(-1px);
 }
 
-.button:active:not(:disabled) {
+m3e-button.button:active:not([disabled]) {
+  filter:
+    drop-shadow(0 3px 6px color-mix(in srgb, var(--md-sys-color-shadow) 24%, transparent))
+    drop-shadow(0 -1px 2px color-mix(in srgb, var(--md-sys-color-surface-bright) 15%, transparent));
   transform: translateY(0);
 }
 
-.button:disabled {
+m3e-button.button[disabled] {
   cursor: not-allowed;
-  opacity: 0.48;
+  filter: none;
 }
 
-.button--primary {
-  background: var(--sage-strong);
-  color: color-mix(in srgb, var(--background) 90%, #000);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--sage) 18%, transparent);
+m3e-button.button--ghost {
+  filter: none;
 }
 
-.button--secondary {
-  border-color: var(--glass-border);
-  background: color-mix(in srgb, var(--glass-bg-strong) 88%, transparent);
-  color: var(--text);
+m3e-button.button--ghost.button--danger-text {
+  --m3e-text-button-label-text-color: var(--danger);
+  --m3e-text-button-icon-color: var(--danger);
+  --m3e-text-button-hover-label-text-color: var(--danger);
+  --m3e-text-button-hover-icon-color: var(--danger);
 }
 
-.button--ghost {
-  border-color: var(--glass-border);
-  background: transparent;
-  color: var(--text-soft);
+m3e-button.button--danger {
+  --m3e-filled-button-container-color: color-mix(
+    in srgb,
+    var(--md-sys-color-error-container) 86%,
+    transparent
+  );
+  --m3e-filled-button-label-text-color: var(--md-sys-color-on-error-container);
+  --m3e-filled-button-icon-color: var(--md-sys-color-on-error-container);
 }
 
-.button--ghost:hover,
-.button--secondary:hover {
-  border-color: color-mix(in srgb, var(--sage) 38%, transparent);
-  color: var(--text);
-}
-
-.button--danger {
-  background: var(--terracotta);
-  color: #fff;
-}
-
-.button--danger-text {
-  color: var(--danger);
-}
-
-.button--compact {
-  min-height: 32px;
-  padding: 6px 11px;
-  font-size: 0.72rem;
-}
-
-.button--large {
-  min-height: 48px;
-  padding: 12px 20px;
-  font-size: 0.88rem;
+.button__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .icon-button {
@@ -105,20 +118,35 @@
   width: 34px;
   height: 34px;
   padding: 0;
-  border: 1px solid transparent;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 22%, transparent);
   border-radius: 50%;
-  background: transparent;
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 42%, transparent);
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, var(--md-sys-color-on-surface) 10%, transparent),
+    inset -1px -1px 0 color-mix(in srgb, var(--md-sys-color-shadow) 22%, transparent),
+    0 6px 14px color-mix(in srgb, var(--md-sys-color-shadow) 18%, transparent);
   color: var(--text-soft);
   cursor: pointer;
   place-items: center;
+  transition:
+    background-color var(--motion-fast-effects),
+    box-shadow var(--motion-fast-spatial),
+    color var(--motion-fast-effects),
+    transform var(--motion-fast-spatial);
 }
 
 .icon-button:hover {
-  border-color: var(--glass-border);
-  background: color-mix(in srgb, var(--glass-bg-strong) 75%, transparent);
+  background: color-mix(in srgb, var(--md-sys-color-secondary-container) 36%, transparent);
   color: var(--text);
+  transform: translateY(-1px);
 }
 
+.icon-button:active {
+  box-shadow:
+    inset 2px 2px 5px color-mix(in srgb, var(--md-sys-color-shadow) 24%, transparent),
+    inset -1px -1px 0 color-mix(in srgb, var(--md-sys-color-on-surface) 7%, transparent);
+  transform: translateY(0);
+}
 .action-row {
   display: flex;
   align-items: center;
@@ -203,8 +231,8 @@ textarea {
   background: var(--field-bg);
   color: var(--text);
   transition:
-    border-color 160ms ease,
-    background 160ms ease;
+    border-color var(--motion-fast-effects),
+    background-color var(--motion-fast-effects);
 }
 
 input,
@@ -289,7 +317,7 @@ select option {
   border-radius: 99px;
   background: var(--field-bg);
   cursor: pointer;
-  transition: background 160ms ease;
+  transition: background-color var(--motion-fast-effects);
 }
 
 .switch span::after {
@@ -302,8 +330,8 @@ select option {
   background: var(--text-faint);
   content: "";
   transition:
-    transform 180ms var(--ease-organic),
-    background 180ms ease;
+    transform var(--motion-fast-spatial),
+    background-color var(--motion-fast-effects);
 }
 
 .switch input:checked + span {
@@ -446,43 +474,7 @@ select option {
   gap: 8px;
   margin-top: 18px;
 }
-.button {
-  min-height: 38px;
-  border-radius: 10px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
 
-.button--primary {
-  border-color: rgba(132, 232, 216, 0.28);
-  background:
-    linear-gradient(180deg, rgba(112, 220, 201, 0.28), rgba(55, 145, 132, 0.2));
-  color: var(--text);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    0 8px 24px rgba(33, 160, 140, 0.1);
-}
-
-.button--secondary,
-.button--ghost {
-  border-color: rgba(224, 237, 249, 0.1);
-  background: rgba(255, 255, 255, 0.025);
-}
-
-.button--secondary:hover,
-.button--ghost:hover {
-  border-color: rgba(139, 225, 210, 0.26);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.icon-button {
-  color: var(--text-faint);
-}
-
-.icon-button:hover {
-  border-color: rgba(224, 237, 249, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-}
 .field > span {
   font-size: 0.65rem;
 }

@@ -19,10 +19,19 @@ test("renders the desktop bridge requirement without overflow", async ({ page })
 test("switches between dark and light appearance", async ({ page }) => {
   await page.goto("/");
   const before = await page.locator("html").getAttribute("data-theme");
+  const expectedScheme = before === "dark" ? "light" : "dark";
   await page.getByRole("button", { name: /切换到.+主题/ }).click();
   await expect
     .poll(() => page.locator("html").getAttribute("data-theme"))
-    .not.toBe(before);
+    .toBe(expectedScheme);
+  await expect
+    .poll(() =>
+      page.locator("m3e-theme").evaluate(
+        (element) =>
+          (element as HTMLElement & { scheme?: string }).scheme,
+      ),
+    )
+    .toBe(expectedScheme);
 });
 
 test("starts native window dragging from titlebar content only", async ({
@@ -175,6 +184,27 @@ test.describe("dashboard fixture", () => {
     await expect(page.getByText("SearXNG", { exact: true })).toBeVisible();
     await expect(page.getByText("FlareSolverr", { exact: true })).toBeVisible();
     await expect(page.getByRole("status").filter({ hasText: "任务运行中" })).toBeHidden();
+    await expect(page.locator("m3e-theme")).toHaveCount(1);
+    await expect
+      .poll(() =>
+        page.locator("m3e-theme").evaluate(
+          (element) =>
+            (element as HTMLElement & { motion?: string }).motion,
+        ),
+      )
+      .toBe("expressive");
+    await expect(page.locator("m3e-card.service-board")).toHaveCount(1);
+    await expect(page.locator(".service-board .service-card")).toHaveCount(3);
+    expect(await page.locator("m3e-button").count()).toBeGreaterThan(0);
+    await expect(page.locator("m3e-card.service-board")).toHaveCSS(
+      "backdrop-filter",
+      "none",
+    );
+    await page.getByRole("button", { name: "重启", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "重启整栈？" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "确认重启" })).toBeVisible();
+    await page.getByRole("button", { name: "取消", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "重启整栈？" })).toBeHidden();
     await expect(page.locator(".glass-scene canvas")).toHaveCount(3);
     await expect(page.locator(".status-pill svg")).toHaveCSS(
       "animation-name",
@@ -270,7 +300,12 @@ test.describe("dashboard fixture", () => {
     await page.evaluate(() => {
       window.dispatchEvent(new PointerEvent("pointerleave"));
     });
-    await page.waitForTimeout(140);
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        }),
+    );
     expect(await maxParticleAlpha()).toBeGreaterThan(0);
     await page.waitForTimeout(760);
     await expect.poll(maxParticleAlpha).toBe(0);
@@ -318,6 +353,13 @@ test.describe("reduced motion compatibility", () => {
         }),
       )
       .toBeLessThan(0.001);
+    await expect
+      .poll(() =>
+        page.locator("m3e-button").first().evaluate((element) => {
+          return Number.parseFloat(getComputedStyle(element).transitionDuration);
+        }),
+      )
+      .toBeLessThanOrEqual(0.001);
   });
 });
 

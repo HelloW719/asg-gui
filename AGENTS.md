@@ -141,6 +141,12 @@ stores -> services
 - 展示组件通过带类型的 `props` 和 `emits` 通信，不要使用隐式 `any`。
 - 优先复用 `PageHeader`、`SectionHeading`、`BaseButton`、`SwitchField` 和
   `InlineNotice`，不要重复创建同类控件。
+- M3E Web Components 只作为视觉原语使用：全局导入并承载 `m3e-theme`，
+  共享 `BaseButton` 封装 `m3e-button`，一体化服务板使用 `m3e-card`；tabs、
+  dialog、表单和导航继续使用现有 Vue/Reka 实现。
+- `BaseButton` 必须把 primary/danger、secondary、ghost 分别映射到
+  filled、tonal、text，并保留 loading、disabled、键盘焦点和原生 click 行为。
+  通用按钮采用玻璃与新拟物结合的外层高光、投影和按压反馈，系统窗口按钮保持平面。
 - 页面不得直接调用 `jobClient`、桌面任务接口或原始
   `jobs.execute` / `jobs.stream`。
 - ASG 命令应放入 `src/services/asg/*`，页面通过 `useAsgServices` 或功能组合式函数
@@ -153,6 +159,13 @@ stores -> services
 - 页面样式留在对应 feature 目录，禁止在功能样式中覆盖其他页面的通用选择器。
 - 整个应用只能有一层全屏毛玻璃：`GlassShell` 中的 `.glass-frost-layer`。
 - 内容面板使用染色、边框和内阴影，不能分别再次添加 `backdrop-filter`。
+- M3E 主题必须通过包裹 `.app-root` 的 `<m3e-theme>` 注入，使用
+  `#5ad1c0` seed、expressive color/motion 和 strong focus；不得把
+  `m3e-theme` 直接放在 `body` 下覆盖透明窗口背景。
+- 所有交互动效优先引用 `--md-sys-motion-spring-*` 映射后的
+  `--motion-*-spatial/effects` token；减少动态时必须同时关闭动画和过渡。
+- 服务状态区必须使用一个 `m3e-card` 承载连续玻璃表面，三张状态卡只作为内部
+  语义分段和分隔，不得重新拆成三块独立厚重背景。
 - 保持四层结构：L1 背景与噪声、L2 动态几何、L3 降采样模糊、L4 全屏磨砂。
 - 顶层窗口使用 `--window-radius` 的 `squircle` 连续曲率圆角，L1-L4 与
   `.app-frame` 必须共享同一轮廓；不得改回仅用普通 `border-radius` 的圆弧。

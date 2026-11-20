@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "reka-ui";
 import { nextTick, ref, watch } from "vue";
+import BaseButton from "./BaseButton.vue";
 
 const props = defineProps<{
   open: boolean;
@@ -87,17 +88,16 @@ function submit(): void {
         </label>
         <p class="field-note">密钥不会写入 GUI 配置、日志或任务参数。</p>
         <div class="dialog-actions">
-          <button class="button button--ghost" type="button" @click="emit('update:open', false)">
+          <BaseButton variant="ghost" @click="emit('update:open', false)">
             取消
-          </button>
-          <button
-            class="button button--primary"
-            type="button"
+          </BaseButton>
+          <BaseButton
+            variant="primary"
             :disabled="!secret.trim() || (editableName && !customName.trim())"
             @click="submit"
           >
             保存并重启
-          </button>
+          </BaseButton>
         </div>
       </DialogContent>
     </DialogPortal>

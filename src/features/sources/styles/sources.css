@@ -17,7 +17,7 @@
 .engine-card {
   position: relative;
   padding: 17px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
 }
 
 .engine-card > header {

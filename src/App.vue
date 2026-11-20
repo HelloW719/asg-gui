@@ -33,13 +33,21 @@ useAppBootstrap({
 </script>
 
 <template>
-  <div class="app-root">
-    <GlassShell
-      :visual-state="appStatus.visualState.value"
-      :theme="appearance.resolvedTheme"
-      :reduced-motion="appearance.reducedMotion"
-      :frame-rate="appearance.glassFrameRate"
-    >
+  <m3e-theme
+    color="#5ad1c0"
+    variant="expressive"
+    :scheme="appearance.resolvedTheme"
+    motion="expressive"
+    density="-1"
+    strong-focus
+  >
+    <div class="app-root">
+      <GlassShell
+        :visual-state="appStatus.visualState.value"
+        :theme="appearance.resolvedTheme"
+        :reduced-motion="appearance.reducedMotion"
+        :frame-rate="appearance.glassFrameRate"
+      >
       <div class="app-frame">
         <AppTitleBar />
 
@@ -89,7 +97,8 @@ useAppBootstrap({
           />
         </Transition>
       </div>
-    </GlassShell>
-  </div>
+      </GlassShell>
+    </div>
+  </m3e-theme>
 </template>
 

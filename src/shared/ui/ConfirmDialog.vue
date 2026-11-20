@@ -7,6 +7,7 @@ import {
   DialogRoot,
   DialogTitle,
 } from "reka-ui";
+import BaseButton from "./BaseButton.vue";
 
 defineProps<{
   open: boolean;
@@ -30,20 +31,18 @@ const emit = defineEmits<{
         <DialogTitle class="dialog-title">{{ title }}</DialogTitle>
         <DialogDescription class="dialog-description">{{ description }}</DialogDescription>
         <div class="dialog-actions">
-          <button class="button button--ghost" type="button" @click="emit('update:open', false)">
+          <BaseButton variant="ghost" @click="emit('update:open', false)">
             取消
-          </button>
-          <button
-            class="button"
-            :class="destructive ? 'button--danger' : 'button--primary'"
-            type="button"
+          </BaseButton>
+          <BaseButton
+            :variant="destructive ? 'danger' : 'primary'"
             @click="
               emit('confirm');
               emit('update:open', false);
             "
           >
             {{ confirmLabel ?? "确认" }}
-          </button>
+          </BaseButton>
         </div>
       </DialogContent>
     </DialogPortal>
