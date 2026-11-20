@@ -48,12 +48,12 @@ export interface LabParams {
 
 export const DEFAULT_PARAMS: LabParams = {
   state: 'healthy',
-  // 定案：轻玻璃（2026-11-15）
-  l3Blur: 20,
+  // 定案：55% 厚玻璃（2026-11-20）
+  l3Blur: 36,
   l3Downsample: 4,
-  l3Alpha: 0.45,
-  l4Blur: 12,
-  l4Alpha: 0.42,
+  l3Alpha: 0.55,
+  l4Blur: 20,
+  l4Alpha: 0.55,
   noise: 0.03,
   highlight: 1,
   borderWidth: 1,

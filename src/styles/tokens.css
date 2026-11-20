@@ -21,6 +21,9 @@
   --glass-tint: 46, 60, 82;
   --glass-bg: rgba(20, 31, 46, 0.22);
   --glass-bg-strong: rgba(18, 29, 43, 0.78);
+  --glass-tint-alpha: 0.55;
+  --glass-blur-radius: 20px;
+  --glass-blur-saturation: 1.3;
   --glass-border: rgba(224, 237, 249, 0.1);
   --glass-highlight: rgba(235, 247, 255, 0.18);
   --glass-shadow: rgba(2, 8, 16, 0.25);
@@ -53,6 +56,7 @@
   --glass-tint: 222, 231, 239;
   --glass-bg: rgba(255, 255, 255, 0.24);
   --glass-bg-strong: rgba(246, 249, 251, 0.9);
+  --glass-tint-alpha: 0.55;
   --glass-border: rgba(36, 54, 72, 0.12);
   --glass-highlight: rgba(255, 255, 255, 0.72);
   --glass-shadow: rgba(44, 63, 82, 0.12);

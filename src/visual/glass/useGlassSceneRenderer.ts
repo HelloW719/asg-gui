@@ -37,6 +37,84 @@ interface GlassSceneRendererOptions {
 
 const DOWN_SAMPLE = 4;
 const MORPH_DURATION_MS = 1400;
+const BLUR_TARGET_PX = 36;
+const BLUR_ALPHA = 0.55;
+const EDGE_WARP_ZOOM = 1.028;
+const EDGE_WARP_ALPHA = 0.4;
+
+function paintEdgeMask(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+): void {
+  const band = Math.max(4, Math.round(Math.min(width, height) * 0.065));
+  context.clearRect(0, 0, width, height);
+
+  const fade = (
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number,
+  ): CanvasGradient => {
+    const gradient = context.createLinearGradient(x0, y0, x1, y1);
+    gradient.addColorStop(0, "rgba(255,255,255,1)");
+    gradient.addColorStop(0.45, "rgba(255,255,255,0.72)");
+    gradient.addColorStop(1, "rgba(255,255,255,0)");
+    return gradient;
+  };
+
+  const drawBand = (
+    gradient: CanvasGradient,
+    x: number,
+    y: number,
+    bandWidth: number,
+    bandHeight: number,
+  ) => {
+    context.fillStyle = gradient;
+    context.fillRect(x, y, bandWidth, bandHeight);
+  };
+
+  drawBand(fade(0, 0, 0, band), 0, 0, width, band);
+  drawBand(fade(0, height, 0, height - band), 0, height - band, width, band);
+  drawBand(fade(0, 0, band, 0), 0, 0, band, height);
+  drawBand(fade(width, 0, width - band, 0), width - band, 0, band, height);
+}
+
+function applyEdgeRefraction(
+  target: CanvasRenderingContext2D,
+  source: HTMLCanvasElement,
+  warp: HTMLCanvasElement,
+  mask: HTMLCanvasElement,
+): void {
+  const width = source.width;
+  const height = source.height;
+  const warpedWidth = width * EDGE_WARP_ZOOM;
+  const warpedHeight = height * EDGE_WARP_ZOOM;
+  const warpContext = warp.getContext("2d");
+  if (!warpContext) return;
+
+  warpContext.setTransform(1, 0, 0, 1, 0, 0);
+  warpContext.clearRect(0, 0, width, height);
+  warpContext.globalCompositeOperation = "source-over";
+  warpContext.imageSmoothingEnabled = true;
+  warpContext.imageSmoothingQuality = "high";
+  warpContext.drawImage(
+    source,
+    (width - warpedWidth) / 2,
+    (height - warpedHeight) / 2,
+    warpedWidth,
+    warpedHeight,
+  );
+
+  warpContext.globalCompositeOperation = "destination-in";
+  warpContext.drawImage(mask, 0, 0);
+  warpContext.globalCompositeOperation = "source-over";
+
+  target.save();
+  target.globalAlpha = EDGE_WARP_ALPHA;
+  target.drawImage(warp, 0, 0);
+  target.restore();
+}
 
 export function useGlassSceneRenderer(options: GlassSceneRendererOptions): void {
   let animationFrame = 0;
@@ -91,7 +169,10 @@ export function useGlassSceneRenderer(options: GlassSceneRendererOptions): void 
 
     const downSampled = document.createElement("canvas");
     const downContext = downSampled.getContext("2d");
-    if (!downContext) return;
+    const edgeWarp = document.createElement("canvas");
+    const edgeMask = document.createElement("canvas");
+    const edgeMaskContext = edgeMask.getContext("2d");
+    if (!downContext || !edgeMaskContext) return;
 
     const renderDpr = cappedDevicePixelRatio(window.devicePixelRatio || 1);
     let width = 1;
@@ -130,6 +211,11 @@ export function useGlassSceneRenderer(options: GlassSceneRendererOptions): void 
       blurredOutput.style.height = `${height}px`;
       downSampled.width = blurWidth;
       downSampled.height = blurHeight;
+      edgeWarp.width = blurWidth;
+      edgeWarp.height = blurHeight;
+      edgeMask.width = blurWidth;
+      edgeMask.height = blurHeight;
+      paintEdgeMask(edgeMaskContext, blurWidth, blurHeight);
       blurUpscale = (width * renderDpr) / blurWidth;
       sceneDirty = true;
     };
@@ -175,11 +261,17 @@ export function useGlassSceneRenderer(options: GlassSceneRendererOptions): void 
 
       blurredContext.setTransform(1, 0, 0, 1, 0, 0);
       blurredContext.clearRect(0, 0, blurWidth, blurHeight);
-      blurredContext.filter = `blur(${Math.max(0.8, 20 / blurUpscale)}px)`;
-      blurredContext.globalAlpha = 0.45;
+      blurredContext.filter = `blur(${Math.max(0.8, BLUR_TARGET_PX / blurUpscale)}px)`;
+      blurredContext.globalAlpha = BLUR_ALPHA;
       blurredContext.drawImage(downSampled, 0, 0);
       blurredContext.filter = "none";
       blurredContext.globalAlpha = 1;
+      applyEdgeRefraction(
+        blurredContext,
+        blurredOutput,
+        edgeWarp,
+        edgeMask,
+      );
     };
 
     const drawFrame = (now: number) => {

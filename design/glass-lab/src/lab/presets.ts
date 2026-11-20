@@ -11,14 +11,14 @@ export const PRESETS: Preset[] = [
   {
     id: 'locked',
     label: '定案',
-    hint: '轻玻璃：L3 20px / 1/4 / 45%，L4 12px / 42%',
-    patch: { l3Blur: 20, l3Downsample: 4, l3Alpha: 0.45, l4Blur: 12, l4Alpha: 0.42 },
+    hint: '55% 厚玻璃：L3 36px / 1/4 / 55%，L4 20px / 55%',
+    patch: { l3Blur: 36, l3Downsample: 4, l3Alpha: 0.55, l4Blur: 20, l4Alpha: 0.55 },
   },
   {
     id: 'base',
-    label: '基准',
-    hint: '更厚的 55% 版本，用于对照',
-    patch: { l3Blur: 36, l3Downsample: 4, l3Alpha: 0.55, l4Blur: 20, l4Alpha: 0.55 },
+    label: '轻玻璃',
+    hint: '轻磨砂对照：L3 20px / 1/4 / 45%，L4 12px / 42%',
+    patch: { l3Blur: 20, l3Downsample: 4, l3Alpha: 0.45, l4Blur: 12, l4Alpha: 0.42 },
   },
   {
     id: 'heavy',

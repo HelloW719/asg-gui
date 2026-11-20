@@ -80,6 +80,38 @@ test("renders a continuous squircle window without a border", async ({
       backgrounds: ["html", "body", "#app"].map(
         (selector) => getComputedStyle(document.querySelector(selector)!).backgroundColor,
       ),
+      dividers: {
+        titlebar: getComputedStyle(
+          document.querySelector<HTMLElement>(".app-titlebar")!,
+        ).borderBottomWidth,
+        sidebar: getComputedStyle(
+          document.querySelector<HTMLElement>(".app-sidebar")!,
+        ).borderRightWidth,
+      },
+      backdrops: [".app-titlebar", ".app-sidebar", ".page"].map((selector) => {
+        const style = getComputedStyle(
+          document.querySelector<HTMLElement>(selector)!,
+        );
+        return {
+          selector,
+          backgroundColor: style.backgroundColor,
+          backgroundImage: style.backgroundImage,
+        };
+      }),
+      frost: (() => {
+        const style = getComputedStyle(
+          document.querySelector<HTMLElement>(".glass-frost-layer")!,
+        );
+        return {
+          backgroundColor: style.backgroundColor,
+          backgroundImage: style.backgroundImage,
+          boxShadow: style.boxShadow,
+          beforeContent: getComputedStyle(
+            document.querySelector<HTMLElement>(".glass-frost-layer")!,
+            "::before",
+          ).content,
+        };
+      })(),
       surfaces: selectors.map((selector) => {
         const element = document.querySelector<HTMLElement>(selector)!;
         const style = getComputedStyle(element);
@@ -102,6 +134,20 @@ test("renders a continuous squircle window without a border", async ({
     "rgba(0, 0, 0, 0)",
     "rgba(0, 0, 0, 0)",
   ]);
+  expect(shell.dividers).toEqual({
+    titlebar: "0px",
+    sidebar: "0px",
+  });
+  for (const backdrop of shell.backdrops) {
+    expect(backdrop.backgroundColor, backdrop.selector).toBe(
+      "rgba(0, 0, 0, 0)",
+    );
+    expect(backdrop.backgroundImage, backdrop.selector).toBe("none");
+  }
+  expect(shell.frost.backgroundColor).not.toContain("255, 255, 255");
+  expect(shell.frost.backgroundImage).not.toContain("255, 255, 255");
+  expect(shell.frost.boxShadow).not.toContain("255, 255, 255");
+  expect(shell.frost.beforeContent).toBe("none");
   for (const surface of shell.surfaces) {
     expect(surface.radius, surface.selector).toBe("32px");
     expect(surface.cornerShape, surface.selector).toBe("superellipse(2)");
