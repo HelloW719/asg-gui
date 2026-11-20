@@ -135,73 +135,196 @@
 .service-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 13px;
+  gap: 12px;
 }
 
 .service-card {
+  --md-comp-card-container-color: rgba(42, 56, 75, 0.82);
+  --md-comp-card-on-surface: #edf4fb;
+  --md-comp-card-on-surface-variant: #aebdcc;
+  --md-comp-card-service-color: 90, 209, 192;
+  --md-comp-card-shape: 12px;
+  --md-comp-card-status-color: var(--success);
+  --md-comp-card-status-container: rgba(85, 214, 168, 0.14);
+
   position: relative;
-  padding: 17px;
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--glass-bg) 64%, transparent);
+  display: flex;
+  min-width: 0;
+  min-height: 200px;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 20px;
+  border: 0;
+  border-radius: var(--md-comp-card-shape);
+  background: var(--md-comp-card-container-color);
+  color: var(--md-comp-card-on-surface);
+  box-shadow: none;
+}
+
+.service-card--searxng {
+  --md-comp-card-service-color: 130, 168, 223;
+}
+
+.service-card--flaresolverr {
+  --md-comp-card-service-color: 226, 189, 98;
 }
 
 .service-card--down {
-  border-color: color-mix(in srgb, var(--danger) 30%, var(--glass-border));
+  --md-comp-card-status-color: var(--danger);
+  --md-comp-card-status-container: rgba(239, 119, 116, 0.14);
+
+  background:
+    linear-gradient(rgba(239, 119, 116, 0.045), rgba(239, 119, 116, 0.045)),
+    var(--md-comp-card-container-color);
 }
 
 .service-card__heading {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
   gap: 12px;
+  min-width: 0;
+}
+
+.service-card__icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 14px;
+  background: rgba(var(--md-comp-card-service-color), 0.14);
+  color: rgb(var(--md-comp-card-service-color));
+  place-items: center;
+}
+
+.service-card__identity {
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.service-card__label {
+  display: block;
+  overflow: hidden;
+  margin-top: 2px;
+  color: var(--md-comp-card-on-surface-variant);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .service-card__heading h3 {
-  font-size: 0.98rem;
+  overflow: hidden;
+  margin: 0;
+  color: var(--md-comp-card-on-surface);
+  font-size: 1.06rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .service-card__state {
   display: inline-flex;
+  min-height: 32px;
+  flex: 0 0 auto;
   align-items: center;
   gap: 5px;
-  color: var(--success);
-  font-size: 0.67rem;
+  margin-left: auto;
+  padding: 5px 10px 5px 8px;
+  border-radius: 99px;
+  background: var(--md-comp-card-status-container);
+  color: var(--md-comp-card-status-color);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
-.service-card--down .service-card__state {
-  color: var(--danger);
+.service-card__latency {
+  margin-top: 20px;
+}
+
+.service-card__latency > span {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--md-comp-card-on-surface-variant);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.015em;
+}
+
+.service-card__latency div {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.service-card__latency strong {
+  color: var(--md-comp-card-on-surface);
+  font-family: "SFMono-Regular", "Cascadia Code", monospace;
+  font-size: 2rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+.service-card__latency small {
+  color: var(--md-comp-card-on-surface-variant);
+  font-family: "SFMono-Regular", "Cascadia Code", monospace;
+  font-size: 0.75rem;
 }
 
 .service-card__meta {
   display: grid;
-  gap: 7px;
-  margin: 15px 0 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: auto 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(224, 237, 249, 0.09);
 }
 
 .service-card__meta div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  min-width: 0;
 }
 
 .service-card__meta dt {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--text-faint);
-  font-size: 0.65rem;
+  margin-bottom: 3px;
+  color: var(--md-comp-card-on-surface-variant);
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 .service-card__meta dd {
   overflow: hidden;
   margin: 0;
-  color: var(--text-soft);
-  font-family: "SFMono-Regular", "Cascadia Code", monospace;
-  font-size: 0.67rem;
+  color: var(--md-comp-card-on-surface);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.service-card__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 12px 0 0;
+  padding: 10px 11px;
+  border-radius: 10px;
+  background: rgba(239, 119, 116, 0.1);
+  color: var(--danger);
+  font-size: 0.65rem;
+  line-height: 1.45;
+}
+
+.service-card__error svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
 }
 
 .dashboard-columns {
@@ -400,37 +523,6 @@
   gap: 10px;
 }
 
-.service-card {
-  min-height: 126px;
-  padding: 16px 17px;
-  border-color: rgba(224, 237, 249, 0.075);
-  border-radius: 16px;
-  background:
-    linear-gradient(145deg, rgba(9, 19, 30, 0.13), rgba(255, 255, 255, 0.02));
-}
-
-.service-card__heading h3 {
-  font-size: 0.94rem;
-  font-weight: 500;
-}
-
-.service-card__state {
-  color: var(--success);
-  font-size: 0.63rem;
-}
-
-.service-card__meta {
-  margin-top: 13px;
-}
-
-.service-card__meta dt {
-  font-size: 0.61rem;
-}
-
-.service-card__meta dd {
-  font-size: 0.63rem;
-}
-
 .dashboard-columns {
   gap: 10px;
   margin-top: 10px;
@@ -451,10 +543,21 @@
 }
 
 :root[data-theme="light"] .status-summary,
-:root[data-theme="light"] .service-card,
 :root[data-theme="light"] .glass-surface.content-card {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.12));
+}
+
+:root[data-theme="light"] .service-card {
+  --md-comp-card-container-color: rgba(238, 243, 247, 0.78);
+  --md-comp-card-on-surface: #172332;
+  --md-comp-card-on-surface-variant: #5c6b7a;
+
+  box-shadow: none;
+}
+
+:root[data-theme="light"] .service-card__meta {
+  border-top-color: rgba(39, 57, 75, 0.1);
 }
 @media (max-width: 1120px) {
   .app-workspace {
