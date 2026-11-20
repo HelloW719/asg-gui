@@ -1,6 +1,5 @@
 import { onBeforeUnmount, onMounted, watch } from "vue";
 import { inTauri, listenNavigate, listenQuitBlocked } from "../services/desktop";
-import { useJobsStore } from "../stores/jobs";
 import { useAppearanceStore } from "../stores/appearance";
 import { useSessionStore } from "../stores/session";
 import { useStatusStore } from "../stores/status";
@@ -15,24 +14,8 @@ export function useAppBootstrap(options: AppBootstrapOptions): void {
   const session = useSessionStore();
   const appearance = useAppearanceStore();
   const statusStore = useStatusStore();
-  const jobs = useJobsStore();
   const appStatus = useAppStatus();
   const cleanups: Array<() => void> = [];
-  let pollTimer: number | null = null;
-
-  function stopPolling(): void {
-    if (pollTimer !== null) window.clearInterval(pollTimer);
-    pollTimer = null;
-  }
-
-  function startPolling(): void {
-    stopPolling();
-    pollTimer = window.setInterval(() => {
-      if (document.visibilityState === "visible" && !jobs.hasRunningOperation) {
-        void appStatus.refresh();
-      }
-    }, 5_000);
-  }
 
   function applyDocumentState(): void {
     document.documentElement.dataset.theme = appearance.resolvedTheme;
@@ -60,12 +43,10 @@ export function useAppBootstrap(options: AppBootstrapOptions): void {
     () => session.rootValid,
     (valid) => {
       if (!valid) {
-        stopPolling();
         statusStore.clear();
         return;
       }
       void appStatus.refresh();
-      startPolling();
     },
   );
 
@@ -100,14 +81,9 @@ export function useAppBootstrap(options: AppBootstrapOptions): void {
       document.removeEventListener("visibilitychange", onVisibilityChange),
     );
 
-    if (session.rootValid) {
-      await appStatus.refresh();
-      startPolling();
-    }
   });
 
   onBeforeUnmount(() => {
-    stopPolling();
     for (const cleanup of cleanups.splice(0)) cleanup();
   });
 }

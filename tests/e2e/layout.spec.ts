@@ -67,6 +67,36 @@ test("starts native window dragging from titlebar content only", async ({
   expect(await dragInvocations()).toBe(1);
 });
 
+test("does not poll the stack status automatically", async ({ page }) => {
+  await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window as typeof window & {
+            __TAURI_TEST_CLI_COMMANDS__?: string[];
+          }).__TAURI_TEST_CLI_COMMANDS__?.filter(
+            (command) => command === "status",
+          ).length ?? 0,
+      ),
+    )
+    .toBe(1);
+
+  await page.waitForTimeout(5_500);
+  expect(
+    await page.evaluate(
+      () =>
+        (window as typeof window & {
+          __TAURI_TEST_CLI_COMMANDS__?: string[];
+        }).__TAURI_TEST_CLI_COMMANDS__?.filter(
+          (command) => command === "status",
+        ).length ?? 0,
+    ),
+  ).toBe(1);
+});
+
 test("renders a continuous squircle window without a border", async ({
   page,
 }) => {

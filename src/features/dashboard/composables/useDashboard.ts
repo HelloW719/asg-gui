@@ -80,9 +80,7 @@ export function useDashboard() {
     void runLifecycle(action);
   }
 
-  onMounted(async () => {
-    await Promise.all([loadRecentLogs(), appStatus.refresh()]);
-  });
+  onMounted(loadRecentLogs);
 
   return {
     session,

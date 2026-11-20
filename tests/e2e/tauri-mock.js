@@ -4,7 +4,9 @@
   let callbackId = 1;
   let jobId = 0;
   const testInvokes = [];
+  const testCliCommands = [];
   window.__TAURI_TEST_INVOKES__ = testInvokes;
+  window.__TAURI_TEST_CLI_COMMANDS__ = testCliCommands;
 
   const result = (command, data) => ({
     schema_version: 1,
@@ -77,6 +79,7 @@
       const id = `fixture-${++jobId}`;
       const cliArgs = args.args ?? [];
       const name = cliArgs[0];
+      testCliCommands.push(name);
       emitJob(id, "started");
       if (name === "status") {
         finish(
