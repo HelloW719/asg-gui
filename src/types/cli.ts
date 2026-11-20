@@ -114,10 +114,16 @@ export type JobEvent =
 
 export type JobEventKind = JobEvent["kind"];
 
+export type EngineGroup =
+  | "searxng"
+  | "gateway.search"
+  | "gateway.reverse_image"
+  | "gateway.upstream";
+
 export interface EngineInfo {
   id: string;
   pluginId?: string;
-  group: "searxng" | "gateway.search" | "gateway.reverse_image";
+  group: EngineGroup;
   name: string;
   kind: "searxng" | "gateway";
   enabled: boolean;

@@ -253,6 +253,12 @@ test.describe("feature pages", () => {
   test("renders source tabs in isolated feature components", async ({ page }) => {
     await page.getByRole("link", { name: "来源" }).click();
     await expect(page.getByRole("heading", { name: "引擎与扩展" })).toBeVisible();
+    await expect(page.getByText("通用上游")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "deepseek" })).toBeVisible();
+    await expect(page.getByText("待配置密钥")).toBeVisible();
+    await expect(
+      page.getByText("通用查询时与 SearXNG 并发，结果由网关统一融合。"),
+    ).toBeVisible();
     await page.getByRole("tab", { name: "内置插件" }).click();
     await expect(page.getByPlaceholder("插件名或规范通道，如 bilibili:kukemc")).toBeVisible();
     await page.getByRole("tab", { name: "第三方扩展" }).click();

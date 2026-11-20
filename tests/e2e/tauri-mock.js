@@ -109,6 +109,24 @@
             ],
           }),
         );
+      } else if (name === "engines") {
+        finish(
+          id,
+          result("engines", {
+            engines: [
+              {
+                id: "gateway.upstream:deepseek",
+                group: "gateway.upstream",
+                name: "deepseek",
+                kind: "gateway",
+                enabled: false,
+                available: false,
+                routing: ["general"],
+                requires: ["secrets.search.deepseek.api_key"],
+              },
+            ],
+          }),
+        );
       } else {
         finish(id, result(name || "fixture", {}));
       }

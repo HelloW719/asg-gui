@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { RefreshCw } from "@lucide/vue";
+import {
+  engineAvailabilityLabel,
+  engineGroupDescription,
+  engineGroupLabel,
+} from "../enginePresentation";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import type { EngineInfo, EngineRouteDraft } from "@/types/cli";
 
@@ -47,7 +52,7 @@ function currentRoute(engine: EngineInfo): string {
     >
       <header>
         <div>
-          <span class="eyebrow">{{ engine.group }}</span>
+          <span class="eyebrow">{{ engineGroupLabel(engine.group) }}</span>
           <h2>{{ engine.name }}</h2>
         </div>
         <label class="switch">
@@ -62,12 +67,18 @@ function currentRoute(engine: EngineInfo): string {
       </header>
       <div class="token-row">
         <span :class="engine.available ? 'token token--ok' : 'token token--warn'">
-          {{ engine.available ? "可用" : "缺依赖" }}
+          {{ engineAvailabilityLabel(engine) }}
         </span>
         <span v-for="route in engine.routing" :key="route" class="token">
           {{ route }}
         </span>
       </div>
+      <p
+        v-if="engineGroupDescription(engine.group)"
+        class="field-note engine-group-note"
+      >
+        {{ engineGroupDescription(engine.group) }}
+      </p>
       <p v-if="engine.requires?.length" class="field-note">
         依赖：{{ engine.requires.join(" · ") }}
       </p>
