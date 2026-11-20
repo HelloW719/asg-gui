@@ -4,6 +4,10 @@ import { inTauri } from "./api";
 
 const desktopWindow = inTauri ? getCurrentWindow() : null;
 
+export async function startWindowDragging(): Promise<void> {
+  await desktopWindow?.startDragging();
+}
+
 export async function minimizeWindow(): Promise<void> {
   await desktopWindow?.minimize();
 }

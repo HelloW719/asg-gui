@@ -3,6 +3,8 @@
   const eventHandlers = new Map();
   let callbackId = 1;
   let jobId = 0;
+  const testInvokes = [];
+  window.__TAURI_TEST_INVOKES__ = testInvokes;
 
   const result = (command, data) => ({
     schema_version: 1,
@@ -52,6 +54,7 @@
       callbacks.delete(id);
     },
     async invoke(command, args = {}) {
+      testInvokes.push(command);
       if (command === "plugin:event|listen") {
         eventHandlers.set(args.event, args.handler);
         return callbackId++;

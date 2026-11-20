@@ -25,6 +25,39 @@ test("switches between dark and light appearance", async ({ page }) => {
     .not.toBe(before);
 });
 
+test("starts native window dragging from titlebar content only", async ({
+  page,
+}) => {
+  await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
+
+  const dragInvocations = () =>
+    page.evaluate(
+      () =>
+        (window as typeof window & { __TAURI_TEST_INVOKES__?: string[] })
+          .__TAURI_TEST_INVOKES__?.filter(
+            (command) => command === "plugin:window|start_dragging",
+          ).length ?? 0,
+    );
+
+  await page.locator(".app-titlebar__name").dispatchEvent("mousedown", {
+    button: 0,
+    buttons: 1,
+    detail: 1,
+  });
+  await expect.poll(dragInvocations).toBe(1);
+
+  await page
+    .getByRole("button", { name: /切换到.+主题/ })
+    .dispatchEvent("mousedown", {
+      button: 0,
+      buttons: 1,
+      detail: 1,
+    });
+  expect(await dragInvocations()).toBe(1);
+});
+
 test("renders a continuous squircle window without a border", async ({
   page,
 }) => {

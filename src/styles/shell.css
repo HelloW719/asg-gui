@@ -98,7 +98,17 @@
   min-width: 0;
   padding-left: 18px;
   border-bottom: 1px solid var(--line);
+  cursor: grab;
   user-select: none;
+}
+
+.app-titlebar button,
+.app-titlebar a,
+.app-titlebar input,
+.app-titlebar textarea,
+.app-titlebar select,
+.app-titlebar [contenteditable="true"] {
+  cursor: pointer;
 }
 
 .app-titlebar__identity,

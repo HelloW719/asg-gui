@@ -3,6 +3,7 @@ import { Minus, Moon, Square, Sun, X } from "@lucide/vue";
 import {
   closeWindow,
   minimizeWindow,
+  startWindowDragging,
   toggleMaximizeWindow,
 } from "@/services/desktop";
 import { useAppearanceStore } from "@/stores/appearance";
@@ -10,6 +11,20 @@ import { useSessionStore } from "@/stores/session";
 
 const session = useSessionStore();
 const appearance = useAppearanceStore();
+
+function isInteractiveTarget(target: EventTarget | null): boolean {
+  return (
+    target instanceof Element &&
+    target.closest(
+      "button, a, input, textarea, select, [contenteditable='true']",
+    ) !== null
+  );
+}
+
+async function beginWindowDrag(event: MouseEvent): Promise<void> {
+  if (event.button !== 0 || isInteractiveTarget(event.target)) return;
+  await startWindowDragging();
+}
 
 async function minimize(): Promise<void> {
   await minimizeWindow();
@@ -25,8 +40,8 @@ async function close(): Promise<void> {
 </script>
 
 <template>
-  <header class="app-titlebar" data-tauri-drag-region>
-    <div class="app-titlebar__identity" data-tauri-drag-region>
+  <header class="app-titlebar" @mousedown="beginWindowDrag">
+    <div class="app-titlebar__identity">
       <span class="app-mark" aria-hidden="true">
         <i />
         <i />

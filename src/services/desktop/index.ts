@@ -16,5 +16,6 @@ export {
   minimizeWindow,
   quitGui,
   revealWindow,
+  startWindowDragging,
   toggleMaximizeWindow,
 } from "./window";
