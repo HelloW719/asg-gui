@@ -1,4 +1,26 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function expectIntegratedWorkspace(
+  page: Page,
+  selector: string,
+): Promise<void> {
+  const workspace = page.locator(selector);
+  await expect(workspace).toHaveCount(1);
+  await expect(workspace.locator(".glass-surface")).toHaveCount(0);
+  expect(
+    await workspace.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return style.backdropFilter || style.webkitBackdropFilter;
+    }),
+  ).toBe("none");
+  expect(
+    await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth <=
+        document.documentElement.clientWidth,
+    ),
+  ).toBe(true);
+}
 
 test("renders the desktop bridge requirement without overflow", async ({ page }) => {
   await page.goto("/");
@@ -404,6 +426,7 @@ test.describe("feature pages", () => {
   test("renders source tabs in isolated feature components", async ({ page }) => {
     await page.getByRole("link", { name: "来源" }).click();
     await expect(page.getByRole("heading", { name: "引擎与扩展" })).toBeVisible();
+    await expectIntegratedWorkspace(page, ".sources-workspace");
     await expect(page.getByText("通用上游")).toBeVisible();
     await expect(page.getByRole("heading", { name: "deepseek" })).toBeVisible();
     await expect(page.getByText("待配置密钥")).toBeVisible();
@@ -429,6 +452,7 @@ test.describe("feature pages", () => {
   test("renders settings panels and configuration browser", async ({ page }) => {
     await page.getByRole("link", { name: "设置" }).click();
     await expect(page.getByRole("heading", { name: "主题与效果" })).toBeVisible();
+    await expectIntegratedWorkspace(page, ".settings-workspace");
     await expect(page.getByRole("heading", { name: "高级设置" })).toBeVisible();
     await expect(page.getByPlaceholder("搜索配置路径")).toBeVisible();
     const frameRate = page.getByLabel("玻璃动效帧率");
@@ -441,6 +465,7 @@ test.describe("feature pages", () => {
 
   test("filters log entries through the extracted log feed", async ({ page }) => {
     await page.getByRole("link", { name: "日志", exact: true }).click();
+    await expectIntegratedWorkspace(page, ".logs-workspace");
     await expect(page.getByText("gateway listening on 127.0.0.1:3000")).toBeVisible();
     await page.getByPlaceholder("筛选日志").fill("not-present");
     await expect(page.getByText("暂无匹配日志。启动服务或开启实时跟随后会显示新内容。")).toBeVisible();
@@ -449,6 +474,7 @@ test.describe("feature pages", () => {
   test("runs maintenance diagnostics from the report components", async ({ page }) => {
     await page.getByRole("link", { name: "维护" }).click();
     await expect(page.getByRole("heading", { name: "环境诊断" })).toBeVisible();
+    await expectIntegratedWorkspace(page, ".maintenance-workspace");
     await expect(page.getByRole("heading", { name: "检查项" })).toBeVisible();
     await page.getByRole("button", { name: "重新诊断" }).click();
     await expect(page.getByText("installation")).toBeVisible();

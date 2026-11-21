@@ -53,33 +53,35 @@ const settings = useSettings();
       @dismiss="settings.validated.value = null"
     />
 
-    <AppearancePanel />
+    <div class="settings-workspace glass-surface">
+      <AppearancePanel />
 
-    <InstallPathPanel
-      :root="settings.session.root"
-      @change="settings.session.chooseRoot"
-      @disconnect="settings.forgetOpen.value = true"
-    />
+      <InstallPathPanel
+        :root="settings.session.root"
+        @change="settings.session.chooseRoot"
+        @disconnect="settings.forgetOpen.value = true"
+      />
 
-    <ConfigBrowser
-      :search="settings.search.value"
-      :groups="settings.groupedRows.value"
-      :row-count="settings.rows.value.length"
-      :loading="settings.loading.value"
-      :group-labels="settings.groupLabels"
-      @update:search="settings.search.value = $event"
-      @edit="settings.beginEdit"
-    />
+      <ConfigBrowser
+        :search="settings.search.value"
+        :groups="settings.groupedRows.value"
+        :row-count="settings.rows.value.length"
+        :loading="settings.loading.value"
+        :group-labels="settings.groupLabels"
+        @update:search="settings.search.value = $event"
+        @edit="settings.beginEdit"
+      />
 
-    <ConfigEditor
-      v-if="settings.editing.value"
-      :field="settings.editing.value"
-      :value="settings.editValue.value"
-      :busy="settings.jobs.hasRunningOperation"
-      @update:value="settings.editValue.value = $event"
-      @cancel="settings.cancelEdit"
-      @save="settings.pendingSave.value = settings.editing.value"
-    />
+      <ConfigEditor
+        v-if="settings.editing.value"
+        :field="settings.editing.value"
+        :value="settings.editValue.value"
+        :busy="settings.jobs.hasRunningOperation"
+        @update:value="settings.editValue.value = $event"
+        @cancel="settings.cancelEdit"
+        @save="settings.pendingSave.value = settings.editing.value"
+      />
+    </div>
 
     <ConfirmDialog
       :open="Boolean(settings.pendingSave.value)"

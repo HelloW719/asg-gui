@@ -1,10 +1,23 @@
 /* Logs feature styles */
+.logs-workspace {
+  padding: 10px;
+  border-radius: var(--radius-lg);
+}
+
+.log-toolbar {
+  padding: 2px 2px 10px;
+  border-bottom: 1px solid var(--surface-card-divider);
+}
+
 .log-console {
   position: relative;
   overflow: auto;
   height: min(58vh, 660px);
+  margin-top: 10px;
   padding: 9px;
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--surface-card-divider);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
 }
 
 .log-empty {

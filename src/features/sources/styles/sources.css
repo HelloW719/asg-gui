@@ -1,6 +1,24 @@
 /* Sources feature styles */
+.sources-workspace {
+  padding: 14px;
+  border-radius: var(--radius-lg);
+}
+
+.sources-workspace .tab-list {
+  margin-bottom: 0;
+}
+
+.sources-workspace .tab-content {
+  padding-top: 12px;
+}
+
 .source-toolbar {
   justify-content: flex-start;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--surface-card-divider);
+  border-radius: var(--radius-md);
+  background: var(--surface-subtle);
 }
 
 .source-toolbar > span {
@@ -11,13 +29,22 @@
 .engine-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 11px;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--surface-card-divider);
+  border-radius: var(--radius-md);
+  background: var(--surface-card-divider);
 }
 
 .engine-card {
   position: relative;
   padding: 17px;
-  border-radius: var(--radius-lg);
+  border-radius: 0;
+  background: var(--surface-sunken);
+}
+
+.engine-card:only-child {
+  grid-column: 1 / -1;
 }
 
 .engine-card > header {
@@ -73,8 +100,12 @@
 .source-list,
 .extension-results {
   display: grid;
-  gap: 9px;
+  gap: 1px;
+  overflow: hidden;
   margin-bottom: 12px;
+  border: 1px solid var(--surface-card-divider);
+  border-radius: var(--radius-md);
+  background: var(--surface-card-divider);
 }
 
 .source-row {
@@ -84,7 +115,8 @@
   align-items: center;
   gap: 16px;
   padding: 15px 17px;
-  border-radius: var(--radius-md);
+  border-radius: 0;
+  background: var(--surface-sunken);
 }
 
 .source-row__main {
@@ -116,7 +148,7 @@
   display: grid;
   gap: 14px;
   padding: 17px;
-  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
 }
 
 .extension-row__header {
@@ -139,7 +171,7 @@
 .extension-capability {
   min-width: 0;
   padding: 11px;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--surface-card-divider);
   border-radius: var(--radius-sm);
   background: var(--field-bg);
 }
@@ -202,7 +234,10 @@
 
 .extension-editor {
   margin-top: 15px;
-  padding: 20px;
+  padding: 17px;
+  border: 1px solid var(--surface-card-divider);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
 }
 
 .token,

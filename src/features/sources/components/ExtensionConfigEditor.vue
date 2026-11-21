@@ -95,7 +95,7 @@ watch(
 </script>
 
 <template>
-  <section v-if="extension" class="extension-editor glass-surface">
+  <section v-if="extension" class="extension-editor">
     <div class="section-heading">
       <div>
         <span class="eyebrow">插件私有配置</span>

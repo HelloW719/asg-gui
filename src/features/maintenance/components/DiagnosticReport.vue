@@ -9,7 +9,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <section class="diagnostic-table glass-surface">
+  <section class="diagnostic-table">
     <SectionHeading eyebrow="完整报告" title="检查项">
       <span class="muted-copy">
         {{ checks.filter((check) => check.ok).length }} / {{ checks.length }} 通过

@@ -13,7 +13,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section class="settings-install glass-surface">
+  <section class="settings-install">
     <FolderCog :size="21" />
     <div>
       <span class="eyebrow">ASG 安装</span>

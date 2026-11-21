@@ -29,7 +29,7 @@ function currentRoute(engine: EngineInfo): string {
 </script>
 
 <template>
-  <section class="source-toolbar glass-surface">
+  <section class="source-toolbar">
     <span>{{ engines.length }} 个本地引擎</span>
     <div class="action-row">
       <BaseButton size="compact" @click="emit('refresh', false)">
@@ -48,7 +48,7 @@ function currentRoute(engine: EngineInfo): string {
     <article
       v-for="engine in engines"
       :key="engine.id"
-      class="engine-card glass-surface"
+      class="engine-card"
     >
       <header>
         <div>

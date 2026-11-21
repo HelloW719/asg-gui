@@ -6,7 +6,7 @@ defineProps<{
 </script>
 
 <template>
-  <article class="maintenance-card glass-surface">
+  <article class="maintenance-card">
     <div class="maintenance-card__icon">
       <slot name="icon" />
     </div>

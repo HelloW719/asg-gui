@@ -1,15 +1,25 @@
 /* Maintenance feature styles */
+.maintenance-workspace {
+  padding: 14px;
+  border-radius: var(--radius-lg);
+}
+
 .maintenance-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 13px;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--surface-card-divider);
+  border-radius: var(--radius-md);
+  background: var(--surface-card-divider);
 }
 
 .maintenance-card {
   position: relative;
   min-height: 220px;
   padding: 19px;
-  border-radius: var(--radius-lg);
+  border-radius: 0;
+  background: var(--surface-sunken);
 }
 
 .maintenance-card__icon {
@@ -52,8 +62,9 @@
 }
 
 .diagnostic-table {
-  margin-top: 13px;
-  padding: 19px;
+  margin-top: 14px;
+  padding: 18px 4px 2px;
+  border-top: 1px solid var(--surface-card-divider);
 }
 
 .check-list {

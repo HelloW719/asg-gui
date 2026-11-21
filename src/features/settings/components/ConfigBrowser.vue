@@ -36,29 +36,30 @@ function displayValue(value: unknown): string {
     <div v-else-if="groups.length === 0" class="empty-copy">
       没有匹配的配置字段。
     </div>
-    <div
-      v-for="[group, fields] in groups"
-      v-else
-      :key="group"
-      class="config-group glass-surface"
-    >
-      <header>
-        <SlidersHorizontal :size="17" />
-        <h3>{{ groupLabels[group] ?? group }}</h3>
-        <span>{{ fields.length }}</span>
-      </header>
-      <div class="config-table">
-        <button
-          v-for="row in fields"
-          :key="row.path"
-          class="config-field"
-          type="button"
-          @click="emit('edit', row)"
-        >
-          <span class="config-field__path">{{ row.path }}</span>
-          <code>{{ row.secret ? "••••••" : displayValue(row.value) }}</code>
-          <Eye :size="15" />
-        </button>
+    <div v-else class="config-groups">
+      <div
+        v-for="[group, fields] in groups"
+        :key="group"
+        class="config-group"
+      >
+        <header>
+          <SlidersHorizontal :size="17" />
+          <h3>{{ groupLabels[group] ?? group }}</h3>
+          <span>{{ fields.length }}</span>
+        </header>
+        <div class="config-table">
+          <button
+            v-for="row in fields"
+            :key="row.path"
+            class="config-field"
+            type="button"
+            @click="emit('edit', row)"
+          >
+            <span class="config-field__path">{{ row.path }}</span>
+            <code>{{ row.secret ? "••••••" : displayValue(row.value) }}</code>
+            <Eye :size="15" />
+          </button>
+        </div>
       </div>
     </div>
   </section>

@@ -41,56 +41,58 @@ const sources = useSources();
       @dismiss="sources.success.value = null"
     />
 
-    <TabsRoot default-value="engines">
-      <TabsList class="tab-list glass-surface">
-        <TabsTrigger value="engines" class="tab-trigger">
-          <Search :size="16" /> 搜索引擎
-        </TabsTrigger>
-        <TabsTrigger value="extensions" class="tab-trigger">
-          <Puzzle :size="16" /> 扩展 V2
-        </TabsTrigger>
-      </TabsList>
+    <div class="sources-workspace glass-surface">
+      <TabsRoot default-value="engines">
+        <TabsList class="tab-list">
+          <TabsTrigger value="engines" class="tab-trigger">
+            <Search :size="16" /> 搜索引擎
+          </TabsTrigger>
+          <TabsTrigger value="extensions" class="tab-trigger">
+            <Puzzle :size="16" /> 扩展 V2
+          </TabsTrigger>
+        </TabsList>
 
-      <TabsContent value="engines" class="tab-content">
-        <EnginesTab
-          :engines="sources.engines.value"
-          :loading="sources.loading.engines"
-          :busy="sources.jobs.hasRunningOperation"
-          :route-drafts="sources.routeDrafts"
-          @refresh="sources.loadEngines"
-          @toggle="sources.toggleEngine"
-          @route-change="sources.changeSearxngRoute"
-          @save-route="sources.saveGatewayRoute"
-          @secret="(engine) => (sources.engineSecret.value = engine)"
-        />
-      </TabsContent>
+        <TabsContent value="engines" class="tab-content">
+          <EnginesTab
+            :engines="sources.engines.value"
+            :loading="sources.loading.engines"
+            :busy="sources.jobs.hasRunningOperation"
+            :route-drafts="sources.routeDrafts"
+            @refresh="sources.loadEngines"
+            @toggle="sources.toggleEngine"
+            @route-change="sources.changeSearxngRoute"
+            @save-route="sources.saveGatewayRoute"
+            @secret="(engine) => (sources.engineSecret.value = engine)"
+          />
+        </TabsContent>
 
-      <TabsContent value="extensions" class="tab-content">
-        <ExtensionsTab
-          :repo="sources.extensionRepo.value"
-          :query="sources.extensionQuery.value"
-          :extensions="sources.extensions.value"
-          :results="sources.extensionResults.value"
-          :loading="sources.loading.extensions"
-          :busy="sources.jobs.hasRunningOperation"
-          @install="(repo) => sources.installExtension(repo)"
-          @search="sources.searchExtensions"
-          @refresh="sources.loadExtensions"
-          @setup="sources.runExtensionSetup"
-          @configure="(extension) => (sources.configExtension.value = extension)"
-          @secret="(extension) => (sources.extensionSecret.value = extension)"
-          @remove="(extension) => (sources.extensionToRemove.value = extension)"
-          @update:repo="sources.extensionRepo.value = $event"
-          @update:query="sources.extensionQuery.value = $event"
-        />
-      </TabsContent>
-    </TabsRoot>
+        <TabsContent value="extensions" class="tab-content">
+          <ExtensionsTab
+            :repo="sources.extensionRepo.value"
+            :query="sources.extensionQuery.value"
+            :extensions="sources.extensions.value"
+            :results="sources.extensionResults.value"
+            :loading="sources.loading.extensions"
+            :busy="sources.jobs.hasRunningOperation"
+            @install="(repo) => sources.installExtension(repo)"
+            @search="sources.searchExtensions"
+            @refresh="sources.loadExtensions"
+            @setup="sources.runExtensionSetup"
+            @configure="(extension) => (sources.configExtension.value = extension)"
+            @secret="(extension) => (sources.extensionSecret.value = extension)"
+            @remove="(extension) => (sources.extensionToRemove.value = extension)"
+            @update:repo="sources.extensionRepo.value = $event"
+            @update:query="sources.extensionQuery.value = $event"
+          />
+        </TabsContent>
+      </TabsRoot>
 
-    <ExtensionConfigEditor
-      :extension="sources.configExtension.value"
-      @close="sources.configExtension.value = null"
-      @saved="sources.success.value = `${$event} 配置已保存。`"
-    />
+      <ExtensionConfigEditor
+        :extension="sources.configExtension.value"
+        @close="sources.configExtension.value = null"
+        @saved="sources.success.value = `${$event} 配置已保存。`"
+      />
+    </div>
 
     <ConfirmDialog
       :open="Boolean(sources.extensionToRemove.value)"

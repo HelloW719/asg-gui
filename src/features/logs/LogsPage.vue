@@ -50,23 +50,25 @@ const autoScroll = ref(true);
       @dismiss="feed.error.value = null"
     />
 
-    <LogToolbar
-      :query="feed.query.value"
-      :selected-services="feed.selectedServices.value"
-      :auto-scroll="autoScroll"
-      :following="feed.following.value"
-      :options="feed.serviceOptions"
-      @update:query="feed.query.value = $event"
-      @update:selected-services="feed.selectedServices.value = $event"
-      @update:auto-scroll="autoScroll = $event"
-      @clear="feed.clear"
-    />
+    <div class="logs-workspace glass-surface">
+      <LogToolbar
+        :query="feed.query.value"
+        :selected-services="feed.selectedServices.value"
+        :auto-scroll="autoScroll"
+        :following="feed.following.value"
+        :options="feed.serviceOptions"
+        @update:query="feed.query.value = $event"
+        @update:selected-services="feed.selectedServices.value = $event"
+        @update:auto-scroll="autoScroll = $event"
+        @clear="feed.clear"
+      />
 
-    <LogConsole
-      :lines="feed.filteredLines.value"
-      :following="feed.following.value"
-      :auto-scroll="autoScroll"
-    />
+      <LogConsole
+        :lines="feed.filteredLines.value"
+        :following="feed.following.value"
+        :auto-scroll="autoScroll"
+      />
+    </div>
   </div>
 </template>
 

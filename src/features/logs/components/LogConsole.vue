@@ -24,7 +24,7 @@ watch(
 </script>
 
 <template>
-  <section ref="logBox" class="log-console glass-surface" aria-live="polite">
+  <section ref="logBox" class="log-console" aria-live="polite">
     <div v-if="lines.length === 0" class="log-empty">
       暂无匹配日志。启动服务或开启实时跟随后会显示新内容。
     </div>

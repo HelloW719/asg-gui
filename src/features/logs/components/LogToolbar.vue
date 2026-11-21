@@ -25,7 +25,7 @@ function toggleService(service: string, event: Event): void {
 </script>
 
 <template>
-  <section class="log-toolbar glass-surface">
+  <section class="log-toolbar">
     <div class="service-filters">
       <label v-for="service in options" :key="service.value" class="check-label">
         <input

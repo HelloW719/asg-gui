@@ -17,7 +17,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section class="editor-drawer glass-surface">
+  <section class="editor-drawer">
     <SectionHeading eyebrow="单字段编辑" :title="field.path">
       <BaseButton size="compact" @click="emit('cancel')">关闭</BaseButton>
     </SectionHeading>

@@ -25,7 +25,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section class="source-toolbar glass-surface extension-toolbar">
+  <section class="source-toolbar extension-toolbar">
     <div class="inline-field">
       <input v-model="repo" placeholder="owner/repo[@version]" />
       <BaseButton
@@ -54,7 +54,7 @@ const emit = defineEmits<{
     <article
       v-for="item in results"
       :key="item.repo"
-      class="source-row glass-surface"
+      class="source-row"
     >
       <div class="source-row__main">
         <span class="eyebrow">{{ item.stars }} stars</span>
@@ -77,7 +77,7 @@ const emit = defineEmits<{
     <article
       v-for="extension in extensions"
       :key="extension.id"
-      class="glass-surface extension-row"
+      class="extension-row"
     >
       <header class="extension-row__header">
         <div class="source-row__main">
