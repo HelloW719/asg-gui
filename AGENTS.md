@@ -148,7 +148,13 @@ stores -> services
   filled、tonal、text 以保留 M3E 的形状、尺寸、状态层、focus 和原生 click
   行为，但不得继承其 primary、secondary 或 error 容器填色。按键表面保持透明，
   直接承接父组件原色，只用外层高光、投影和按压反馈表达新拟物；错误色仅用于危险
-  操作的文字和图标。系统窗口按钮保持平面。
+  操作的文字和图标。primary、secondary、ghost 的层级只能通过文字对比、字重和
+  深度反馈表达，不得恢复 M3E 容器装色。hover、pressed、disabled 和 loading
+  必须同步改变新拟物状态；pressed 同时响应原生 `:active` 和 M3E 的 `--pressed`
+  自定义状态，使 M3E 形变与新拟物内凹处于同一生命周期。系统窗口按钮保持平面。
+- 新拟物只适用于 `BaseButton` 和代表普通操作的图标按键。卡片、面板、列表、
+  dialog、导航项、tabs、segmented control、开关和输入框不得添加新拟物凸起、
+  凹槽或 pressed 外观，继续使用 M3E 颜色、玻璃表面、边框和状态层。
 - 页面不得直接调用 `jobClient`、桌面任务接口或原始
   `jobs.execute` / `jobs.stream`。
 - ASG 命令应放入 `src/services/asg/*`，页面通过 `useAsgServices` 或功能组合式函数
