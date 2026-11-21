@@ -41,6 +41,13 @@ test("renders the desktop bridge requirement without overflow", async ({ page })
     "animation-name",
     "setup-orbit-turn",
   );
+  expect(
+    await page
+      .getByRole("heading", { name: "连接你的 ASG 安装" })
+      .evaluate((element) =>
+        Number.parseFloat(getComputedStyle(element).fontSize),
+      ),
+  ).toBeLessThanOrEqual(40.8);
 
   const dimensions = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
@@ -141,6 +148,15 @@ test.describe("M3E button visual contract", () => {
         (element) => getComputedStyle(element).transform,
       ),
     ).not.toBe("none");
+    const pressedSurface = await primary.evaluate((element) => {
+      const style = getComputedStyle(element, "::before");
+      return {
+        opacity: style.opacity,
+        boxShadow: style.boxShadow,
+      };
+    });
+    expect(pressedSurface.opacity).toBe("1");
+    expect(pressedSurface.boxShadow).toContain("inset");
     await page.screenshot({
       path: `test-results/button-contract-${size}-dark-pressed.png`,
       fullPage: true,
@@ -395,6 +411,10 @@ test("uses the shared shape scale across feature surfaces", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "检索与抓取" })).toBeVisible();
   await expectRadius(".query-card", "18px");
   await expectRadius(".field--hero input", "14px");
+  await expect(page.locator(".field--hero input").first()).toHaveCSS(
+    "height",
+    "52px",
+  );
 
   await page.getByRole("link", { name: "来源" }).click();
   await expect(page.getByRole("heading", { name: "引擎与扩展" })).toBeVisible();
@@ -536,7 +556,12 @@ test.describe("dashboard fixture", () => {
       bounds.y + bounds.height * point.y,
     );
     await expect.poll(maxParticleAlpha).toBeGreaterThan(0);
-    await page.waitForTimeout(360);
+    await expect
+      .poll(async () => {
+        const [pixel] = await samplePixels([point]);
+        return pixel?.[3] ?? 0;
+      })
+      .toBeGreaterThan(200);
     const [tracking, geometryColor] = await samplePixels([
       point,
       { x: 0.75, y: 0.7 },
@@ -612,6 +637,60 @@ test.describe("reduced motion compatibility", () => {
         }),
       )
       .toBeLessThanOrEqual(0.001);
+  });
+});
+
+test.describe("reduced transparency compatibility", () => {
+  test.use({ colorScheme: "dark" });
+
+  test("persists the setting and disables full-screen glass blur", async ({
+    page,
+  }) => {
+    await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
+    await page.getByRole("link", { name: "设置" }).click();
+
+    const reducedTransparency = page.getByRole("checkbox", {
+      name: /减少透明/,
+    });
+    await expect(reducedTransparency).not.toBeChecked();
+    await page.getByText("减少透明", { exact: true }).click();
+    await expect(reducedTransparency).toBeChecked();
+
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-reduced-transparency",
+      "true",
+    );
+    await expect
+      .poll(() =>
+        page
+          .locator(".glass-frost-layer")
+          .evaluate((element) => getComputedStyle(element).backdropFilter),
+      )
+      .toBe("none");
+    expect(
+      await page
+        .locator(".glass-frost-layer")
+        .evaluate((element) => getComputedStyle(element).backgroundColor),
+    ).toContain("0.78");
+
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "主题与效果" })).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-reduced-transparency",
+      "true",
+    );
+    await expect(
+      page.getByRole("checkbox", { name: /减少透明/ }),
+    ).toBeChecked();
+    await expect
+      .poll(() =>
+        page
+          .locator(".glass-frost-layer")
+          .evaluate((element) => getComputedStyle(element).backdropFilter),
+      )
+      .toBe("none");
   });
 });
 

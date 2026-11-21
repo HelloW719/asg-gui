@@ -135,11 +135,7 @@
 .service-board {
   --m3e-card-padding: 6px;
   --m3e-card-shape: var(--radius-xl);
-  --m3e-filled-card-container-color: color-mix(
-    in srgb,
-    var(--md-sys-color-surface-container-high) 46%,
-    transparent
-  );
+  --m3e-filled-card-container-color: var(--surface-card-fill);
 
   position: relative;
   display: block;
@@ -151,10 +147,6 @@
   box-shadow:
     inset 1px 1px 0 var(--surface-card-highlight-top),
     inset -1px -1px 0 var(--surface-card-highlight-bottom);
-}
-
-:root[data-theme="light"] .service-board {
-  --m3e-filled-card-container-color: rgba(232, 244, 245, 0.18);
 }
 
 :root[data-theme="light"] .status-summary {

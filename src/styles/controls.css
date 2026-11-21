@@ -47,6 +47,18 @@ m3e-button.button {
     transform var(--motion-fast-spatial);
 }
 
+m3e-button.button::before {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  box-shadow: var(--button-press-shadow);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-fast-effects);
+}
+
 m3e-button.button[size="extra-small"] {
   /* M3E at density -1 subtracts 4px from the configured container height. */
   --m3e-button-extra-small-container-height: calc(
@@ -82,6 +94,10 @@ m3e-button.button:active:not([disabled]) {
     drop-shadow(0 3px 6px color-mix(in srgb, var(--md-sys-color-shadow) 24%, transparent))
     drop-shadow(0 -1px 2px color-mix(in srgb, var(--md-sys-color-surface-bright) 15%, transparent));
   transform: translateY(0);
+}
+
+m3e-button.button:active:not([disabled])::before {
+  opacity: 1;
 }
 
 m3e-button.button[disabled] {

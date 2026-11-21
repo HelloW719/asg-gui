@@ -165,6 +165,7 @@ light:
 | `--glass-highlight` | 面板顶部受光，来自 `on-surface`。 |
 | `--glass-shadow` | 轻量外投影，来自 `shadow`。 |
 | `--surface-card` | 深色跟随 `surface-container`；浅色固定使用修改前的中性白灰琉璃渐变。 |
+| `--surface-card-fill` | 不支持渐变的自定义组件使用的纯色填充；浅色与服务板保持同一中性白灰琉璃色。 |
 | `--surface-card-border` | 深色跟随 `outline-variant`；浅色固定使用 `rgba(42, 91, 93, 0.16)`。 |
 | `--surface-card-highlight-*` | 新拟物卡片的内高光和内暗边；浅色使用修改前的白色高光与灰青暗边。 |
 | `--surface-card-divider` | 同一块面板内部的语义分隔；浅色使用 `rgba(42, 91, 93, 0.13)`。 |
@@ -290,8 +291,9 @@ L4 全屏 backdrop-filter + 55% 染色 + 连续曲率边缘
 
 尺寸为 compact `34px`、regular `40px`、large `50px`。按钮圆角为 full，使用 M3E
 filled/tonal/text token。通用按钮叠加玻璃与新拟物的外高光、柔和投影、hover 抬升和
-pressed 凹陷；系统窗口按钮保持平面。loading 时保持宽度，设置 `aria-busy` 并禁用；
-disabled 不响应 hover；键盘 focus 使用 strong focus 和 2px 可见轮廓。
+`--button-press-shadow` 定义的 pressed 凹陷；系统窗口按钮保持平面。loading 时保持
+宽度，设置 `aria-busy` 并禁用；disabled 不响应 hover；键盘 focus 使用 strong focus
+和 2px 可见轮廓。
 
 ### 7.2 面板与服务板
 
@@ -302,8 +304,9 @@ disabled 不响应 hover；键盘 focus 使用 strong focus 和 2px 可见轮廓
 
 ### 7.3 表单与选择
 
-- 输入框高度 38px，圆角由 `--radius-sm` 控制，背景使用 `--field-bg`，边界使用
-  `--field-border`。
+- 标准输入框高度 38px，圆角由 `--radius-sm` 控制，背景使用 `--field-bg`，边界使用
+  `--field-border`。检索与抓取页的主查询输入框是唯一的 Hero 输入变体：高度使用
+  `--field-height-hero`（52px），圆角使用 `--radius-md`，以突出页面首要操作。
 - focus 只改变边界、顶部高光和轮廓，不改变布局尺寸。
 - 开关使用项目 `SwitchField`，选中颜色只来自 primary；减少动态时滑块立即到位。
 - Tabs 和 segmented control 使用 full pill。容器使用 `--surface-subtle`，选中项使用
