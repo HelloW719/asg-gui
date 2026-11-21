@@ -410,10 +410,20 @@ test.describe("feature pages", () => {
     await expect(
       page.getByText("通用查询时与 SearXNG 并发，结果由网关统一融合。"),
     ).toBeVisible();
-    await page.getByRole("tab", { name: "内置插件" }).click();
-    await expect(page.getByPlaceholder("插件名或规范通道，如 bilibili:kukemc")).toBeVisible();
-    await page.getByRole("tab", { name: "第三方扩展" }).click();
+    await expect(page.getByRole("tab", { name: "内置插件" })).toHaveCount(0);
+    await page.getByRole("tab", { name: "扩展 V2" }).click();
     await expect(page.getByPlaceholder("owner/repo[@version]")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Example V2" })).toBeVisible();
+    await expect(page.getByText("V2 · fetch · search")).toBeVisible();
+    await expect(page.getByText("example:cli")).toBeVisible();
+    await expect(page.getByText("gateway.search:example")).toBeVisible();
+    await expect(page.getByText("已安装", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "重跑 setup" })).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    ).toBe(true);
   });
 
   test("renders settings panels and configuration browser", async ({ page }) => {

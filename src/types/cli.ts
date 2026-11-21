@@ -133,15 +133,29 @@ export interface EngineInfo {
   source?: "default" | "local";
 }
 
-export interface PluginInfo {
-  name: "bili" | "ytdlp" | "opencli" | "article";
-  platform: string;
-  channel: string;
-  channel_id: string;
+export interface ExtensionBackendInfo {
+  id: string;
+  name: string;
+  description?: string;
+  aliases?: string[];
   installed: boolean;
-  version?: string;
   enabled: boolean;
+  version?: string;
   path?: string;
+}
+
+export interface ExtensionFetchChannelInfo {
+  id: string;
+  name?: string;
+  description?: string;
+  backends?: string[];
+  aliases?: string[];
+}
+
+export interface ExtensionSearchEngineInfo {
+  id: string;
+  name?: string;
+  description?: string;
 }
 
 export interface ExtensionInfo {
@@ -149,6 +163,9 @@ export interface ExtensionInfo {
   name?: string;
   version?: string;
   provides?: Array<"search" | "fetch">;
+  backends?: ExtensionBackendInfo[];
+  fetch_channels?: ExtensionFetchChannelInfo[];
+  search_engines?: ExtensionSearchEngineInfo[];
   entry?: string;
   path: string;
   error?: string;

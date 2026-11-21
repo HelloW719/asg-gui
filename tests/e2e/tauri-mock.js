@@ -133,6 +133,44 @@
             ],
           }),
         );
+      } else if (name === "extensions") {
+        finish(
+          id,
+          result("extensions", {
+            extensions: [
+              {
+                id: "example-v2",
+                name: "Example V2",
+                version: "1.2.0",
+                provides: ["fetch", "search"],
+                entry: "index.mjs",
+                path: "C:\\ASG-Fixture\\data\\extensions\\example-v2",
+                backends: [
+                  {
+                    id: "example-api",
+                    name: "Example API",
+                    installed: true,
+                    enabled: true,
+                    version: "0.8.0",
+                  },
+                ],
+                fetch_channels: [
+                  {
+                    id: "example:cli",
+                    name: "Example CLI",
+                    backends: ["example-api"],
+                  },
+                ],
+                search_engines: [
+                  {
+                    id: "gateway.search:example",
+                    name: "Example Search",
+                  },
+                ],
+              },
+            ],
+          }),
+        );
       } else {
         finish(id, result(name || "fixture", {}));
       }

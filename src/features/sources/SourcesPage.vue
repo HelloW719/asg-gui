@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Blocks, Puzzle, Search } from "@lucide/vue";
+import { Puzzle, Search } from "@lucide/vue";
 import {
   TabsContent,
   TabsList,
@@ -13,7 +13,6 @@ import SecretDialog from "@/shared/ui/SecretDialog.vue";
 import EnginesTab from "./components/EnginesTab.vue";
 import ExtensionConfigEditor from "./components/ExtensionConfigEditor.vue";
 import ExtensionsTab from "./components/ExtensionsTab.vue";
-import PluginsTab from "./components/PluginsTab.vue";
 import { useSources } from "./composables/useSources";
 
 const sources = useSources();
@@ -24,7 +23,7 @@ const sources = useSources();
     <PageHeader
       eyebrow="能力来源"
       title="引擎与扩展"
-      description="所有启停、路由和安装动作均由 CLI 完成；配置改动会触发整栈重启。"
+      description="扩展仅展示 V2 manifest；后端 setup、配置和卸载均由 CLI 完成。"
     />
 
     <InlineNotice
@@ -47,11 +46,8 @@ const sources = useSources();
         <TabsTrigger value="engines" class="tab-trigger">
           <Search :size="16" /> 搜索引擎
         </TabsTrigger>
-        <TabsTrigger value="plugins" class="tab-trigger">
-          <Blocks :size="16" /> 内置插件
-        </TabsTrigger>
         <TabsTrigger value="extensions" class="tab-trigger">
-          <Puzzle :size="16" /> 第三方扩展
+          <Puzzle :size="16" /> 扩展 V2
         </TabsTrigger>
       </TabsList>
 
@@ -69,19 +65,6 @@ const sources = useSources();
         />
       </TabsContent>
 
-      <TabsContent value="plugins" class="tab-content">
-        <PluginsTab
-          :plugin-name="sources.pluginName.value"
-          :plugins="sources.plugins.value"
-          :loading="sources.loading.plugins"
-          :busy="sources.jobs.hasRunningOperation"
-          @install="(name) => sources.installPlugin(name)"
-          @remove="(plugin) => (sources.pluginToRemove.value = plugin)"
-          @refresh="sources.loadPlugins"
-          @update:plugin-name="sources.pluginName.value = $event"
-        />
-      </TabsContent>
-
       <TabsContent value="extensions" class="tab-content">
         <ExtensionsTab
           :repo="sources.extensionRepo.value"
@@ -93,6 +76,7 @@ const sources = useSources();
           @install="(repo) => sources.installExtension(repo)"
           @search="sources.searchExtensions"
           @refresh="sources.loadExtensions"
+          @setup="sources.runExtensionSetup"
           @configure="(extension) => (sources.configExtension.value = extension)"
           @secret="(extension) => (sources.extensionSecret.value = extension)"
           @remove="(extension) => (sources.extensionToRemove.value = extension)"
@@ -109,18 +93,9 @@ const sources = useSources();
     />
 
     <ConfirmDialog
-      :open="Boolean(sources.pluginToRemove.value)"
-      :title="`卸载 ${sources.pluginToRemove.value?.name ?? ''}？`"
-      description="内置插件会被移除，CLI 随后重启整栈。"
-      confirm-label="卸载"
-      destructive
-      @update:open="(open) => !open && (sources.pluginToRemove.value = null)"
-      @confirm="sources.removePlugin"
-    />
-    <ConfirmDialog
       :open="Boolean(sources.extensionToRemove.value)"
       :title="`卸载 ${sources.extensionToRemove.value?.id ?? ''}？`"
-      description="只删除第三方扩展目录；重启网关后停止加载。"
+      description="CLI 会先运行扩展后端的卸载 setup；成功后才删除扩展目录。失败时会保留扩展。"
       confirm-label="卸载"
       destructive
       @update:open="(open) => !open && (sources.extensionToRemove.value = null)"

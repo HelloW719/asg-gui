@@ -7,7 +7,6 @@ import type {
   EngineRouteDraft,
   ExtensionInfo,
   ExtensionSearchItem,
-  PluginInfo,
   SecretPayload,
 } from "@/types/cli";
 
@@ -16,16 +15,13 @@ export function useSources() {
   const serviceClient = useAsgServices();
   const jobs = useJobsStore();
   const engines = ref<EngineInfo[]>([]);
-  const plugins = ref<PluginInfo[]>([]);
   const extensions = ref<ExtensionInfo[]>([]);
   const extensionResults = ref<ExtensionSearchItem[]>([]);
-  const pluginName = ref("bilibili:kukemc");
   const extensionRepo = ref("");
   const extensionQuery = ref("");
   const error = ref<string | null>(null);
   const success = ref<string | null>(null);
-  const loading = reactive({ engines: false, plugins: false, extensions: false });
-  const pluginToRemove = ref<PluginInfo | null>(null);
+  const loading = reactive({ engines: false, extensions: false });
   const extensionToRemove = ref<ExtensionInfo | null>(null);
   const engineSecret = ref<EngineInfo | null>(null);
   const extensionSecret = ref<ExtensionInfo | null>(null);
@@ -112,37 +108,6 @@ export function useSources() {
     );
   }
 
-  async function loadPlugins(): Promise<void> {
-    loading.plugins = true;
-    try {
-      plugins.value = await serviceClient.sources.listPlugins();
-    } catch (cause) {
-      setError(cause);
-    } finally {
-      loading.plugins = false;
-    }
-  }
-
-  async function installPlugin(name = pluginName.value): Promise<void> {
-    if (!name.trim()) return;
-    await runAndRefresh(
-      () => serviceClient.sources.installPlugin(name.trim()),
-      `${name.trim()} 已安装。`,
-    );
-    await loadPlugins();
-  }
-
-  async function removePlugin(): Promise<void> {
-    const plugin = pluginToRemove.value;
-    pluginToRemove.value = null;
-    if (!plugin) return;
-    await runAndRefresh(
-      () => serviceClient.sources.removePlugin(plugin),
-      `${plugin.name} 已卸载。`,
-    );
-    await loadPlugins();
-  }
-
   async function loadExtensions(): Promise<void> {
     loading.extensions = true;
     try {
@@ -170,9 +135,17 @@ export function useSources() {
     if (!target) return;
     await runAndRefresh(
       () => serviceClient.sources.installExtension(target),
-      `${target} 已安装。重启网关后生效。`,
+      `${target} 已安装并执行后端 setup。重启网关后生效。`,
     );
     extensionRepo.value = "";
+    await loadExtensions();
+  }
+
+  async function runExtensionSetup(extension: ExtensionInfo): Promise<void> {
+    await runAndRefresh(
+      () => serviceClient.sources.setupExtension(extension),
+      `${extension.name || extension.id} 的后端 setup 已完成。重启网关后生效。`,
+    );
     await loadExtensions();
   }
 
@@ -182,7 +155,7 @@ export function useSources() {
     if (!extension) return;
     await runAndRefresh(
       () => serviceClient.sources.removeExtension(extension),
-      `${extension.id} 已卸载。`,
+      `${extension.id} 已卸载。重启网关后停止加载。`,
     );
     await loadExtensions();
   }
@@ -202,23 +175,20 @@ export function useSources() {
   }
 
   onMounted(() => {
-    void Promise.all([loadEngines(), loadPlugins(), loadExtensions()]);
+    void Promise.all([loadEngines(), loadExtensions()]);
   });
 
   return {
     appStatus,
     jobs,
     engines,
-    plugins,
     extensions,
     extensionResults,
-    pluginName,
     extensionRepo,
     extensionQuery,
     error,
     success,
     loading,
-    pluginToRemove,
     extensionToRemove,
     engineSecret,
     extensionSecret,
@@ -229,12 +199,10 @@ export function useSources() {
     changeSearxngRoute,
     saveGatewayRoute,
     saveEngineSecret,
-    loadPlugins,
-    installPlugin,
-    removePlugin,
     loadExtensions,
     searchExtensions,
     installExtension,
+    runExtensionSetup,
     removeExtension,
     saveExtensionSecret,
   };

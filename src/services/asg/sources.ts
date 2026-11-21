@@ -4,7 +4,6 @@ import type {
   EngineRouteDraft,
   ExtensionInfo,
   ExtensionSearchItem,
-  PluginInfo,
   SecretPayload,
 } from "../../types/cli";
 import type { AsgCommandRunner } from "./command";
@@ -82,34 +81,10 @@ export function createSourcesService(runner: AsgCommandRunner) {
       });
     },
 
-    async listPlugins(): Promise<PluginInfo[]> {
-      const result = await runner.run<{ plugins: PluginInfo[] }>(["plugins", "list"], {
-        label: "读取内置插件",
-      });
-      return result.plugins ?? [];
-    },
-
-    async installPlugin(name: string): Promise<void> {
-      await runner.run<unknown>(["plugins", "install", name], {
-        label: "安装内置插件",
-        visualState: "restarting",
-      });
-    },
-
-    async removePlugin(plugin: PluginInfo): Promise<void> {
-      await runner.run<unknown>(
-        ["plugins", "remove", plugin.channel_id || plugin.name],
-        {
-          label: `卸载 ${plugin.name}`,
-          visualState: "restarting",
-        },
-      );
-    },
-
     async listExtensions(): Promise<ExtensionInfo[]> {
       const result = await runner.run<{ extensions: ExtensionInfo[] }>(
         ["extensions", "list"],
-        { label: "读取第三方扩展" },
+        { label: "读取 V2 扩展" },
       );
       return result.extensions ?? [];
     },
@@ -119,7 +94,7 @@ export function createSourcesService(runner: AsgCommandRunner) {
       const result = await runner.run<{ results: ExtensionSearchItem[] }>(
         ["extensions", "search", ...(normalized ? [normalized] : [])],
         {
-          label: "搜索第三方扩展",
+          label: "搜索 GitHub 扩展",
           visualState: "loading",
         },
       );
@@ -128,15 +103,22 @@ export function createSourcesService(runner: AsgCommandRunner) {
 
     async installExtension(repo: string): Promise<void> {
       await runner.run<unknown>(["extensions", "install", repo], {
-        label: "安装第三方扩展",
-        visualState: "restarting",
+        label: "安装 V2 扩展",
+        visualState: "loading",
+      });
+    },
+
+    async setupExtension(extension: ExtensionInfo): Promise<void> {
+      await runner.run<unknown>(["extensions", "setup", extension.id], {
+        label: `运行 ${extension.name || extension.id} 后端 setup`,
+        visualState: "loading",
       });
     },
 
     async removeExtension(extension: ExtensionInfo): Promise<void> {
       await runner.run<unknown>(["extensions", "remove", extension.id], {
         label: `卸载扩展 ${extension.id}`,
-        visualState: "restarting",
+        visualState: "loading",
       });
     },
 
