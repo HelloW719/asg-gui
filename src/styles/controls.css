@@ -24,39 +24,72 @@ m3e-button.button {
   flex: 0 0 auto;
   isolation: isolate;
   border-radius: var(--radius-full);
-  background: var(--button-surface);
+  background: transparent;
   box-shadow: var(--button-raised-shadow);
-  --m3e-filled-button-container-color: color-mix(
-    in srgb,
-    var(--md-sys-color-primary-container) 86%,
-    transparent
-  );
-  --m3e-filled-button-label-text-color: var(--md-sys-color-on-primary-container);
-  --m3e-filled-button-icon-color: var(--md-sys-color-on-primary-container);
-  --m3e-tonal-button-container-color: color-mix(
-    in srgb,
-    var(--md-sys-color-secondary-container) 82%,
-    transparent
-  );
-  --m3e-tonal-button-label-text-color: var(--md-sys-color-on-secondary-container);
-  --m3e-tonal-button-icon-color: var(--md-sys-color-on-secondary-container);
+  color: var(--text);
+  --m3e-filled-button-container-color: transparent;
+  --m3e-filled-button-container-elevation: 0;
+  --m3e-filled-button-label-text-color: var(--text);
+  --m3e-filled-button-icon-color: var(--text);
+  --m3e-filled-button-hover-label-text-color: var(--text);
+  --m3e-filled-button-hover-icon-color: var(--text);
+  --m3e-filled-button-hover-state-layer-color: var(--text);
+  --m3e-filled-button-hover-container-elevation: 0;
+  --m3e-filled-button-focus-label-text-color: var(--text);
+  --m3e-filled-button-focus-icon-color: var(--text);
+  --m3e-filled-button-focus-state-layer-color: var(--text);
+  --m3e-filled-button-focus-container-elevation: 0;
+  --m3e-filled-button-pressed-label-text-color: var(--text);
+  --m3e-filled-button-pressed-icon-color: var(--text);
+  --m3e-filled-button-pressed-state-layer-color: var(--text);
+  --m3e-filled-button-pressed-container-elevation: 0;
+  --m3e-filled-button-disabled-container-color: transparent;
+  --m3e-filled-button-disabled-container-elevation: 0;
+  --m3e-filled-button-disabled-label-text-color: var(--text-soft);
+  --m3e-filled-button-disabled-icon-color: var(--text-soft);
+  --m3e-tonal-button-container-color: transparent;
+  --m3e-tonal-button-container-elevation: 0;
+  --m3e-tonal-button-label-text-color: var(--text);
+  --m3e-tonal-button-icon-color: var(--text);
+  --m3e-tonal-button-hover-label-text-color: var(--text);
+  --m3e-tonal-button-hover-icon-color: var(--text);
+  --m3e-tonal-button-hover-state-layer-color: var(--text);
+  --m3e-tonal-button-hover-container-elevation: 0;
+  --m3e-tonal-button-focus-label-text-color: var(--text);
+  --m3e-tonal-button-focus-icon-color: var(--text);
+  --m3e-tonal-button-focus-state-layer-color: var(--text);
+  --m3e-tonal-button-focus-container-elevation: 0;
+  --m3e-tonal-button-pressed-label-text-color: var(--text);
+  --m3e-tonal-button-pressed-icon-color: var(--text);
+  --m3e-tonal-button-pressed-state-layer-color: var(--text);
+  --m3e-tonal-button-pressed-container-elevation: 0;
+  --m3e-tonal-button-disabled-container-color: transparent;
+  --m3e-tonal-button-disabled-container-elevation: 0;
+  --m3e-tonal-button-disabled-label-text-color: var(--text-soft);
+  --m3e-tonal-button-disabled-icon-color: var(--text-soft);
+  --m3e-text-button-container-color: transparent;
+  --m3e-text-button-container-elevation: 0;
   --m3e-text-button-label-text-color: var(--text-soft);
   --m3e-text-button-icon-color: var(--text-soft);
+  --m3e-text-button-hover-label-text-color: var(--text);
+  --m3e-text-button-hover-icon-color: var(--text);
+  --m3e-text-button-hover-state-layer-color: var(--text);
+  --m3e-text-button-hover-container-elevation: 0;
+  --m3e-text-button-focus-label-text-color: var(--text);
+  --m3e-text-button-focus-icon-color: var(--text);
+  --m3e-text-button-focus-state-layer-color: var(--text);
+  --m3e-text-button-focus-container-elevation: 0;
+  --m3e-text-button-pressed-label-text-color: var(--text);
+  --m3e-text-button-pressed-icon-color: var(--text);
+  --m3e-text-button-pressed-state-layer-color: var(--text);
+  --m3e-text-button-pressed-container-elevation: 0;
+  --m3e-text-button-disabled-container-color: transparent;
+  --m3e-text-button-disabled-container-elevation: 0;
+  --m3e-text-button-disabled-label-text-color: var(--text-soft);
+  --m3e-text-button-disabled-icon-color: var(--text-soft);
   transition:
     box-shadow var(--motion-fast-spatial),
     transform var(--motion-fast-spatial);
-}
-
-m3e-button.button::before {
-  position: absolute;
-  inset: 1px;
-  z-index: 2;
-  border-radius: inherit;
-  box-shadow: var(--button-press-shadow);
-  content: "";
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--motion-fast-effects);
 }
 
 m3e-button.button[size="extra-small"] {
@@ -83,23 +116,17 @@ m3e-button.button[size="large"] {
 }
 
 m3e-button.button:hover:not([disabled]) {
-  background: var(--button-surface-hover);
   box-shadow: var(--button-hover-shadow);
   transform: translateY(-1px);
 }
 
-m3e-button.button:active:not([disabled]) {
-  background: var(--button-surface-hover);
-  box-shadow: var(--button-loading-shadow);
-  transform: translateY(1px);
-}
-
-m3e-button.button:active:not([disabled])::before {
-  opacity: 1;
+m3e-button.button:is(:active, :state(--pressed), :--pressed):not([disabled]) {
+  background: var(--button-pressed-surface);
+  box-shadow: var(--button-press-shadow);
+  transform: translateY(1px) scale(0.985);
 }
 
 m3e-button.button[disabled] {
-  background: var(--button-surface);
   box-shadow: var(--button-disabled-shadow);
   cursor: not-allowed;
   opacity: 0.52;
@@ -113,12 +140,8 @@ m3e-button.button[aria-busy="true"] {
   transform: none;
 }
 
-m3e-button.button--ghost {
-  background: var(--button-ghost-surface);
-}
-
-m3e-button.button--ghost:hover:not([disabled]) {
-  background: var(--button-ghost-surface-hover);
+m3e-button.button--primary {
+  --m3e-button-label-text-font-weight: 600;
 }
 
 m3e-button.button--ghost.button--danger-text {
@@ -126,16 +149,29 @@ m3e-button.button--ghost.button--danger-text {
   --m3e-text-button-icon-color: var(--danger);
   --m3e-text-button-hover-label-text-color: var(--danger);
   --m3e-text-button-hover-icon-color: var(--danger);
+  --m3e-text-button-hover-state-layer-color: var(--danger);
+  --m3e-text-button-focus-label-text-color: var(--danger);
+  --m3e-text-button-focus-icon-color: var(--danger);
+  --m3e-text-button-focus-state-layer-color: var(--danger);
+  --m3e-text-button-pressed-label-text-color: var(--danger);
+  --m3e-text-button-pressed-icon-color: var(--danger);
+  --m3e-text-button-pressed-state-layer-color: var(--danger);
 }
 
 m3e-button.button--danger {
-  --m3e-filled-button-container-color: color-mix(
-    in srgb,
-    var(--md-sys-color-error-container) 86%,
-    transparent
-  );
-  --m3e-filled-button-label-text-color: var(--md-sys-color-on-error-container);
-  --m3e-filled-button-icon-color: var(--md-sys-color-on-error-container);
+  --m3e-filled-button-label-text-color: var(--danger);
+  --m3e-filled-button-icon-color: var(--danger);
+  --m3e-filled-button-hover-label-text-color: var(--danger);
+  --m3e-filled-button-hover-icon-color: var(--danger);
+  --m3e-filled-button-hover-state-layer-color: var(--danger);
+  --m3e-filled-button-focus-label-text-color: var(--danger);
+  --m3e-filled-button-focus-icon-color: var(--danger);
+  --m3e-filled-button-focus-state-layer-color: var(--danger);
+  --m3e-filled-button-pressed-label-text-color: var(--danger);
+  --m3e-filled-button-pressed-icon-color: var(--danger);
+  --m3e-filled-button-pressed-state-layer-color: var(--danger);
+  --m3e-filled-button-disabled-label-text-color: var(--danger);
+  --m3e-filled-button-disabled-icon-color: var(--danger);
 }
 
 .button__icon {
@@ -161,28 +197,27 @@ m3e-button.button[aria-busy="true"] .button__icon {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--button-ghost-surface);
+  background: transparent;
   box-shadow: var(--button-raised-shadow);
   color: var(--text-soft);
   cursor: pointer;
   place-items: center;
   transition:
     box-shadow var(--motion-fast-spatial),
-    background-color var(--motion-fast-effects),
     color var(--motion-fast-effects),
     transform var(--motion-fast-spatial);
 }
 
 .icon-button:hover:not(:disabled) {
-  background: var(--button-ghost-surface-hover);
   box-shadow: var(--button-hover-shadow);
   color: var(--text);
   transform: translateY(-1px);
 }
 
 .icon-button:active:not(:disabled) {
+  background: var(--button-pressed-surface);
   box-shadow: var(--button-press-shadow);
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.96);
 }
 
 .icon-button:disabled {

@@ -145,8 +145,10 @@ stores -> services
   共享 `BaseButton` 封装 `m3e-button`，一体化服务板使用 `m3e-card`；tabs、
   dialog、表单和导航继续使用现有 Vue/Reka 实现。
 - `BaseButton` 必须把 primary/danger、secondary、ghost 分别映射到
-  filled、tonal、text，并保留 loading、disabled、键盘焦点和原生 click 行为。
-  通用按钮采用玻璃与新拟物结合的外层高光、投影和按压反馈，系统窗口按钮保持平面。
+  filled、tonal、text 以保留 M3E 的形状、尺寸、状态层、focus 和原生 click
+  行为，但不得继承其 primary、secondary 或 error 容器填色。按键表面保持透明，
+  直接承接父组件原色，只用外层高光、投影和按压反馈表达新拟物；错误色仅用于危险
+  操作的文字和图标。系统窗口按钮保持平面。
 - 页面不得直接调用 `jobClient`、桌面任务接口或原始
   `jobs.execute` / `jobs.stream`。
 - ASG 命令应放入 `src/services/asg/*`，页面通过 `useAsgServices` 或功能组合式函数

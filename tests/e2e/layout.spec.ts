@@ -112,6 +112,7 @@ test.describe("Neumorphic M3E button visual contract", () => {
           return [
             testId,
             {
+              backgroundColor: style.backgroundColor,
               backgroundImage: style.backgroundImage,
               boxShadow: style.boxShadow,
               transform: style.transform,
@@ -121,30 +122,43 @@ test.describe("Neumorphic M3E button visual contract", () => {
       ),
     );
     for (const style of Object.values(restingStyles)) {
-      expect(style.backgroundImage).not.toBe("none");
+      expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+      expect(style.backgroundImage).toBe("none");
       expect(style.boxShadow).not.toBe("none");
       expect(style.boxShadow).toContain("inset");
       expect(style.transform).toBe("none");
     }
-    expect(restingStyles["button-primary"].backgroundImage).not.toBe(
-      restingStyles["button-ghost"].backgroundImage,
-    );
 
     await expectButtonHeight(page, "button-compact", 34);
     await expectButtonHeight(page, "button-regular", 40);
     await expectButtonHeight(page, "button-large", 50);
 
-    const surfaceColors = await page.evaluate(() =>
-      ["button-primary", "button-secondary", "button-danger"].map((testId) => {
+    const buttonSurfaces = await page.evaluate(() =>
+      [
+        "button-primary",
+        "button-secondary",
+        "button-ghost",
+        "button-danger",
+      ].map((testId) => {
         const host = document.querySelector<HTMLElement>(
           `[data-testid="${testId}"]`,
         );
         const surface = host?.shadowRoot?.querySelector(".base");
-        return surface ? getComputedStyle(surface).backgroundColor : "";
+        const label = host?.shadowRoot?.querySelector(".label");
+        return {
+          backgroundColor: surface
+            ? getComputedStyle(surface).backgroundColor
+            : "",
+          labelColor: label ? getComputedStyle(label).color : "",
+        };
       }),
     );
-    expect(surfaceColors.every(Boolean)).toBe(true);
-    expect(new Set(surfaceColors).size).toBe(3);
+    expect([
+      ...new Set(buttonSurfaces.map((surface) => surface.backgroundColor)),
+    ]).toEqual(["rgba(0, 0, 0, 0)"]);
+    expect(buttonSurfaces[0].labelColor).toBe(buttonSurfaces[1].labelColor);
+    expect(buttonSurfaces[0].labelColor).not.toBe(buttonSurfaces[2].labelColor);
+    expect(buttonSurfaces[0].labelColor).not.toBe(buttonSurfaces[3].labelColor);
 
     await page.keyboard.press("Tab");
     await expect(primary).toBeFocused();
@@ -181,22 +195,29 @@ test.describe("Neumorphic M3E button visual contract", () => {
         primary.evaluate((element) => getComputedStyle(element).transform),
       )
       .not.toBe("none");
-    await page.mouse.down();
-    await page.waitForTimeout(180);
-    expect(
-      await primary.evaluate(
-        (element) => getComputedStyle(element).transform,
-      ),
-    ).not.toBe("none");
-    const pressedSurface = await primary.evaluate((element) => {
-      const style = getComputedStyle(element, "::before");
+    const hoveredStyles = await primary.evaluate((element) => {
+      const style = getComputedStyle(element);
       return {
-        opacity: style.opacity,
         boxShadow: style.boxShadow,
+        transform: style.transform,
       };
     });
-    expect(pressedSurface.opacity).toBe("1");
+    await page.mouse.down();
+    await page.waitForTimeout(180);
+    const pressedSurface = await primary.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        backgroundColor: style.backgroundColor,
+        boxShadow: style.boxShadow,
+        hasM3ePressedState: element.matches(":state(--pressed)"),
+        transform: style.transform,
+      };
+    });
+    expect(pressedSurface.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
     expect(pressedSurface.boxShadow).toContain("inset");
+    expect(pressedSurface.boxShadow).not.toBe(hoveredStyles.boxShadow);
+    expect(pressedSurface.hasM3ePressedState).toBe(true);
+    expect(pressedSurface.transform).not.toBe(hoveredStyles.transform);
     await page.screenshot({
       path: `test-results/button-contract-${size}-dark-pressed.png`,
       fullPage: true,

@@ -282,19 +282,22 @@ L4 全屏 backdrop-filter + 55% 染色 + 连续曲率边缘
 这里的“按键”是桌面 GUI 中的可点击动作，不表示实体键盘键或快捷键。`BaseButton`
 是通用按键唯一入口，封装 `m3e-button`：
 
-| 项目变体 | M3E 变体 | 语义 |
+| 项目变体 | M3E 结构 | 语义 |
 | --- | --- | --- |
-| `primary` | filled | 页面主操作 |
+| `primary` | filled | 页面主操作；较高字重与明确深度 |
 | `secondary` | tonal | 次要但明确的操作 |
 | `ghost` | text | 导航式、取消式或低强调操作 |
-| `danger` | filled + error | 破坏性确认 |
-| `ghost + danger-text` | text + error | 低强调危险入口 |
+| `danger` | filled | 破坏性确认；错误色只用于文字和图标 |
+| `ghost + danger-text` | text | 低强调危险入口；错误色只用于文字和图标 |
 
 尺寸为 compact `34px`、regular `40px`、large `50px`。按键圆角为 full，使用 M3E
-filled/tonal/text token。通用按键叠加玻璃与新拟物的外高光、柔和投影、hover 抬升和
-`--button-press-shadow` 定义的 pressed 凹陷；系统窗口按键保持平面。loading 时保持
-宽度，设置 `aria-busy` 并禁用；disabled 不响应 hover；键盘 focus 使用 strong focus
-和 2px 可见轮廓。
+filled/tonal/text 的形状、尺寸、排版、焦点和状态层结构，但不得继承其 primary、
+secondary 或 error 容器填色。按键容器保持透明，以显示父组件原有玻璃、状态或背景色；
+新拟物只通过外高光、柔和投影、hover 抬升和 `--button-press-shadow` 定义的 pressed
+凹陷表达形状。pressed 必须同时响应原生 `:active` 和 M3E 的 `--pressed` 自定义
+状态，使 M3E 形状变化与新拟物内凹在同一生命周期完成。非按键组件继续使用 M3E
+颜色与玻璃表面。系统窗口按键保持平面。loading 时保持宽度，设置 `aria-busy` 并
+禁用；disabled 不响应 hover；键盘 focus 使用 strong focus 和 2px 可见轮廓。
 
 新拟物只适用于 `BaseButton` 和代表普通操作的图标按键。卡片、面板、列表、对话框、
 导航项、Tabs、segmented control、开关和输入框不采用新拟物凸起或凹槽，继续遵循
