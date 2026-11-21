@@ -172,7 +172,7 @@ light:
 | `--surface-subtle` | 工具栏、标签容器和低层分段背景。 |
 | `--surface-sunken` | 日志行、诊断项和低层列表的凹陷背景。 |
 | `--surface-code` | 原始输出、Markdown 代码块。 |
-| `--surface-interaction` | 非按钮列表的 hover。 |
+| `--surface-interaction` | 非按键列表的 hover。 |
 | `--surface-selected` | 当前标签、当前导航、已选择分段。 |
 | `--surface-overlay` | 模态遮罩。 |
 
@@ -200,7 +200,7 @@ light:
 ## 3. Typography
 
 Epilogue 负责全部拉丁字符、数字和标题；中文回退字体承担 CJK。所有字号按桌面密度
-收敛，按钮和标签使用 0.65–0.9rem，正文使用 0.75–0.9rem，页面标题最大 2.55rem。
+收敛，按键和标签使用 0.65–0.9rem，正文使用 0.75–0.9rem，页面标题最大 2.55rem。
 状态页英雄标题可以在 2.7–5.2rem 之间响应式变化，单屏只能出现一个这种权重的标题。
 
 | 角色 | 字号 / 行高 | 字重 | 用途 |
@@ -211,7 +211,7 @@ Epilogue 负责全部拉丁字符、数字和标题；中文回退字体承担 C
 | Card title | `1.06–1.4rem` / `1.3` | 600 | 服务、维护动作、结果标题 |
 | Body | `0.82–0.9rem` / `1.6` | 400 | 说明、正文、状态解释 |
 | Compact body | `0.68–0.78rem` / `1.5` | 400 | 表格、列表、配置值 |
-| Label | `0.6–0.7rem` / `1.4` | 600 | 字段名、状态、工具按钮 |
+| Label | `0.6–0.7rem` / `1.4` | 600 | 字段名、状态、工具按键 |
 | Mono | `0.66–0.75rem` | 400 | 时间、路径、代码、延迟数值 |
 
 数字需要使用等宽字体和 `font-variant-numeric: tabular-nums`。Eyebrow 只用于帮助定位
@@ -269,7 +269,7 @@ L4 全屏 backdrop-filter + 55% 染色 + 连续曲率边缘
 | `--radius-md` | `14px` | 工具栏、独立列表容器、内部容器 |
 | `--radius-sm` | `10px` | 输入框、提示、能力块 |
 | `--radius-xs` | `8px` | 标签、代码块、细粒度 chip |
-| `--radius-full` | `999px` | 按钮、分段控件、状态 pill |
+| `--radius-full` | `999px` | 按键、分段控件、状态 pill |
 
 窗口圆角与系统装饰不叠加。Windows 关闭 DWM 自带圆角与边框；macOS、Windows、Linux
 均由页面绘制同一个 squircle 轮廓。旧 WebView 不支持 `corner-shape` 时才允许普通
@@ -277,9 +277,10 @@ L4 全屏 backdrop-filter + 55% 染色 + 连续曲率边缘
 
 ## 7. Components
 
-### 7.1 `BaseButton`
+### 7.1 动作按键 `BaseButton`
 
-`BaseButton` 是通用按钮唯一入口，封装 `m3e-button`：
+这里的“按键”是桌面 GUI 中的可点击动作，不表示实体键盘键或快捷键。`BaseButton`
+是通用按键唯一入口，封装 `m3e-button`：
 
 | 项目变体 | M3E 变体 | 语义 |
 | --- | --- | --- |
@@ -289,13 +290,13 @@ L4 全屏 backdrop-filter + 55% 染色 + 连续曲率边缘
 | `danger` | filled + error | 破坏性确认 |
 | `ghost + danger-text` | text + error | 低强调危险入口 |
 
-尺寸为 compact `34px`、regular `40px`、large `50px`。按钮圆角为 full，使用 M3E
-filled/tonal/text token。通用按钮叠加玻璃与新拟物的外高光、柔和投影、hover 抬升和
-`--button-press-shadow` 定义的 pressed 凹陷；系统窗口按钮保持平面。loading 时保持
+尺寸为 compact `34px`、regular `40px`、large `50px`。按键圆角为 full，使用 M3E
+filled/tonal/text token。通用按键叠加玻璃与新拟物的外高光、柔和投影、hover 抬升和
+`--button-press-shadow` 定义的 pressed 凹陷；系统窗口按键保持平面。loading 时保持
 宽度，设置 `aria-busy` 并禁用；disabled 不响应 hover；键盘 focus 使用 strong focus
 和 2px 可见轮廓。
 
-新拟物只适用于 `BaseButton` 和代表普通操作的图标按钮。卡片、面板、列表、对话框、
+新拟物只适用于 `BaseButton` 和代表普通操作的图标按键。卡片、面板、列表、对话框、
 导航项、Tabs、segmented control、开关和输入框不采用新拟物凸起或凹槽，继续遵循
 M3E 与玻璃层级规范。
 
@@ -343,7 +344,7 @@ M3E 与玻璃层级规范。
   color/motion、strong focus、density `-1`。
 - 使用 `--md-sys-color-*` 和本文定义的语义 token；页面只表达组合与例外。
 - 用色调、内高光、分隔线建立层级；阴影只帮助浮层和交互反馈。
-- 新拟物只用于按钮及其 hover、pressed、disabled 和 loading 反馈。
+- 新拟物只用于按键及其 hover、pressed、disabled 和 loading 反馈。
 - 为深浅主题、减少动态、减少透明和 960×640 分别验证。
 - 浅色模式的卡片层固定使用上述中性白灰琉璃 token；主题生成的浅青色只用于卡片之外的
   primary、选择和状态语义。
