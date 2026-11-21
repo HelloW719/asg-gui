@@ -156,6 +156,10 @@ stores -> services
 ## 样式与玻璃效果
 
 - 全局样式只放在 `tokens.css`、`base.css`、`controls.css` 和 `shell.css`。
+- `design.md` 是最终视觉契约；`tokens.css` 负责把其中颜色、字阶、布局、层级、
+  形状和组件规则映射为运行时 token。两者必须在同一次设计变更中同步。
+- 页面和功能样式优先使用 `--md-sys-color-*` 与 `--surface-*`、`--outline-*`、
+  `--field-*` 等语义 token；原始色值只允许集中在全局 token 或 L1/L4 玻璃例外中。
 - 页面样式留在对应 feature 目录，禁止在功能样式中覆盖其他页面的通用选择器。
 - 整个应用只能有一层全屏毛玻璃：`GlassShell` 中的 `.glass-frost-layer`。
 - 内容面板使用染色、边框和内阴影，不能分别再次添加 `backdrop-filter`。

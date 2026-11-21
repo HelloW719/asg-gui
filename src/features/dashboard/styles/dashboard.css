@@ -51,9 +51,9 @@
   align-items: center;
   gap: 7px;
   padding: 6px 10px;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--outline-subtle);
   border-radius: 99px;
-  background: rgba(0, 0, 0, 0.07);
+  background: var(--surface-sunken);
   color: var(--sage-strong);
   font-size: 0.68rem;
   font-weight: 700;
@@ -145,29 +145,21 @@
   display: block;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 28%, transparent);
+  border: 1px solid var(--surface-card-border);
   border-radius: var(--radius-xl);
-  background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--md-sys-color-on-surface) 7%, transparent),
-      transparent 42%,
-      color-mix(in srgb, var(--md-sys-color-shadow) 8%, transparent)
-    ),
-    color-mix(in srgb, var(--md-sys-color-surface-container-high) 46%, transparent);
+  background: var(--surface-card);
   box-shadow:
-    inset 1px 1px 0 color-mix(in srgb, var(--md-sys-color-on-surface) 9%, transparent),
-    inset -1px -1px 0 color-mix(in srgb, var(--md-sys-color-shadow) 18%, transparent);
+    inset 1px 1px 0 var(--surface-card-highlight-top),
+    inset -1px -1px 0 var(--surface-card-highlight-bottom);
 }
 
 :root[data-theme="light"] .service-board {
   --m3e-filled-card-container-color: rgba(232, 244, 245, 0.18);
+}
 
-  border-color: var(--light-card-border);
-  background: var(--light-card-surface);
-  box-shadow:
-    inset 1px 1px 0 var(--light-card-highlight),
-    inset -1px -1px 0 var(--light-card-shadow);
+:root[data-theme="light"] .status-summary {
+  border-color: var(--surface-card-border);
+  background: var(--surface-card);
 }
 
 .service-grid {
@@ -385,7 +377,7 @@
   gap: 9px;
   padding: 7px 8px;
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--surface-sunken);
 }
 
 .log-preview__line span {
@@ -415,7 +407,7 @@
   gap: 9px;
   padding: 8px;
   border-radius: 9px;
-  background: rgba(0, 0, 0, 0.07);
+  background: var(--surface-sunken);
 }
 
 .diagnostic-item > span {
@@ -483,8 +475,8 @@
 }
 
 .status-pill {
-  border-color: rgba(139, 225, 210, 0.16);
-  background: rgba(90, 209, 192, 0.075);
+  border-color: color-mix(in srgb, var(--sage) 22%, transparent);
+  background: var(--surface-selected);
   color: var(--sage-strong);
   font-size: 0.64rem;
   letter-spacing: 0.04em;
@@ -493,15 +485,15 @@
 .status-pill--failed,
 .status-pill--degraded,
 .status-pill--disconnected {
-  border-color: rgba(239, 119, 116, 0.2);
-  background: rgba(239, 119, 116, 0.075);
+  border-color: color-mix(in srgb, var(--danger) 22%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
 }
 
 .status-pill--starting,
 .status-pill--restarting,
 .status-pill--loading {
-  border-color: rgba(226, 189, 98, 0.2);
-  background: rgba(226, 189, 98, 0.075);
+  border-color: color-mix(in srgb, var(--ochre) 22%, transparent);
+  background: color-mix(in srgb, var(--ochre) 8%, transparent);
 }
 
 .status-summary {
@@ -510,10 +502,9 @@
   gap: 0;
   align-self: stretch;
   margin: 0;
-  border: 1px solid rgba(224, 237, 249, 0.075);
+  border: 1px solid var(--outline-subtle);
   border-radius: var(--radius-lg);
-  background:
-    linear-gradient(145deg, rgba(8, 18, 29, 0.14), rgba(255, 255, 255, 0.018));
+  background: var(--surface-subtle);
 }
 
 .status-summary div {
@@ -523,7 +514,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 17px 18px;
-  border-bottom: 1px solid rgba(224, 237, 249, 0.065);
+  border-bottom: 1px solid var(--surface-card-divider);
 }
 
 .status-summary div:last-child {
@@ -564,26 +555,8 @@
   border-radius: var(--radius-lg);
 }
 
-.glass-surface.content-card {
-  background:
-    linear-gradient(145deg, rgba(8, 18, 29, 0.12), rgba(255, 255, 255, 0.018));
-}
-
 .log-preview__line {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-:root[data-theme="light"] .status-summary,
-:root[data-theme="light"] .glass-surface.content-card {
-  background: var(--light-card-surface);
-}
-
-:root[data-theme="light"] .status-summary {
-  border-color: var(--light-card-border);
-}
-
-:root[data-theme="light"] .status-summary div {
-  border-bottom-color: var(--light-card-divider);
+  background: var(--surface-sunken);
 }
 
 :root[data-reduced-transparency="true"] .service-board {

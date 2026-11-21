@@ -14,7 +14,7 @@
 .field--hero input {
   height: 52px;
   padding: 0 16px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   font-size: 1rem;
 }
 
@@ -42,9 +42,9 @@
 .result-panel {
   margin-top: 14px;
   padding: 22px;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--surface-card-border);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--glass-bg-strong) 72%, transparent);
+  background: var(--surface-card);
 }
 
 .result-panel__header {
@@ -60,7 +60,7 @@
   margin: 0;
   padding: 16px;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.14);
+  background: var(--surface-code);
   color: var(--text-soft);
   font-size: 0.72rem;
   line-height: 1.65;
@@ -94,16 +94,16 @@
 
 .markdown-body code {
   padding: 2px 5px;
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-xs);
+  background: var(--surface-sunken);
   font-size: 0.9em;
 }
 
 .markdown-body pre {
   overflow: auto;
   padding: 12px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.13);
+  border-radius: var(--radius-sm);
+  background: var(--surface-code);
 }
 
 .markdown-body blockquote {
@@ -124,13 +124,13 @@
 }
 
 .field--hero input {
-  border-radius: 12px;
-  background: rgba(5, 13, 23, 0.27);
+  border-radius: var(--radius-md);
+  background: var(--field-bg);
 }
 
 .result-panel {
-  border-color: rgba(224, 237, 249, 0.075);
-  background: rgba(255, 255, 255, 0.025);
+  border-color: var(--surface-card-border);
+  background: var(--surface-card);
   backdrop-filter: none;
 }
 

@@ -118,11 +118,11 @@
 }
 
 .setup-orbit {
-  border-color: rgba(124, 233, 213, 0.22);
+  border-color: color-mix(in srgb, var(--md-sys-color-primary) 28%, transparent);
 }
 
 .setup-orbit span {
-  border-color: rgba(245, 196, 81, 0.35);
+  border-color: color-mix(in srgb, var(--md-sys-color-tertiary) 40%, transparent);
 }
 
 .setup-orbit span:nth-child(2) {
