@@ -552,18 +552,11 @@ m3e-theme {
 }
 
 :root[data-theme="light"] .glass-surface {
-  border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 34%, transparent);
-  background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent),
-      transparent 54%,
-      color-mix(in srgb, var(--md-sys-color-shadow) 5%, transparent)
-    ),
-    color-mix(in srgb, var(--md-sys-color-surface-container) 48%, transparent);
+  border-color: var(--light-card-border);
+  background: var(--light-card-surface);
   box-shadow:
-    inset 1px 1px 0 color-mix(in srgb, var(--md-sys-color-surface-bright) 42%, transparent),
-    inset -1px -1px 0 color-mix(in srgb, var(--md-sys-color-shadow) 7%, transparent);
+    inset 1px 1px 0 var(--light-card-highlight),
+    inset -1px -1px 0 var(--light-card-shadow);
 }
 .app-loading {
   display: flex;
@@ -659,8 +652,7 @@ m3e-theme {
 :root[data-theme="light"] .status-summary,
 
 :root[data-theme="light"] .glass-surface.content-card {
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.12));
+  background: var(--light-card-surface);
 }
 
 @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {

@@ -80,6 +80,18 @@
   --glass-border: rgba(36, 54, 72, 0.12);
   --glass-highlight: rgba(255, 255, 255, 0.72);
   --glass-shadow: rgba(44, 63, 82, 0.12);
+  --light-card-surface:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.26),
+      rgba(243, 249, 249, 0.06) 54%,
+      rgba(43, 86, 88, 0.025)
+    ),
+    rgba(232, 244, 245, 0.18);
+  --light-card-border: rgba(42, 91, 93, 0.16);
+  --light-card-highlight: rgba(255, 255, 255, 0.62);
+  --light-card-shadow: rgba(42, 72, 77, 0.06);
+  --light-card-divider: rgba(42, 91, 93, 0.13);
   --field-bg: rgba(255, 255, 255, 0.34);
   --field-border: rgba(39, 57, 75, 0.13);
   --line: rgba(39, 57, 75, 0.09);

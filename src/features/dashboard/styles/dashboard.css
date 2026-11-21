@@ -160,6 +160,16 @@
     inset -1px -1px 0 color-mix(in srgb, var(--md-sys-color-shadow) 18%, transparent);
 }
 
+:root[data-theme="light"] .service-board {
+  --m3e-filled-card-container-color: rgba(232, 244, 245, 0.18);
+
+  border-color: var(--light-card-border);
+  background: var(--light-card-surface);
+  box-shadow:
+    inset 1px 1px 0 var(--light-card-highlight),
+    inset -1px -1px 0 var(--light-card-shadow);
+}
+
 .service-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -565,8 +575,15 @@
 
 :root[data-theme="light"] .status-summary,
 :root[data-theme="light"] .glass-surface.content-card {
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.12));
+  background: var(--light-card-surface);
+}
+
+:root[data-theme="light"] .status-summary {
+  border-color: var(--light-card-border);
+}
+
+:root[data-theme="light"] .status-summary div {
+  border-bottom-color: var(--light-card-divider);
 }
 
 :root[data-reduced-transparency="true"] .service-board {
