@@ -18,6 +18,7 @@
 }
 
 m3e-button.button {
+  position: relative;
   display: inline-flex;
   min-width: 0;
   flex: 0 0 auto;
@@ -47,17 +48,24 @@ m3e-button.button {
 }
 
 m3e-button.button[size="extra-small"] {
-  --m3e-button-extra-small-container-height: 34px;
+  /* M3E at density -1 subtracts 4px from the configured container height. */
+  --m3e-button-extra-small-container-height: calc(
+    var(--button-height-compact) + 4px
+  );
   --m3e-button-extra-small-label-text-font-size: 0.72rem;
 }
 
 m3e-button.button[size="small"] {
-  --m3e-button-small-container-height: 40px;
+  --m3e-button-small-container-height: calc(
+    var(--button-height-regular) + 4px
+  );
   --m3e-button-small-label-text-font-size: 0.76rem;
 }
 
 m3e-button.button[size="large"] {
-  --m3e-button-large-container-height: 50px;
+  --m3e-button-large-container-height: calc(
+    var(--button-height-large) + 4px
+  );
   --m3e-button-large-label-text-font-size: 0.9rem;
   --m3e-button-large-icon-size: 20px;
 }
@@ -106,6 +114,15 @@ m3e-button.button--danger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+m3e-button.button[aria-busy="true"] .button__icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  z-index: 2;
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .icon-button {

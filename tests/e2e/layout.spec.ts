@@ -22,6 +22,17 @@ async function expectIntegratedWorkspace(
   ).toBe(true);
 }
 
+async function expectButtonHeight(
+  page: Page,
+  testId: string,
+  height: number,
+): Promise<void> {
+  const actual = await page
+    .getByTestId(testId)
+    .evaluate((element) => element.getBoundingClientRect().height);
+  expect(Math.abs(actual - height)).toBeLessThanOrEqual(0.5);
+}
+
 test("renders the desktop bridge requirement without overflow", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("当前是浏览器预览")).toBeVisible();
@@ -54,6 +65,120 @@ test("switches between dark and light appearance", async ({ page }) => {
       ),
     )
     .toBe(expectedScheme);
+});
+
+test.describe("M3E button visual contract", () => {
+  test.use({ colorScheme: "dark" });
+
+  test("keeps variants, focus, states and themes aligned", async ({ page }) => {
+    await page.goto("/tests/e2e/button-visual.html?scheme=dark");
+    const primary = page.getByTestId("button-primary");
+    const secondary = page.getByTestId("button-secondary");
+    const ghost = page.getByTestId("button-ghost");
+    const danger = page.getByTestId("button-danger");
+    const dangerText = page.getByTestId("button-danger-text");
+    const disabled = page.getByTestId("button-disabled");
+    const loading = page.getByTestId("button-loading");
+
+    await expect(primary).toBeVisible();
+    await expect(primary).toHaveAttribute("variant", "filled");
+    await expect(primary).toHaveClass(/button--primary/);
+    await expect(secondary).toHaveAttribute("variant", "tonal");
+    await expect(secondary).toHaveClass(/button--secondary/);
+    await expect(ghost).toHaveAttribute("variant", "text");
+    await expect(ghost).toHaveClass(/button--ghost/);
+    await expect(danger).toHaveAttribute("variant", "filled");
+    await expect(danger).toHaveClass(/button--danger/);
+    await expect(dangerText).toHaveAttribute("variant", "text");
+    await expect(dangerText).toHaveClass(/button--ghost/);
+    await expect(dangerText).toHaveClass(/button--danger-text/);
+
+    await expectButtonHeight(page, "button-compact", 34);
+    await expectButtonHeight(page, "button-regular", 40);
+    await expectButtonHeight(page, "button-large", 50);
+
+    const surfaceColors = await page.evaluate(() =>
+      ["button-primary", "button-secondary", "button-danger"].map((testId) => {
+        const host = document.querySelector<HTMLElement>(
+          `[data-testid="${testId}"]`,
+        );
+        const surface = host?.shadowRoot?.querySelector(".base");
+        return surface ? getComputedStyle(surface).backgroundColor : "";
+      }),
+    );
+    expect(surfaceColors.every(Boolean)).toBe(true);
+    expect(new Set(surfaceColors).size).toBe(3);
+
+    await page.keyboard.press("Tab");
+    await expect(primary).toBeFocused();
+    expect(
+      await primary.evaluate((element) => {
+        const focusRing =
+          element.shadowRoot?.querySelector<HTMLElement>(".focus-ring");
+        const outline =
+          focusRing?.shadowRoot?.querySelector<HTMLElement>(".outline");
+        return outline?.classList.contains("visible") ?? false;
+      }),
+    ).toBe(true);
+    const size =
+      test.info().project.name === "minimum-window" ? "minimum" : "desktop";
+    await page.screenshot({
+      path: `test-results/button-contract-${size}-dark-focus.png`,
+      fullPage: true,
+    });
+
+    const primaryBox = await primary.boundingBox();
+    expect(primaryBox).not.toBeNull();
+    if (!primaryBox) return;
+    await page.mouse.move(
+      primaryBox.x + primaryBox.width / 2,
+      primaryBox.y + primaryBox.height / 2,
+    );
+    await page.mouse.down();
+    await page.waitForTimeout(180);
+    expect(
+      await primary.evaluate(
+        (element) => getComputedStyle(element).transform,
+      ),
+    ).not.toBe("none");
+    await page.screenshot({
+      path: `test-results/button-contract-${size}-dark-pressed.png`,
+      fullPage: true,
+    });
+    await page.mouse.up();
+
+    await disabled.hover();
+    await expect(disabled).toHaveAttribute("disabled", "");
+    expect(
+      await disabled.evaluate((element) => getComputedStyle(element).transform),
+    ).toBe("none");
+
+    const loadingWidthBefore = await loading.evaluate(
+      (element) => element.getBoundingClientRect().width,
+    );
+    await page.getByTestId("button-toggle-loading").click();
+    await expect(loading).toHaveAttribute("aria-busy", "true");
+    await expect(loading).toHaveAttribute("disabled", "");
+    const loadingWidthAfter = await loading.evaluate(
+      (element) => element.getBoundingClientRect().width,
+    );
+    expect(Math.abs(loadingWidthAfter - loadingWidthBefore)).toBeLessThanOrEqual(
+      0.5,
+    );
+    await expect(loading.locator(".spin")).toBeVisible();
+    await page.screenshot({
+      path: `test-results/button-contract-${size}-dark-states.png`,
+      fullPage: true,
+    });
+
+    await page.goto("/tests/e2e/button-visual.html?scheme=light");
+    await expect(page.getByTestId("button-primary")).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    await page.screenshot({
+      path: `test-results/button-contract-${size}-light.png`,
+      fullPage: true,
+    });
+  });
 });
 
 test("starts native window dragging from titlebar content only", async ({

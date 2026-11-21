@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { LoaderCircle } from "@lucide/vue";
 
 const props = withDefaults(
@@ -43,10 +43,28 @@ const m3eSize = computed(() => {
       return "small";
   }
 });
+
+const buttonElement = ref<HTMLElement | null>(null);
+const loadingWidth = ref<string>();
+
+watch(
+  () => props.loading,
+  (loading) => {
+    if (!loading) {
+      loadingWidth.value = undefined;
+      return;
+    }
+
+    const width = buttonElement.value?.getBoundingClientRect().width ?? 0;
+    loadingWidth.value = width > 0 ? `${width}px` : undefined;
+  },
+  { flush: "sync" },
+);
 </script>
 
 <template>
   <m3e-button
+    ref="buttonElement"
     :type="type"
     class="button neu-button"
     :variant="m3eVariant"
@@ -57,6 +75,7 @@ const m3eSize = computed(() => {
     ]"
     :disabled="disabled || loading"
     :aria-busy="loading || undefined"
+    :style="{ width: loadingWidth }"
   >
     <span v-if="loading" slot="icon" class="button__icon">
       <LoaderCircle class="spin" :size="15" />
