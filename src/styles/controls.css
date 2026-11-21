@@ -22,7 +22,10 @@ m3e-button.button {
   display: inline-flex;
   min-width: 0;
   flex: 0 0 auto;
+  isolation: isolate;
   border-radius: var(--radius-full);
+  background: var(--button-surface);
+  box-shadow: var(--button-raised-shadow);
   --m3e-filled-button-container-color: color-mix(
     in srgb,
     var(--md-sys-color-primary-container) 86%,
@@ -39,17 +42,14 @@ m3e-button.button {
   --m3e-tonal-button-icon-color: var(--md-sys-color-on-secondary-container);
   --m3e-text-button-label-text-color: var(--text-soft);
   --m3e-text-button-icon-color: var(--text-soft);
-  filter:
-    drop-shadow(0 8px 14px color-mix(in srgb, var(--md-sys-color-shadow) 24%, transparent))
-    drop-shadow(0 -2px 4px color-mix(in srgb, var(--md-sys-color-surface-bright) 18%, transparent));
   transition:
-    filter var(--motion-fast-spatial),
+    box-shadow var(--motion-fast-spatial),
     transform var(--motion-fast-spatial);
 }
 
 m3e-button.button::before {
   position: absolute;
-  inset: 0;
+  inset: 1px;
   z-index: 2;
   border-radius: inherit;
   box-shadow: var(--button-press-shadow);
@@ -83,17 +83,15 @@ m3e-button.button[size="large"] {
 }
 
 m3e-button.button:hover:not([disabled]) {
-  filter:
-    drop-shadow(0 11px 18px color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent))
-    drop-shadow(0 -2px 5px color-mix(in srgb, var(--md-sys-color-surface-bright) 22%, transparent));
+  background: var(--button-surface-hover);
+  box-shadow: var(--button-hover-shadow);
   transform: translateY(-1px);
 }
 
 m3e-button.button:active:not([disabled]) {
-  filter:
-    drop-shadow(0 3px 6px color-mix(in srgb, var(--md-sys-color-shadow) 24%, transparent))
-    drop-shadow(0 -1px 2px color-mix(in srgb, var(--md-sys-color-surface-bright) 15%, transparent));
-  transform: translateY(0);
+  background: var(--button-surface-hover);
+  box-shadow: var(--button-loading-shadow);
+  transform: translateY(1px);
 }
 
 m3e-button.button:active:not([disabled])::before {
@@ -101,12 +99,26 @@ m3e-button.button:active:not([disabled])::before {
 }
 
 m3e-button.button[disabled] {
+  background: var(--button-surface);
+  box-shadow: var(--button-disabled-shadow);
   cursor: not-allowed;
-  filter: none;
+  opacity: 0.52;
+  transform: none;
+}
+
+m3e-button.button[aria-busy="true"] {
+  box-shadow: var(--button-loading-shadow);
+  cursor: progress;
+  opacity: 1;
+  transform: none;
 }
 
 m3e-button.button--ghost {
-  filter: none;
+  background: var(--button-ghost-surface);
+}
+
+m3e-button.button--ghost:hover:not([disabled]) {
+  background: var(--button-ghost-surface-hover);
 }
 
 m3e-button.button--ghost.button--danger-text {
@@ -142,38 +154,42 @@ m3e-button.button[aria-busy="true"] .button__icon {
 }
 
 .icon-button {
+  position: relative;
   display: inline-grid;
   width: 34px;
   height: 34px;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 22%, transparent);
+  border: 0;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 42%, transparent);
-  box-shadow:
-    inset 1px 1px 0 color-mix(in srgb, var(--md-sys-color-on-surface) 10%, transparent),
-    inset -1px -1px 0 color-mix(in srgb, var(--md-sys-color-shadow) 22%, transparent),
-    0 6px 14px color-mix(in srgb, var(--md-sys-color-shadow) 18%, transparent);
+  background: var(--button-ghost-surface);
+  box-shadow: var(--button-raised-shadow);
   color: var(--text-soft);
   cursor: pointer;
   place-items: center;
   transition:
-    background-color var(--motion-fast-effects),
     box-shadow var(--motion-fast-spatial),
+    background-color var(--motion-fast-effects),
     color var(--motion-fast-effects),
     transform var(--motion-fast-spatial);
 }
 
-.icon-button:hover {
-  background: color-mix(in srgb, var(--md-sys-color-secondary-container) 36%, transparent);
+.icon-button:hover:not(:disabled) {
+  background: var(--button-ghost-surface-hover);
+  box-shadow: var(--button-hover-shadow);
   color: var(--text);
   transform: translateY(-1px);
 }
 
-.icon-button:active {
-  box-shadow:
-    inset 2px 2px 5px color-mix(in srgb, var(--md-sys-color-shadow) 24%, transparent),
-    inset -1px -1px 0 color-mix(in srgb, var(--md-sys-color-on-surface) 7%, transparent);
-  transform: translateY(0);
+.icon-button:active:not(:disabled) {
+  box-shadow: var(--button-press-shadow);
+  transform: translateY(1px);
+}
+
+.icon-button:disabled {
+  box-shadow: var(--button-disabled-shadow);
+  cursor: not-allowed;
+  opacity: 0.52;
+  transform: none;
 }
 .action-row {
   display: flex;

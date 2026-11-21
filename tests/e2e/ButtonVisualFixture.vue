@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { Search, Save, Trash2 } from "@lucide/vue";
+import { RefreshCw, Search, Save, Trash2 } from "@lucide/vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 
 defineProps<{
@@ -22,8 +22,8 @@ const loading = ref(false);
     <div class="app-root button-fixture">
       <header>
         <span class="eyebrow">Visual contract fixture</span>
-        <h1>M3E Button States</h1>
-        <p>用于 E2E 验收按钮变体、尺寸、焦点、按下、禁用、加载和浅色主题。</p>
+        <h1>Neumorphic Button States</h1>
+        <p>用于 E2E 验收新拟物按钮变体、尺寸、焦点、按下、禁用、加载和浅色主题。</p>
       </header>
 
       <section class="button-contract-panel">
@@ -63,6 +63,18 @@ const loading = ref(false);
           <BaseButton danger-text data-testid="button-danger-text">
             停止
           </BaseButton>
+        </div>
+
+        <div class="button-contract-row">
+          <span>Icon</span>
+          <button
+            class="icon-button"
+            type="button"
+            aria-label="刷新按钮样式"
+            data-testid="icon-button"
+          >
+            <RefreshCw :size="16" />
+          </button>
         </div>
       </section>
 

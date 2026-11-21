@@ -74,7 +74,7 @@ test("switches between dark and light appearance", async ({ page }) => {
     .toBe(expectedScheme);
 });
 
-test.describe("M3E button visual contract", () => {
+test.describe("Neumorphic M3E button visual contract", () => {
   test.use({ colorScheme: "dark" });
 
   test("keeps variants, focus, states and themes aligned", async ({ page }) => {
@@ -84,6 +84,7 @@ test.describe("M3E button visual contract", () => {
     const ghost = page.getByTestId("button-ghost");
     const danger = page.getByTestId("button-danger");
     const dangerText = page.getByTestId("button-danger-text");
+    const icon = page.getByTestId("icon-button");
     const disabled = page.getByTestId("button-disabled");
     const loading = page.getByTestId("button-loading");
 
@@ -99,6 +100,35 @@ test.describe("M3E button visual contract", () => {
     await expect(dangerText).toHaveAttribute("variant", "text");
     await expect(dangerText).toHaveClass(/button--ghost/);
     await expect(dangerText).toHaveClass(/button--danger-text/);
+    await expect(icon).toBeVisible();
+    await expect(icon).toHaveClass(/icon-button/);
+
+    const restingStyles = await page.evaluate(() =>
+      Object.fromEntries(
+        ["button-primary", "button-ghost", "icon-button"].map((testId) => {
+          const style = getComputedStyle(
+            document.querySelector<HTMLElement>(`[data-testid="${testId}"]`)!,
+          );
+          return [
+            testId,
+            {
+              backgroundImage: style.backgroundImage,
+              boxShadow: style.boxShadow,
+              transform: style.transform,
+            },
+          ];
+        }),
+      ),
+    );
+    for (const style of Object.values(restingStyles)) {
+      expect(style.backgroundImage).not.toBe("none");
+      expect(style.boxShadow).not.toBe("none");
+      expect(style.boxShadow).toContain("inset");
+      expect(style.transform).toBe("none");
+    }
+    expect(restingStyles["button-primary"].backgroundImage).not.toBe(
+      restingStyles["button-ghost"].backgroundImage,
+    );
 
     await expectButtonHeight(page, "button-compact", 34);
     await expectButtonHeight(page, "button-regular", 40);
@@ -141,6 +171,16 @@ test.describe("M3E button visual contract", () => {
       primaryBox.x + primaryBox.width / 2,
       primaryBox.y + primaryBox.height / 2,
     );
+    await expect
+      .poll(() =>
+        primary.evaluate((element) => getComputedStyle(element).boxShadow),
+      )
+      .not.toBe(restingStyles["button-primary"].boxShadow);
+    await expect
+      .poll(() =>
+        primary.evaluate((element) => getComputedStyle(element).transform),
+      )
+      .not.toBe("none");
     await page.mouse.down();
     await page.waitForTimeout(180);
     expect(
@@ -168,6 +208,11 @@ test.describe("M3E button visual contract", () => {
     expect(
       await disabled.evaluate((element) => getComputedStyle(element).transform),
     ).toBe("none");
+    expect(
+      await disabled.evaluate(
+        (element) => getComputedStyle(element).boxShadow,
+      ),
+    ).not.toBe("none");
 
     const loadingWidthBefore = await loading.evaluate(
       (element) => element.getBoundingClientRect().width,
@@ -181,6 +226,17 @@ test.describe("M3E button visual contract", () => {
     expect(Math.abs(loadingWidthAfter - loadingWidthBefore)).toBeLessThanOrEqual(
       0.5,
     );
+    expect(
+      await loading.evaluate((element) => ({
+        boxShadow: getComputedStyle(element).boxShadow,
+        cursor: getComputedStyle(element).cursor,
+      })),
+    ).toMatchObject({ cursor: "progress" });
+    expect(
+      await loading.evaluate(
+        (element) => getComputedStyle(element).boxShadow,
+      ),
+    ).not.toBe("none");
     await expect(loading.locator(".spin")).toBeVisible();
     await page.screenshot({
       path: `test-results/button-contract-${size}-dark-states.png`,
@@ -360,6 +416,13 @@ test("renders a continuous squircle window without a border", async ({
       "0px 0px 0px 1px",
     );
   }
+  expect(
+    await page
+      .locator(".window-controls button")
+      .evaluateAll((buttons) =>
+        buttons.map((button) => getComputedStyle(button).boxShadow),
+      ),
+  ).toEqual(["none", "none", "none"]);
 });
 
 test("uses the shared shape scale across feature surfaces", async ({ page }) => {
