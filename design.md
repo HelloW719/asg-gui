@@ -265,10 +265,10 @@ L4 全屏 backdrop-filter + 55% 染色 + 连续曲率边缘
 | `--window-radius` | `32px` + `corner-shape: squircle` | L1–L4、`.app-frame` 共享轮廓 |
 | `--radius-xl` | `24px` | 一体化服务板、主状态面板 |
 | `--radius-lg` | `18px` | 常规内容卡、抽屉、日志面板 |
-| `--radius-md` | `14px` | 工具栏、列表行、内部容器 |
+| `--radius-md` | `14px` | 工具栏、独立列表容器、内部容器 |
 | `--radius-sm` | `10px` | 输入框、提示、能力块 |
 | `--radius-xs` | `8px` | 标签、代码块、细粒度 chip |
-| Full | `999px` | 按钮、分段控件、状态 pill |
+| `--radius-full` | `999px` | 按钮、分段控件、状态 pill |
 
 窗口圆角与系统装饰不叠加。Windows 关闭 DWM 自带圆角与边框；macOS、Windows、Linux
 均由页面绘制同一个 squircle 轮廓。旧 WebView 不支持 `corner-shape` 时才允许普通

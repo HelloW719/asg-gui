@@ -22,7 +22,7 @@ m3e-button.button {
   display: inline-flex;
   min-width: 0;
   flex: 0 0 auto;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   --m3e-filled-button-container-color: color-mix(
     in srgb,
     var(--md-sys-color-primary-container) 86%,
@@ -238,7 +238,7 @@ textarea {
   width: 100%;
   min-width: 0;
   border: 1px solid var(--field-border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   outline: 0;
   background: var(--field-bg);
   color: var(--text);
@@ -326,7 +326,7 @@ select option {
   width: 38px;
   height: 22px;
   border: 1px solid var(--field-border);
-  border-radius: 99px;
+  border-radius: var(--radius-full);
   background: var(--field-bg);
   cursor: pointer;
   transition: background-color var(--motion-fast-effects);
@@ -361,7 +361,7 @@ select option {
   gap: 3px;
   margin-bottom: 14px;
   padding: 4px;
-  border-radius: 99px;
+  border-radius: var(--radius-full);
 }
 
 .tab-trigger {
@@ -370,7 +370,7 @@ select option {
   gap: 6px;
   padding: 8px 13px;
   border: 0;
-  border-radius: 99px;
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-faint);
   cursor: pointer;
@@ -390,7 +390,7 @@ select option {
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--glass-border);
-  border-radius: 99px;
+  border-radius: var(--radius-full);
   background: var(--field-bg);
 }
 
@@ -398,7 +398,7 @@ select option {
   min-height: 28px;
   padding: 4px 10px;
   border: 0;
-  border-radius: 99px;
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-faint);
   cursor: pointer;
@@ -436,7 +436,7 @@ select option {
   gap: 7px;
   padding: 0 9px;
   border: 1px solid var(--field-border);
-  border-radius: 99px;
+  border-radius: var(--radius-full);
   background: var(--field-bg);
   color: var(--text-faint);
 }

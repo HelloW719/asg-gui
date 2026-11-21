@@ -52,7 +52,7 @@
   gap: 7px;
   padding: 6px 10px;
   border: 1px solid var(--outline-subtle);
-  border-radius: 99px;
+  border-radius: var(--radius-full);
   background: var(--surface-sunken);
   color: var(--sage-strong);
   font-size: 0.68rem;
@@ -212,7 +212,7 @@
   width: 44px;
   height: 44px;
   flex: 0 0 44px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--service-accent) 16%, transparent);
   color: var(--service-accent);
   place-items: center;
@@ -258,7 +258,7 @@
   gap: 5px;
   margin-left: auto;
   padding: 5px 10px 5px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--service-status) 14%, transparent);
   color: var(--service-status);
   font-size: 0.7rem;
@@ -343,7 +343,7 @@
   gap: 7px;
   margin: 12px 0 0;
   padding: 10px 11px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--md-sys-color-error-container) 24%, transparent);
   color: var(--md-sys-color-on-error-container);
   font-size: 0.65rem;
@@ -376,7 +376,7 @@
   grid-template-columns: 74px minmax(0, 1fr);
   gap: 9px;
   padding: 7px 8px;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: var(--surface-sunken);
 }
 
@@ -406,14 +406,14 @@
   display: flex;
   gap: 9px;
   padding: 8px;
-  border-radius: 9px;
+  border-radius: var(--radius-xs);
   background: var(--surface-sunken);
 }
 
 .diagnostic-item > span {
   height: fit-content;
   padding: 2px 5px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   font-size: 0.58rem;
 }
 

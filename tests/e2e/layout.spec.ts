@@ -346,6 +346,81 @@ test("renders a continuous squircle window without a border", async ({
   }
 });
 
+test("uses the shared shape scale across feature surfaces", async ({ page }) => {
+  await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
+
+  const tokens = await page.locator("html").evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      window: style.getPropertyValue("--window-radius").trim(),
+      xl: style.getPropertyValue("--radius-xl").trim(),
+      lg: style.getPropertyValue("--radius-lg").trim(),
+      md: style.getPropertyValue("--radius-md").trim(),
+      sm: style.getPropertyValue("--radius-sm").trim(),
+      xs: style.getPropertyValue("--radius-xs").trim(),
+      full: style.getPropertyValue("--radius-full").trim(),
+    };
+  });
+  expect(tokens).toEqual({
+    window: "32px",
+    xl: "24px",
+    lg: "18px",
+    md: "14px",
+    sm: "10px",
+    xs: "8px",
+    full: "999px",
+  });
+
+  async function expectRadius(selector: string, radius: string) {
+    await expect
+      .poll(() =>
+        page
+          .locator(selector)
+          .first()
+          .evaluate((element) => getComputedStyle(element).borderRadius),
+      )
+      .toBe(radius);
+  }
+
+  await expectRadius(".status-hero", "24px");
+  await expectRadius(".service-board", "24px");
+  await expectRadius(".service-card", "0px");
+  await expectRadius(".service-card__icon", "14px");
+  await expectRadius(".status-pill", "999px");
+  await expectRadius(".content-card", "18px");
+
+  await page.getByRole("link", { name: "检索" }).click();
+  await expect(page.getByRole("heading", { name: "检索与抓取" })).toBeVisible();
+  await expectRadius(".query-card", "18px");
+  await expectRadius(".field--hero input", "14px");
+
+  await page.getByRole("link", { name: "来源" }).click();
+  await expect(page.getByRole("heading", { name: "引擎与扩展" })).toBeVisible();
+  await expectRadius(".sources-workspace", "18px");
+  await expectRadius(".engine-grid", "14px");
+  await expectRadius(".engine-card", "0px");
+  await expectRadius(".token", "8px");
+
+  await page.getByRole("link", { name: "设置" }).click();
+  await expect(page.getByRole("heading", { name: "主题与效果" })).toBeVisible();
+  await expectRadius(".settings-workspace", "18px");
+  await expectRadius(".config-search input", "10px");
+
+  await page.getByRole("link", { name: "日志", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "日志", exact: true })).toBeVisible();
+  await expectRadius(".logs-workspace", "18px");
+  await expectRadius(".log-console", "14px");
+  await expectRadius(".log-line", "8px");
+
+  await page.getByRole("link", { name: "维护" }).click();
+  await expect(page.getByRole("heading", { name: "环境诊断" })).toBeVisible();
+  await expectRadius(".maintenance-workspace", "18px");
+  await expectRadius(".maintenance-grid", "14px");
+  await expectRadius(".maintenance-card", "0px");
+});
+
 test.describe("dashboard fixture", () => {
   test.use({
     colorScheme: "dark",

@@ -117,7 +117,7 @@ m3e-theme {
 .app-titlebar__version {
   padding: 2px 7px;
   border: 1px solid var(--outline-subtle);
-  border-radius: 99px;
+  border-radius: var(--radius-full);
   background: var(--surface-subtle);
   color: var(--text-faint);
   font-size: 0.61rem;
@@ -246,7 +246,7 @@ m3e-theme {
   left: -13px;
   width: 3px;
   height: 22px;
-  border-radius: 0 3px 3px 0;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
   background: var(--sage-strong);
   content: "";
 }
@@ -543,7 +543,7 @@ m3e-theme {
   gap: 7px;
   padding: 8px 12px;
   border: 1px solid var(--glass-border);
-  border-radius: 99px;
+  border-radius: var(--radius-full);
   background: var(--glass-bg-strong);
   box-shadow: 0 12px 30px var(--glass-shadow);
   color: var(--text-soft);
