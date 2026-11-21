@@ -167,7 +167,7 @@ light:
 | `--surface-card` | 深色跟随 `surface-container`；浅色固定使用修改前的中性白灰琉璃渐变。 |
 | `--surface-card-fill` | 不支持渐变的自定义组件使用的纯色填充；浅色与服务板保持同一中性白灰琉璃色。 |
 | `--surface-card-border` | 深色跟随 `outline-variant`；浅色固定使用 `rgba(42, 91, 93, 0.16)`。 |
-| `--surface-card-highlight-*` | 新拟物卡片的内高光和内暗边；浅色使用修改前的白色高光与灰青暗边。 |
+| `--surface-card-highlight-*` | 玻璃卡片与内容面板的内沿高光和暗边，只表达玻璃边缘，不构成新拟物凸起。 |
 | `--surface-card-divider` | 同一块面板内部的语义分隔；浅色使用 `rgba(42, 91, 93, 0.13)`。 |
 | `--surface-subtle` | 工具栏、标签容器和低层分段背景。 |
 | `--surface-sunken` | 日志行、诊断项和低层列表的凹陷背景。 |
@@ -295,12 +295,17 @@ filled/tonal/text token。通用按钮叠加玻璃与新拟物的外高光、柔
 宽度，设置 `aria-busy` 并禁用；disabled 不响应 hover；键盘 focus 使用 strong focus
 和 2px 可见轮廓。
 
+新拟物只适用于 `BaseButton` 和代表普通操作的图标按钮。卡片、面板、列表、对话框、
+导航项、Tabs、segmented control、开关和输入框不采用新拟物凸起或凹槽，继续遵循
+M3E 与玻璃层级规范。
+
 ### 7.2 面板与服务板
 
 - 服务状态区必须由一个 `m3e-card` 承载连续玻璃表面，三张服务卡只做内部语义分段。
 - 一个连续数据集合使用一个外层玻璃面板；工具栏、表头、行和编辑区只做内部结构。
 - `.glass-surface` 只做染色、边界、内高光，不得添加 backdrop blur。
 - 浮层使用 `--glass-bg-strong`；页面内容使用 `--surface-card`。
+- 卡片和面板不是新拟物控件，不得添加 raised、pressed 或 concave 立体状态。
 
 ### 7.3 表单与选择
 
@@ -311,6 +316,8 @@ filled/tonal/text token。通用按钮叠加玻璃与新拟物的外高光、柔
 - 开关使用项目 `SwitchField`，选中颜色只来自 primary；减少动态时滑块立即到位。
 - Tabs 和 segmented control 使用 full pill。容器使用 `--surface-subtle`，选中项使用
   `--surface-selected`；不得升级为新的磨砂面板。
+- 输入框、开关、Tabs 和 segmented control 不属于新拟物范围，只使用现有 M3E
+  表面、边框、状态层和焦点轮廓。
 
 ### 7.4 提示、对话框和反馈
 
@@ -336,6 +343,7 @@ filled/tonal/text token。通用按钮叠加玻璃与新拟物的外高光、柔
   color/motion、strong focus、density `-1`。
 - 使用 `--md-sys-color-*` 和本文定义的语义 token；页面只表达组合与例外。
 - 用色调、内高光、分隔线建立层级；阴影只帮助浮层和交互反馈。
+- 新拟物只用于按钮及其 hover、pressed、disabled 和 loading 反馈。
 - 为深浅主题、减少动态、减少透明和 960×640 分别验证。
 - 浅色模式的卡片层固定使用上述中性白灰琉璃 token；主题生成的浅青色只用于卡片之外的
   primary、选择和状态语义。
@@ -345,6 +353,7 @@ filled/tonal/text token。通用按钮叠加玻璃与新拟物的外高光、柔
 - 不要为每个面板、列表行或工具栏添加独立 `backdrop-filter`。
 - 不要用纯白或纯黑 rgba 替代主题 token；L1/L4 的玻璃例外也只能集中在全局 token 中。
 - 不要给服务卡重新添加三块厚重背景，破坏一个 `m3e-card` 的连续表面。
+- 不要把卡片、面板、列表、表单控件或导航项做成新拟物凸起或凹槽。
 - 不要为装饰新增语义色；success、warning、error 只表达运行状态。
 - 不要在页面中拼装 CLI 参数、调用任务客户端或复制服务健康状态机。
 - 不要让页面圆角、系统圆角和第二层内缩窗口同时出现。
