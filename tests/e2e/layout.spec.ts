@@ -459,6 +459,40 @@ test("renders a continuous squircle window without a border", async ({
   ).toEqual(["none", "none", "none"]);
 });
 
+test("renders complete Chinese ghost titles without clipping", async ({
+  page,
+}) => {
+  await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
+
+  for (const [route, title] of [
+    ["/#/status", "系统状态"],
+    ["/#/explore", "检索与抓取"],
+    ["/#/sources", "引擎与扩展"],
+  ] as const) {
+    await page.goto(route);
+    await expect(page.getByRole("heading", { name: title })).toBeVisible();
+
+    const ghost = page.locator(".page-header__ghost");
+    await expect(ghost).toHaveText(title);
+    await expect(ghost).toHaveAttribute("aria-hidden", "true");
+
+    const metrics = await ghost.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        clientHeight: element.clientHeight,
+        clientWidth: element.clientWidth,
+        overflow: style.overflow,
+        scrollHeight: element.scrollHeight,
+        scrollWidth: element.scrollWidth,
+      };
+    });
+
+    expect(metrics.overflow).toBe("visible");
+    expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.clientHeight + 1);
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
+  }
+});
+
 test("uses the shared shape scale across feature surfaces", async ({ page }) => {
   await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
   await page.goto("/");

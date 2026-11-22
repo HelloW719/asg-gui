@@ -865,6 +865,8 @@ m3e-theme {
 }
 
 .page-header__copy {
+  position: relative;
+  z-index: 1;
   min-width: 0;
 }
 
@@ -880,15 +882,18 @@ m3e-theme {
   position: absolute;
   top: 44px;
   left: 0;
-  max-width: min(720px, 80vw);
-  overflow: hidden;
+  display: block;
+  overflow: visible;
   color: var(--tactical-ghost);
   font-family: "Epilogue", "Microsoft YaHei UI", sans-serif;
-  font-size: clamp(2.8rem, 5.4vw, 5.4rem);
+  font-size: clamp(3rem, 5.2vw, 5.5rem);
   font-weight: 700;
-  letter-spacing: -0.045em;
-  line-height: 0.86;
+  font-synthesis: none;
+  letter-spacing: -0.08em;
+  line-height: 1;
   pointer-events: none;
+  text-align: right;
+  user-select: none;
   white-space: nowrap;
 }
 
@@ -1075,6 +1080,10 @@ m3e-theme {
 @media (max-width: 720px) {
   .page-header {
     grid-template-columns: 18px minmax(0, 1fr);
+  }
+
+  .page-header__ghost {
+    display: none;
   }
 
   .page-header .action-row {
