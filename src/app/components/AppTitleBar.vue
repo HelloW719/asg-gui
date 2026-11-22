@@ -49,6 +49,7 @@ async function close(): Promise<void> {
       </span>
       <span class="app-titlebar__name">Agent Search Gateway</span>
       <span class="app-titlebar__version">{{ session.guiVersion }}</span>
+      <span class="app-titlebar__mode">LOCAL CONTROL</span>
     </div>
 
     <div class="app-titlebar__actions">

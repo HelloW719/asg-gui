@@ -554,6 +554,16 @@ test.describe("dashboard fixture", () => {
     await expect(page.getByText("FlareSolverr", { exact: true })).toBeVisible();
     await expect(page.getByRole("status").filter({ hasText: "任务运行中" })).toBeHidden();
     await expect(page.locator("m3e-theme")).toHaveCount(1);
+    await expect(page.locator(".tactical-plane")).toHaveCount(1);
+    await expect(page.locator(".tactical-plane")).toHaveCSS(
+      "pointer-events",
+      "none",
+    );
+    await expect(page.locator(".tactical-plane")).toHaveCSS(
+      "backdrop-filter",
+      "none",
+    );
+    await expect(page.locator(".nav-item__index")).toHaveCount(6);
     await expect
       .poll(() =>
         page.locator("m3e-theme").evaluate(

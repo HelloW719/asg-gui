@@ -18,6 +18,15 @@
   --ochre: #e2bd62;
   --danger: #ef7774;
   --success: #55d6a8;
+  --tactical-signal: #5ad1c0;
+  --tactical-plane: rgba(90, 209, 192, 0.055);
+  --tactical-plane-alt: rgba(130, 168, 223, 0.045);
+  --tactical-grid-minor: rgba(222, 242, 240, 0.035);
+  --tactical-grid-major: rgba(222, 242, 240, 0.075);
+  --tactical-line: rgba(139, 225, 210, 0.2);
+  --tactical-line-soft: rgba(218, 239, 246, 0.1);
+  --tactical-ghost: rgba(218, 239, 246, 0.055);
+  --tactical-scan: rgba(225, 255, 250, 0.12);
   --m3e-fallback-on-surface: #e9f0f8;
   --m3e-fallback-on-surface-variant: #b4c0ce;
   --m3e-fallback-primary: #5ad1c0;
@@ -182,6 +191,15 @@
   --ochre: #8d681e;
   --danger: #a84f4b;
   --success: #26795f;
+  --tactical-signal: #287f70;
+  --tactical-plane: rgba(40, 127, 112, 0.07);
+  --tactical-plane-alt: rgba(85, 127, 186, 0.055);
+  --tactical-grid-minor: rgba(39, 57, 75, 0.045);
+  --tactical-grid-major: rgba(39, 57, 75, 0.085);
+  --tactical-line: rgba(40, 127, 112, 0.2);
+  --tactical-line-soft: rgba(39, 57, 75, 0.11);
+  --tactical-ghost: rgba(39, 57, 75, 0.06);
+  --tactical-scan: rgba(255, 255, 255, 0.34);
   --m3e-fallback-on-surface: #172332;
   --m3e-fallback-on-surface-variant: #4d5e70;
   --m3e-fallback-primary: #287f70;
@@ -464,6 +482,47 @@
   --line: color-mix(
     in srgb,
     var(--md-sys-color-outline-variant, var(--m3e-fallback-line)) 58%,
+    transparent
+  );
+  --tactical-signal: var(--sage);
+  --tactical-plane: color-mix(
+    in srgb,
+    var(--md-sys-color-primary, var(--m3e-fallback-primary)) 7%,
+    transparent
+  );
+  --tactical-plane-alt: color-mix(
+    in srgb,
+    var(--md-sys-color-tertiary, var(--m3e-fallback-tertiary)) 6%,
+    transparent
+  );
+  --tactical-grid-minor: color-mix(
+    in srgb,
+    var(--md-sys-color-on-surface, var(--m3e-fallback-on-surface)) 4%,
+    transparent
+  );
+  --tactical-grid-major: color-mix(
+    in srgb,
+    var(--md-sys-color-on-surface, var(--m3e-fallback-on-surface)) 8%,
+    transparent
+  );
+  --tactical-line: color-mix(
+    in srgb,
+    var(--md-sys-color-primary, var(--m3e-fallback-primary)) 24%,
+    transparent
+  );
+  --tactical-line-soft: color-mix(
+    in srgb,
+    var(--md-sys-color-on-surface, var(--m3e-fallback-on-surface)) 11%,
+    transparent
+  );
+  --tactical-ghost: color-mix(
+    in srgb,
+    var(--md-sys-color-on-surface, var(--m3e-fallback-on-surface)) 6%,
+    transparent
+  );
+  --tactical-scan: color-mix(
+    in srgb,
+    var(--md-sys-color-on-surface, var(--m3e-fallback-on-surface)) 14%,
     transparent
   );
   --motion-fast-spatial: var(
