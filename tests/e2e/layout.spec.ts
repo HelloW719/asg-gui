@@ -598,6 +598,16 @@ test.describe("dashboard fixture", () => {
       "none",
     );
     await expect(page.locator(".nav-item__index")).toHaveCount(6);
+    await expect(page.locator(".nav-item__copy small")).toHaveCount(6);
+    await expect(page.getByRole("link", { name: "状态" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(
+      await page
+        .locator(".app-sidebar")
+        .evaluate((element) => getComputedStyle(element, "::after").content),
+    ).toBe("none");
     await expect
       .poll(() =>
         page.locator("m3e-theme").evaluate(

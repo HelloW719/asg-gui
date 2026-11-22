@@ -560,16 +560,16 @@ m3e-theme {
 
 .app-titlebar::after {
   position: absolute;
-  right: 0;
+  right: auto;
   bottom: 0;
   left: 20px;
+  width: min(38%, 360px);
   height: 1px;
   background: linear-gradient(
     90deg,
     transparent,
-    var(--tactical-line-soft) 8%,
-    var(--tactical-line-soft) 56%,
-    var(--tactical-line) 92%,
+    var(--tactical-line-soft) 14%,
+    var(--tactical-line) 62%,
     transparent
   );
   content: "";
@@ -628,53 +628,55 @@ m3e-theme {
 
 .app-sidebar {
   isolation: isolate;
-  padding: 20px 12px 16px;
-}
-
-.app-sidebar::after {
-  position: absolute;
-  top: 20px;
-  right: 0;
-  bottom: 16px;
-  width: 1px;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    var(--tactical-line-soft) 10%,
-    var(--tactical-line) 67%,
-    transparent
-  );
-  content: "";
-  pointer-events: none;
+  gap: 7px;
+  padding: 22px 12px 18px;
 }
 
 .app-sidebar__label {
-  display: flex;
-  margin: 0 12px 12px;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--text-faint);
-  font-size: 0.61rem;
-  letter-spacing: 0.14em;
+  display: grid;
+  margin: 0 10px 20px;
+  align-items: center;
+  gap: 9px;
+  grid-template-columns: 10px minmax(0, 1fr);
+}
+
+.app-sidebar__label i {
+  width: 8px;
+  height: 8px;
+  background: var(--sage);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sage) 9%, transparent);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+.app-sidebar__label span {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.app-sidebar__label strong {
+  color: var(--text-soft);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
 }
 
 .app-sidebar__label small {
+  color: var(--text-faint);
   font-family: "SFMono-Regular", "Cascadia Code", monospace;
-  font-size: 0.48rem;
+  font-size: 0.46rem;
   font-weight: 400;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.11em;
 }
 
 .nav-item {
   isolation: isolate;
   gap: 10px;
-  min-height: 42px;
-  padding: 10px 10px 10px 6px;
+  min-height: 50px;
+  padding: 8px 12px 8px 7px;
   border: 0;
   border-radius: 0;
-  color: var(--text-faint);
-  font-size: 0.79rem;
+  color: var(--text-soft);
 }
 
 .nav-item::after {
@@ -692,7 +694,7 @@ m3e-theme {
   content: "";
   transition:
     background-color var(--motion-fast-effects),
-    box-shadow var(--motion-fast-effects);
+    opacity var(--motion-fast-effects);
 }
 
 .nav-item:hover {
@@ -708,18 +710,18 @@ m3e-theme {
 .nav-item--active {
   border: 0;
   background: transparent;
-  color: var(--sage-strong);
+  color: var(--text);
 }
 
 .nav-item--active::after {
   background:
     linear-gradient(
       90deg,
-      var(--surface-selected),
-      var(--surface-selected-soft) 72%,
+      color-mix(in srgb, var(--surface-selected) 88%, transparent),
+      var(--surface-selected-soft) 76%,
       transparent
     );
-  box-shadow: inset 0 0 0 1px var(--outline-subtle);
+  box-shadow: none;
 }
 
 .nav-item--active::before {
@@ -733,39 +735,64 @@ m3e-theme {
 }
 
 .nav-item__index {
-  width: 18px;
-  flex: 0 0 18px;
-  color: color-mix(in srgb, var(--text-faint) 58%, transparent);
+  width: 16px;
+  flex: 0 0 16px;
+  color: color-mix(in srgb, var(--text-faint) 62%, transparent);
   font-family: "SFMono-Regular", "Cascadia Code", monospace;
-  font-size: 0.52rem;
+  font-size: 0.47rem;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
 .nav-item__icon {
-  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  padding: 3px;
+  box-sizing: border-box;
+  transition:
+    color var(--motion-fast-effects),
+    background-color var(--motion-fast-effects);
 }
 
-.nav-item__label {
+.nav-item__copy {
+  display: grid;
   min-width: 0;
   flex: 1;
+  gap: 2px;
+  padding-block: 1px;
 }
 
-.nav-item__notch {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 9px;
-  height: 9px;
-  border-top: 1px solid transparent;
-  border-right: 1px solid transparent;
-  pointer-events: none;
+.nav-item__copy strong {
+  overflow: hidden;
+  color: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-item__copy small {
+  overflow: hidden;
+  color: var(--text-faint);
+  font-family: "SFMono-Regular", "Cascadia Code", monospace;
+  font-size: 0.43rem;
+  font-weight: 400;
+  letter-spacing: 0.11em;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-item--active .nav-item__icon {
+  color: var(--sage-strong);
 }
 
 .nav-item--active .nav-item__index,
-.nav-item--active .nav-item__notch {
+.nav-item--active .nav-item__copy small {
   color: var(--sage);
-  border-color: color-mix(in srgb, var(--sage) 42%, transparent);
 }
 
 .app-sidebar__footer {
@@ -806,14 +833,14 @@ m3e-theme {
 .page::before {
   position: absolute;
   top: 15px;
-  right: clamp(24px, 3vw, 44px);
+  right: auto;
   left: clamp(24px, 3vw, 44px);
+  width: clamp(120px, 22vw, 220px);
   height: 1px;
   background: linear-gradient(
     90deg,
-    transparent,
-    var(--tactical-line-soft) 10%,
-    var(--tactical-line) 72%,
+    var(--tactical-line-soft),
+    var(--tactical-line) 58%,
     transparent
   );
   content: "";
@@ -1061,18 +1088,18 @@ m3e-theme {
   .app-sidebar__label,
   .app-sidebar__footer,
   .nav-item__index,
-  .nav-item__label,
-  .nav-item__notch {
+  .nav-item__copy {
     display: none;
   }
-  .nav-item { justify-content: center; }
-  .app-sidebar::after { display: none; }
+  .nav-item {
+    justify-content: center;
+    padding-inline: 0;
+  }
 }
 
 @media (max-width: 900px) {
   .page { padding-inline: 19px; }
   .page::before {
-    right: 19px;
     left: 19px;
   }
 }
