@@ -151,7 +151,9 @@ stores -> services
   操作的文字和图标。primary、secondary、ghost 的层级只能通过文字对比、字重和
   深度反馈表达，不得恢复 M3E 容器装色。hover、pressed、disabled 和 loading
   必须同步改变新拟物状态；pressed 同时响应原生 `:active` 和 M3E 的 `--pressed`
-  自定义状态，使 M3E 形变与新拟物内凹处于同一生命周期。系统窗口按钮保持平面。
+  自定义状态，使 M3E 形变与新拟物内凹处于同一生命周期。浅色模式必须单独减弱
+  按键受光、暗影和扩散范围，不得直接沿用深色模式的长尾阴影强度。系统窗口按钮
+  保持平面。
 - 新拟物只适用于 `BaseButton` 和代表普通操作的图标按键。卡片、面板、列表、
   dialog、导航项、tabs、segmented control、开关和输入框不得添加新拟物凸起、
   凹槽或 pressed 外观，继续使用 M3E 颜色、玻璃表面、边框和状态层。

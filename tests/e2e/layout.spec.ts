@@ -87,6 +87,14 @@ test.describe("Neumorphic M3E button visual contract", () => {
     const icon = page.getByTestId("icon-button");
     const disabled = page.getByTestId("button-disabled");
     const loading = page.getByTestId("button-loading");
+    const maxButtonShadowAlpha = () =>
+      primary.evaluate((element) => {
+        const shadow = getComputedStyle(element).boxShadow;
+        const alphaValues = [
+          ...shadow.matchAll(/(?:,\s*|\/\s*)([01](?:\.\d+)?)\)/g),
+        ].map((match) => Number.parseFloat(match[1]));
+        return Math.max(0, ...alphaValues);
+      });
 
     await expect(primary).toBeVisible();
     await expect(primary).toHaveAttribute("variant", "filled");
@@ -128,6 +136,8 @@ test.describe("Neumorphic M3E button visual contract", () => {
       expect(style.boxShadow).toContain("inset");
       expect(style.transform).toBe("none");
     }
+    const darkMaxButtonShadowAlpha = await maxButtonShadowAlpha();
+    expect(darkMaxButtonShadowAlpha).toBeGreaterThan(0);
 
     await expectButtonHeight(page, "button-compact", 34);
     await expectButtonHeight(page, "button-regular", 40);
@@ -267,6 +277,9 @@ test.describe("Neumorphic M3E button visual contract", () => {
     await page.goto("/tests/e2e/button-visual.html?scheme=light");
     await expect(page.getByTestId("button-primary")).toBeVisible();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    expect(await maxButtonShadowAlpha()).toBeLessThan(
+      darkMaxButtonShadowAlpha,
+    );
     await page.screenshot({
       path: `test-results/button-contract-${size}-light.png`,
       fullPage: true,

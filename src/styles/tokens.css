@@ -197,6 +197,90 @@
   --glass-border: rgba(36, 54, 72, 0.12);
   --glass-highlight: rgba(255, 255, 255, 0.72);
   --glass-shadow: rgba(44, 63, 82, 0.12);
+  --button-sheen-faint: color-mix(
+    in srgb,
+    var(--glass-highlight) 10%,
+    transparent
+  );
+  --button-sheen-soft: color-mix(
+    in srgb,
+    var(--glass-highlight) 16%,
+    transparent
+  );
+  --button-sheen: color-mix(
+    in srgb,
+    var(--glass-highlight) 22%,
+    transparent
+  );
+  --button-sheen-strong: color-mix(
+    in srgb,
+    var(--glass-highlight) 30%,
+    transparent
+  );
+  --button-raised-shadow:
+    -3px -3px 9px -7px var(--button-sheen),
+    0 6px 14px -10px color-mix(
+      in srgb,
+      var(--md-sys-color-shadow, #000) 28%,
+      transparent
+    ),
+    inset 1px 1px 0 var(--button-sheen-strong),
+    inset -1px -1px 0 color-mix(
+      in srgb,
+      var(--md-sys-color-shadow, #000) 14%,
+      transparent
+    );
+  --button-hover-shadow:
+    -3px -4px 11px -8px var(--button-sheen-strong),
+    0 9px 18px -12px color-mix(
+      in srgb,
+      var(--md-sys-color-shadow, #000) 32%,
+      transparent
+    ),
+    inset 1px 1px 0 var(--button-sheen-strong),
+    inset -1px -1px 0 color-mix(
+      in srgb,
+      var(--md-sys-color-shadow, #000) 13%,
+      transparent
+    );
+  --button-pressed-surface: color-mix(
+    in srgb,
+    var(--md-sys-color-shadow, #000) 4%,
+    transparent
+  );
+  --button-press-shadow:
+    inset 2px 2px 5px color-mix(
+      in srgb,
+      var(--md-sys-color-shadow, #000) 28%,
+      transparent
+    ),
+    inset -1px -1px 4px var(--button-sheen-soft);
+  --button-disabled-shadow:
+    -2px -2px 6px -7px var(--button-sheen-faint),
+    0 3px 7px -8px color-mix(
+      in srgb,
+      var(--md-sys-color-shadow, #000) 12%,
+      transparent
+    ),
+    inset 1px 1px 0 var(--button-sheen-soft),
+    inset -1px -1px 0 color-mix(
+      in srgb,
+      var(--md-sys-color-shadow, #000) 8%,
+      transparent
+    );
+  --button-loading-shadow:
+    -2px -3px 7px -8px var(--button-sheen-soft),
+    0 5px 10px -10px color-mix(
+      in srgb,
+      var(--md-sys-color-shadow, #000) 20%,
+      transparent
+    ),
+    inset 1px 1px 0 var(--button-sheen),
+    inset -1px -1px 0 color-mix(
+      in srgb,
+      var(--md-sys-color-shadow, #000) 11%,
+      transparent
+    );
   --surface-card:
     linear-gradient(
       145deg,
