@@ -837,12 +837,63 @@ test.describe("feature pages", () => {
     await expect(configSearch).toHaveCSS("outline-style", "none");
     await expect(configSearchField).toHaveCSS("outline-style", "solid");
     await expect(configSearchField).toHaveCSS("border-radius", "999px");
-    const frameRate = page.getByLabel("玻璃动效帧率");
-    await frameRate.selectOption("90");
-    await expect(frameRate).toHaveValue("90");
+    const frameRate = page.getByRole("combobox", {
+      name: "玻璃动效帧率",
+    });
+    await frameRate.click();
+    const frameRateMenu = page.getByRole("listbox");
+    await expect(frameRateMenu).toBeVisible();
+    await expect(frameRateMenu).toHaveCSS("border-radius", "14px");
+    await expect(frameRateMenu).toHaveCSS("backdrop-filter", "none");
+    await expect(frameRateMenu).toHaveCSS("width", "170px");
+    await expect(frameRateMenu).toHaveCSS("max-height", "224px");
+    expect(
+      await page.getByRole("option", { name: "90 Hz" }).evaluate((element) =>
+        Number.parseFloat(getComputedStyle(element).fontSize),
+      ),
+    ).toBeGreaterThan(13);
+    await page.getByRole("option", { name: "90 Hz" }).click();
+    await expect(frameRate).toContainText("90 Hz");
     await page.reload();
     await expect(page.getByRole("heading", { name: "主题与效果" })).toBeVisible();
-    await expect(page.getByLabel("玻璃动效帧率")).toHaveValue("90");
+    await expect(
+      page.getByRole("combobox", { name: "玻璃动效帧率" }),
+    ).toContainText("90 Hz");
+  });
+
+  test("uses shared glass styling for selects and disclosures", async ({ page }) => {
+    await page.getByRole("link", { name: "检索" }).click();
+    await expect(page.getByText("搜索参数", { exact: true })).toBeVisible();
+
+    await page.getByText("搜索参数", { exact: true }).click();
+    const disclosure = page.locator(".disclosure-panel");
+    await expect(disclosure).toHaveAttribute("open", "");
+    await expect(disclosure).toHaveCSS("border-radius", "14px");
+    await expect(disclosure.locator(".disclosure-panel__body")).toHaveCSS(
+      "backdrop-filter",
+      "none",
+    );
+
+    const safeSearch = page.getByRole("combobox", { name: "安全搜索" });
+    await safeSearch.click();
+    const safeSearchMenu = page.getByRole("listbox");
+    await expect(safeSearchMenu).toBeVisible();
+    await expect(safeSearchMenu).toHaveCSS("border-radius", "14px");
+    await expect(safeSearchMenu).toHaveCSS("backdrop-filter", "none");
+    await page.getByRole("option", { name: "2 · 严格" }).click();
+    await expect(safeSearch).toContainText("2 · 严格");
+    await expect(page.locator("select")).toHaveCount(0);
+
+    await page.getByRole("link", { name: "来源" }).click();
+    await expect(
+      page.getByRole("heading", { name: "引擎与扩展" }),
+    ).toBeVisible();
+    const routeTrigger = page.getByText("编辑类别路由", { exact: true });
+    await routeTrigger.click();
+    const routePanel = page.locator(".route-editor");
+    await expect(routePanel).toHaveAttribute("open", "");
+    await expect(routePanel).toHaveCSS("border-radius", "14px");
+    await expect(page.locator("select")).toHaveCount(0);
   });
 
   test("filters log entries through the extracted log feed", async ({ page }) => {
@@ -864,6 +915,26 @@ test.describe("feature pages", () => {
     await expect(page.getByRole("heading", { name: "环境诊断" })).toBeVisible();
     await expectIntegratedWorkspace(page, ".maintenance-workspace");
     await expect(page.getByRole("heading", { name: "检查项" })).toBeVisible();
+
+    const adLevel = page.getByRole("combobox", {
+      name: "广告过滤级别",
+    });
+    const adLevelBox = await adLevel.boundingBox();
+    expect(adLevelBox?.width ?? 0).toBeGreaterThanOrEqual(150);
+    await adLevel.click();
+    await expect(page.getByRole("listbox")).toHaveCSS("min-width", "170px");
+    const trackingOption = page.getByRole("option", {
+      name: "ads+tracking",
+    });
+    await expect
+      .poll(() =>
+        trackingOption.evaluate(
+          (element) => element.scrollWidth <= element.clientWidth,
+        ),
+      )
+      .toBe(true);
+    await page.keyboard.press("Escape");
+
     await page.getByRole("button", { name: "重新诊断" }).click();
     await expect(page.getByText("installation")).toBeVisible();
   });

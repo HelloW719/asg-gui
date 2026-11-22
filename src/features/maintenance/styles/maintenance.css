@@ -42,6 +42,14 @@
   font-size: 0.73rem;
 }
 
+.maintenance-card .inline-field {
+  width: 100%;
+}
+
+.maintenance-card .inline-field .select-field {
+  max-width: 180px;
+}
+
 .compact-list {
   display: grid;
   gap: 7px;

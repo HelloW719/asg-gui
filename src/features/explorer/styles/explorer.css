@@ -18,25 +18,8 @@
   font-size: 1rem;
 }
 
-.advanced-fields {
+.query-card > .disclosure-panel {
   margin-top: 17px;
-  border-top: 1px solid var(--line);
-}
-
-.advanced-fields summary,
-.route-editor summary {
-  padding: 13px 0 6px;
-  color: var(--text-faint);
-  cursor: pointer;
-  font-size: 0.69rem;
-}
-
-.advanced-fields .form-grid {
-  margin-top: 10px;
-}
-
-.file-picker {
-  margin-top: 13px;
 }
 
 .result-panel {

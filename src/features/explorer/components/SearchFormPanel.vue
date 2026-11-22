@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import { FileImage, Send } from "@lucide/vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
+import DisclosurePanel from "@/shared/ui/DisclosurePanel.vue";
+import SelectField from "@/shared/ui/SelectField.vue";
 import type { SearchForm } from "@/utils/args";
 
 defineProps<{
   form: SearchForm;
   busy: boolean;
 }>();
+
+const safeSearchOptions = [
+  { value: "", label: "默认" },
+  { value: "0", label: "0 · 关闭" },
+  { value: "1", label: "1 · 中等" },
+  { value: "2", label: "2 · 严格" },
+] as const;
 
 const emit = defineEmits<{
   submit: [];
@@ -31,8 +40,7 @@ const emit = defineEmits<{
       </BaseButton>
     </div>
 
-    <details class="advanced-fields">
-      <summary>搜索参数</summary>
+    <DisclosurePanel label="搜索参数">
       <div class="form-grid">
         <label class="field">
           <span>类别</span>
@@ -46,15 +54,14 @@ const emit = defineEmits<{
           <span>语言</span>
           <input v-model="form.language" placeholder="zh-CN" />
         </label>
-        <label class="field">
+        <div class="field">
           <span>安全搜索</span>
-          <select v-model="form.safesearch">
-            <option value="">默认</option>
-            <option value="0">0 · 关闭</option>
-            <option value="1">1 · 中等</option>
-            <option value="2">2 · 严格</option>
-          </select>
-        </label>
+          <SelectField
+            v-model="form.safesearch"
+            :options="safeSearchOptions"
+            accessible-label="安全搜索"
+          />
+        </div>
         <label class="field">
           <span>结果数量</span>
           <input v-model="form.numResults" type="number" min="1" max="1000" />
@@ -79,6 +86,6 @@ const emit = defineEmits<{
           选择图片
         </BaseButton>
       </div>
-    </details>
+    </DisclosurePanel>
   </form>
 </template>

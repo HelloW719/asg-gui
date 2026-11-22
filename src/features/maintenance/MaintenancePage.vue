@@ -11,11 +11,18 @@ import BaseButton from "@/shared/ui/BaseButton.vue";
 import ConfirmDialog from "@/shared/ui/ConfirmDialog.vue";
 import InlineNotice from "@/shared/ui/InlineNotice.vue";
 import PageHeader from "@/shared/ui/PageHeader.vue";
+import SelectField from "@/shared/ui/SelectField.vue";
 import DiagnosticReport from "./components/DiagnosticReport.vue";
 import MaintenanceActionCard from "./components/MaintenanceActionCard.vue";
 import { useMaintenance } from "./composables/useMaintenance";
 
 const maintenance = useMaintenance();
+const adLevelOptions = [
+  { value: "off", label: "off" },
+  { value: "ads", label: "ads" },
+  { value: "ads+tracking", label: "ads+tracking" },
+  { value: "full", label: "full" },
+] as const;
 </script>
 
 <template>
@@ -113,12 +120,11 @@ const maintenance = useMaintenance();
         <p>下载后写入本地 hosts，并通过 CLI 重启整栈以刷新内存过滤集。</p>
         <template #actions>
           <div class="inline-field">
-            <select v-model="maintenance.adLevel.value">
-              <option value="off">off</option>
-              <option value="ads">ads</option>
-              <option value="ads+tracking">ads+tracking</option>
-              <option value="full">full</option>
-            </select>
+            <SelectField
+              v-model="maintenance.adLevel.value"
+              :options="adLevelOptions"
+              accessible-label="广告过滤级别"
+            />
             <BaseButton
               size="compact"
               variant="secondary"

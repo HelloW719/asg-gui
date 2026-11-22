@@ -1,12 +1,20 @@
 <script setup lang="ts">
 import { Send } from "@lucide/vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
+import DisclosurePanel from "@/shared/ui/DisclosurePanel.vue";
+import SelectField from "@/shared/ui/SelectField.vue";
 import type { FetchForm } from "@/utils/args";
 
 defineProps<{
   form: FetchForm;
   busy: boolean;
 }>();
+
+const renderOptions = [
+  { value: "auto", label: "auto" },
+  { value: "always", label: "always" },
+  { value: "never", label: "never" },
+] as const;
 
 const emit = defineEmits<{
   submit: [];
@@ -29,17 +37,16 @@ const emit = defineEmits<{
         抓取正文
       </BaseButton>
     </div>
-    <details class="advanced-fields">
-      <summary>抓取参数</summary>
+    <DisclosurePanel label="抓取参数">
       <div class="form-grid">
-        <label class="field">
+        <div class="field">
           <span>渲染模式</span>
-          <select v-model="form.render">
-            <option value="auto">auto</option>
-            <option value="always">always</option>
-            <option value="never">never</option>
-          </select>
-        </label>
+          <SelectField
+            v-model="form.render"
+            :options="renderOptions"
+            accessible-label="渲染模式"
+          />
+        </div>
         <label class="field">
           <span>最大字符</span>
           <input v-model="form.maxChars" type="number" min="1" max="200000" />
@@ -49,6 +56,6 @@ const emit = defineEmits<{
           <input v-model="form.timeout" type="number" min="1" />
         </label>
       </div>
-    </details>
+    </DisclosurePanel>
   </form>
 </template>

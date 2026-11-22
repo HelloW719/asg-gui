@@ -130,6 +130,15 @@
                 routing: ["general"],
                 requires: ["secrets.search.deepseek.api_key"],
               },
+              {
+                id: "gateway.search:main",
+                group: "gateway.search",
+                name: "main search",
+                kind: "gateway",
+                enabled: true,
+                available: true,
+                routing: ["category:news"],
+              },
             ],
           }),
         );

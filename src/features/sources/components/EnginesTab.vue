@@ -6,6 +6,8 @@ import {
   engineGroupLabel,
 } from "../enginePresentation";
 import BaseButton from "@/shared/ui/BaseButton.vue";
+import DisclosurePanel from "@/shared/ui/DisclosurePanel.vue";
+import SelectField from "@/shared/ui/SelectField.vue";
 import type { EngineInfo, EngineRouteDraft } from "@/types/cli";
 
 defineProps<{
@@ -22,6 +24,12 @@ const emit = defineEmits<{
   saveRoute: [engine: EngineInfo];
   secret: [engine: EngineInfo];
 }>();
+
+const routeOptions = [
+  { value: "none", label: "none" },
+  { value: "resident", label: "resident" },
+  { value: "rotating", label: "rotating" },
+] as const;
 
 function currentRoute(engine: EngineInfo): string {
   return ["resident", "rotating"].find((route) => engine.routing.includes(route)) ?? "none";
@@ -83,18 +91,19 @@ function currentRoute(engine: EngineInfo): string {
         依赖：{{ engine.requires.join(" · ") }}
       </p>
       <div v-if="engine.group === 'searxng'" class="inline-field">
-        <select
-          :value="currentRoute(engine)"
+        <SelectField
+          :model-value="currentRoute(engine)"
+          :options="routeOptions"
           :disabled="busy"
-          @change="emit('routeChange', engine, ($event.target as HTMLSelectElement).value)"
-        >
-          <option value="none">none</option>
-          <option value="resident">resident</option>
-          <option value="rotating">rotating</option>
-        </select>
+          :accessible-label="`${engine.name} 路由`"
+          @update:model-value="emit('routeChange', engine, $event)"
+        />
       </div>
-      <details v-else-if="engine.group === 'gateway.search'" class="route-editor">
-        <summary>编辑类别路由</summary>
+      <DisclosurePanel
+        v-else-if="engine.group === 'gateway.search'"
+        class="route-editor"
+        label="编辑类别路由"
+      >
         <label class="field">
           <span>Category</span>
           <input v-model="routeDrafts[engine.id]!.category" placeholder="news" />
@@ -106,7 +115,7 @@ function currentRoute(engine: EngineInfo): string {
         <BaseButton size="compact" variant="secondary" @click="emit('saveRoute', engine)">
           保存路由
         </BaseButton>
-      </details>
+      </DisclosurePanel>
       <BaseButton
         v-if="engine.requires?.length"
         size="compact"

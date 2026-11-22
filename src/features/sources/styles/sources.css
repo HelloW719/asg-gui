@@ -87,16 +87,6 @@
   margin-bottom: 8px;
 }
 
-.route-editor {
-  margin: 10px 0;
-  padding-top: 8px;
-  border-top: 1px solid var(--line);
-}
-
-.route-editor .field {
-  margin-bottom: 8px;
-}
-
 .source-list,
 .extension-results {
   display: grid;

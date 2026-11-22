@@ -7,8 +7,9 @@ import {
   DialogRoot,
   DialogTitle,
 } from "reka-ui";
-import { nextTick, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import BaseButton from "./BaseButton.vue";
+import SelectField from "./SelectField.vue";
 
 const props = defineProps<{
   open: boolean;
@@ -27,6 +28,13 @@ const secret = ref("");
 const selectedName = ref("");
 const customName = ref("");
 const input = ref<HTMLInputElement | null>(null);
+const secretNameOptions = computed(
+  () =>
+    props.secretNames?.map((name) => ({
+      value: name,
+      label: name,
+    })) ?? [],
+);
 
 watch(
   () => props.open,
@@ -60,12 +68,14 @@ function submit(): void {
       <DialogContent class="dialog-content glass-surface">
         <DialogTitle class="dialog-title">{{ title }}</DialogTitle>
         <DialogDescription class="dialog-description">{{ description }}</DialogDescription>
-        <label v-if="secretNames && secretNames.length > 1" class="field">
+        <div v-if="secretNames && secretNames.length > 1" class="field">
           <span>密钥名称</span>
-          <select v-model="selectedName">
-            <option v-for="name in secretNames" :key="name" :value="name">{{ name }}</option>
-          </select>
-        </label>
+          <SelectField
+            v-model="selectedName"
+            :options="secretNameOptions"
+            accessible-label="密钥名称"
+          />
+        </div>
         <label v-if="editableName" class="field">
           <span>密钥名称</span>
           <input

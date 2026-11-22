@@ -318,6 +318,14 @@ M3E 与玻璃层级规范。
 - 标准输入框高度 38px，圆角由 `--radius-sm` 控制，背景使用 `--field-bg`，边界使用
   `--field-border`。检索与抓取页的主查询输入框是唯一的 Hero 输入变体：高度使用
   `--field-height-hero`（52px），圆角使用 `--radius-md`，以突出页面首要操作。
+- 下拉选择统一使用共享 `SelectField`，菜单通过 Portal 绘制为
+  `--glass-bg-strong` 浮层、`--surface-card-border` 边界和 `--radius-md` 圆角；
+  当前项使用 `--surface-selected`，悬停项使用 `--surface-interaction`；选项使用
+  `0.82rem` 字号，窄触发框的菜单至少保留 `170px` 可读宽度。不得回退到由操作系统
+  绘制的原生下拉菜单。
+- 参数、路由等可展开内容统一使用共享 `DisclosurePanel`。折叠标题栏使用
+  `--surface-subtle`，展开区使用 `--surface-sunken`，以分隔线和旋转 Chevron 表达
+  状态，不新增独立毛玻璃或新拟物层级。
 - focus 只改变边界、顶部高光和轮廓，不改变布局尺寸。
 - 开关使用项目 `SwitchField`，选中颜色只来自 primary；减少动态时滑块立即到位。
 - Tabs 和 segmented control 使用 full pill。容器使用 `--surface-subtle`，选中项使用
