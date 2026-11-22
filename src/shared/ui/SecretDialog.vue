@@ -9,6 +9,7 @@ import {
 } from "reka-ui";
 import { computed, nextTick, ref, watch } from "vue";
 import BaseButton from "./BaseButton.vue";
+import InlineNotice from "./InlineNotice.vue";
 import SelectField from "./SelectField.vue";
 
 const props = defineProps<{
@@ -17,6 +18,8 @@ const props = defineProps<{
   description: string;
   secretNames?: string[];
   editableName?: boolean;
+  busy?: boolean;
+  error?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -49,20 +52,21 @@ watch(
 );
 
 function submit(): void {
-  if (!secret.value.trim()) return;
+  if (props.busy || !secret.value.trim()) return;
   emit("submit", {
     name: props.editableName
       ? customName.value.trim() || undefined
       : selectedName.value || undefined,
     secret: secret.value,
   });
-  secret.value = "";
-  emit("update:open", false);
 }
 </script>
 
 <template>
-  <DialogRoot :open="open" @update:open="emit('update:open', $event)">
+  <DialogRoot
+    :open="open"
+    @update:open="!busy && emit('update:open', $event)"
+  >
     <DialogPortal>
       <DialogOverlay class="dialog-overlay" />
       <DialogContent class="dialog-content glass-surface">
@@ -73,6 +77,7 @@ function submit(): void {
           <SelectField
             v-model="selectedName"
             :options="secretNameOptions"
+            :disabled="busy"
             accessible-label="密钥名称"
           />
         </div>
@@ -83,6 +88,7 @@ function submit(): void {
             type="text"
             placeholder="例如 api_key"
             pattern="[a-z][a-z0-9_-]*"
+            :disabled="busy"
           />
         </label>
         <label class="field">
@@ -93,16 +99,23 @@ function submit(): void {
             type="password"
             autocomplete="new-password"
             placeholder="输入后仅通过 stdin 发送"
+            :disabled="busy"
             @keydown.enter.prevent="submit"
           />
         </label>
         <p class="field-note">密钥不会写入 GUI 配置、日志或任务参数。</p>
+        <InlineNotice v-if="error" tone="error" :message="error" />
         <div class="dialog-actions">
-          <BaseButton variant="ghost" @click="emit('update:open', false)">
+          <BaseButton
+            variant="ghost"
+            :disabled="busy"
+            @click="emit('update:open', false)"
+          >
             取消
           </BaseButton>
           <BaseButton
             variant="primary"
+            :loading="busy"
             :disabled="!secret.trim() || (editableName && !customName.trim())"
             @click="submit"
           >

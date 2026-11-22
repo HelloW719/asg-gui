@@ -4,6 +4,7 @@ import {
   engineAvailabilityLabel,
   engineGroupDescription,
   engineGroupLabel,
+  engineSecretRequirements,
 } from "../enginePresentation";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import DisclosurePanel from "@/shared/ui/DisclosurePanel.vue";
@@ -40,11 +41,20 @@ function currentRoute(engine: EngineInfo): string {
   <section class="source-toolbar">
     <span>{{ engines.length }} 个本地引擎</span>
     <div class="action-row">
-      <BaseButton size="compact" @click="emit('refresh', false)">
+      <BaseButton
+        size="compact"
+        :disabled="busy || loading"
+        @click="emit('refresh', false)"
+      >
         <template #icon><RefreshCw :size="15" /></template>
         本地
       </BaseButton>
-      <BaseButton size="compact" variant="secondary" @click="emit('refresh', true)">
+      <BaseButton
+        size="compact"
+        variant="secondary"
+        :disabled="busy || loading"
+        @click="emit('refresh', true)"
+      >
         包含远端目录
       </BaseButton>
     </div>
@@ -112,13 +122,19 @@ function currentRoute(engine: EngineInfo): string {
           <span>Hot category</span>
           <input v-model="routeDrafts[engine.id]!.hotCategory" placeholder="news_hot" />
         </label>
-        <BaseButton size="compact" variant="secondary" @click="emit('saveRoute', engine)">
+        <BaseButton
+          size="compact"
+          variant="secondary"
+          :disabled="busy"
+          @click="emit('saveRoute', engine)"
+        >
           保存路由
         </BaseButton>
       </DisclosurePanel>
       <BaseButton
-        v-if="engine.requires?.length"
+        v-if="engineSecretRequirements(engine).length"
         size="compact"
+        :disabled="busy"
         @click="emit('secret', engine)"
       >
         设置密钥

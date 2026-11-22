@@ -29,14 +29,16 @@ export function useAppStatus() {
 
   async function refresh(): Promise<void> {
     if (!session.rootValid || statusStore.pending) return;
-    statusStore.pending = true;
-    statusStore.error = null;
+    const revision = statusStore.beginRequest();
     try {
-      statusStore.status = await services.status.get();
+      const nextStatus = await services.status.get();
+      statusStore.settleRequest(revision, nextStatus, null);
     } catch (error) {
-      statusStore.error = error instanceof Error ? error.message : String(error);
-    } finally {
-      statusStore.pending = false;
+      statusStore.settleRequest(
+        revision,
+        statusStore.status,
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 

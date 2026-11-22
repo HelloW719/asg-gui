@@ -60,19 +60,33 @@ describe("frontend architecture boundaries", () => {
     );
   });
 
-  it("does not expose low-level tasks or CLI arguments to pages", () => {
+  it("keeps native integrations behind the desktop service", () => {
+    const violations = filesIn("features").flatMap(([path, source]) =>
+      /from\s+["']@tauri-apps\//.test(source) ||
+      /from\s+["'][^"']*services\/desktop/.test(source)
+        ? [path]
+        : [],
+    );
+    expect(
+      violations,
+      "功能层必须通过 services/desktop 暴露的类型化能力访问 Tauri",
+    ).toEqual([]);
+  });
+
+  it("does not expose low-level tasks or CLI arguments to feature code", () => {
     const violations = filesIn("features")
-      .filter(([path]) => path.endsWith("Page.vue"))
       .flatMap(([path, source]) => {
-      const patterns = [
-        /services\/desktop/,
-        /\bjobClient\b/,
-        /\bjobs\.(execute|stream)\s*\(/,
-        /runner\.(run|stream)\s*\(/,
-        /\[\s*["'](status|logs|doctor|engines|plugins|extensions|config|browser|adlist|update)["']/,
-      ];
-      return patterns.some((pattern) => pattern.test(source)) ? [path] : [];
+        const patterns = [
+          /\bjobClient\b/,
+          /\bjobs\.(execute|stream)\s*\(/,
+          /runner\.(run|stream)\s*\(/,
+          /\[\s*["'](status|logs|doctor|engines|plugins|extensions|config|browser|adlist|update)["']/,
+        ];
+        return patterns.some((pattern) => pattern.test(source)) ? [path] : [];
       });
-    expect(violations, "页面必须通过 useAsgServices 或功能组合式函数访问能力").toEqual([]);
+    expect(
+      violations,
+      "页面和功能模块必须通过 useAsgServices 或功能组合式函数访问能力",
+    ).toEqual([]);
   });
 });

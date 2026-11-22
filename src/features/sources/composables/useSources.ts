@@ -9,6 +9,7 @@ import type {
   ExtensionSearchItem,
   SecretPayload,
 } from "@/types/cli";
+import { engineRouteDraft } from "../enginePresentation";
 
 export function useSources() {
   const appStatus = useAppStatus();
@@ -32,29 +33,39 @@ export function useSources() {
     error.value = cause instanceof Error ? cause.message : String(cause);
   }
 
+  function openEngineSecret(engine: EngineInfo): void {
+    error.value = null;
+    success.value = null;
+    engineSecret.value = engine;
+  }
+
+  function openExtensionSecret(extension: ExtensionInfo): void {
+    error.value = null;
+    success.value = null;
+    extensionSecret.value = extension;
+  }
+
   async function runAndRefresh(
     action: () => Promise<void>,
     successMessage: string,
-  ): Promise<void> {
+  ): Promise<boolean> {
     error.value = null;
     success.value = null;
     try {
       await action();
       success.value = successMessage;
       await appStatus.refresh();
+      return true;
     } catch (cause) {
       setError(cause);
+      return false;
     }
   }
 
   function syncRouteDrafts(): void {
     for (const engine of engines.value) {
       if (routeDrafts[engine.id]) continue;
-      routeDrafts[engine.id] = {
-        category:
-          engine.routing.find((item) => item.startsWith("category:"))?.slice(9) ?? "",
-        hotCategory: "",
-      };
+      routeDrafts[engine.id] = engineRouteDraft(engine);
     }
   }
 
@@ -73,39 +84,51 @@ export function useSources() {
 
   async function toggleEngine(engine: EngineInfo): Promise<void> {
     const enabled = !engine.enabled;
-    await runAndRefresh(
-      () => serviceClient.sources.setEngineEnabled(engine.id, enabled),
-      `${engine.name} 已${enabled ? "启用" : "禁用"}。`,
-    );
-    await loadEngines();
+    if (
+      await runAndRefresh(
+        () => serviceClient.sources.setEngineEnabled(engine.id, enabled),
+        `${engine.name} 已${enabled ? "启用" : "禁用"}。`,
+      )
+    ) {
+      await loadEngines();
+    }
   }
 
   async function changeSearxngRoute(engine: EngineInfo, route: string): Promise<void> {
-    await runAndRefresh(
-      () => serviceClient.sources.setSearxngRoute(engine.id, route),
-      `${engine.name} 路由已设置为 ${route}。`,
-    );
-    await loadEngines();
+    if (
+      await runAndRefresh(
+        () => serviceClient.sources.setSearxngRoute(engine.id, route),
+        `${engine.name} 路由已设置为 ${route}。`,
+      )
+    ) {
+      await loadEngines();
+    }
   }
 
   async function saveGatewayRoute(engine: EngineInfo): Promise<void> {
     const draft = routeDrafts[engine.id];
     if (!draft) return;
-    await runAndRefresh(
-      () => serviceClient.sources.setGatewayRoute(engine.id, draft),
-      `${engine.name} 路由已更新。`,
-    );
-    await loadEngines();
+    if (
+      await runAndRefresh(
+        () => serviceClient.sources.setGatewayRoute(engine.id, draft),
+        `${engine.name} 路由已更新。`,
+      )
+    ) {
+      await loadEngines();
+    }
   }
 
   async function saveEngineSecret(payload: SecretPayload): Promise<void> {
     const engine = engineSecret.value;
-    engineSecret.value = null;
     if (!engine) return;
-    await runAndRefresh(
-      () => serviceClient.sources.setEngineSecret(engine, payload),
-      `${engine.name} 密钥已更新。`,
-    );
+    if (
+      await runAndRefresh(
+        () => serviceClient.sources.setEngineSecret(engine, payload),
+        `${engine.name} 密钥已更新。`,
+      )
+    ) {
+      engineSecret.value = null;
+    }
   }
 
   async function loadExtensions(): Promise<void> {
@@ -133,45 +156,57 @@ export function useSources() {
   async function installExtension(repo = extensionRepo.value): Promise<void> {
     const target = repo.trim();
     if (!target) return;
-    await runAndRefresh(
-      () => serviceClient.sources.installExtension(target),
-      `${target} 已安装并执行后端 setup。重启网关后生效。`,
-    );
-    extensionRepo.value = "";
-    await loadExtensions();
+    if (
+      await runAndRefresh(
+        () => serviceClient.sources.installExtension(target),
+        `${target} 已安装并执行后端 setup。重启网关后生效。`,
+      )
+    ) {
+      extensionRepo.value = "";
+      await loadExtensions();
+    }
   }
 
   async function runExtensionSetup(extension: ExtensionInfo): Promise<void> {
-    await runAndRefresh(
-      () => serviceClient.sources.setupExtension(extension),
-      `${extension.name || extension.id} 的后端 setup 已完成。重启网关后生效。`,
-    );
-    await loadExtensions();
+    if (
+      await runAndRefresh(
+        () => serviceClient.sources.setupExtension(extension),
+        `${extension.name || extension.id} 的后端 setup 已完成。重启网关后生效。`,
+      )
+    ) {
+      await loadExtensions();
+    }
   }
 
   async function removeExtension(): Promise<void> {
     const extension = extensionToRemove.value;
-    extensionToRemove.value = null;
     if (!extension) return;
-    await runAndRefresh(
-      () => serviceClient.sources.removeExtension(extension),
-      `${extension.id} 已卸载。重启网关后停止加载。`,
-    );
-    await loadExtensions();
+    if (
+      await runAndRefresh(
+        () => serviceClient.sources.removeExtension(extension),
+        `${extension.id} 已卸载。重启网关后停止加载。`,
+      )
+    ) {
+      extensionToRemove.value = null;
+      await loadExtensions();
+    }
   }
 
   async function saveExtensionSecret(payload: SecretPayload): Promise<void> {
     const extension = extensionSecret.value;
-    extensionSecret.value = null;
     if (!extension || !payload.name) return;
-    await runAndRefresh(
-      () =>
-        serviceClient.sources.setExtensionSecret(extension, {
-          name: payload.name!,
-          secret: payload.secret,
-        }),
-      `${extension.id} 的 ${payload.name} 已更新。`,
-    );
+    if (
+      await runAndRefresh(
+        () =>
+          serviceClient.sources.setExtensionSecret(extension, {
+            name: payload.name!,
+            secret: payload.secret,
+          }),
+        `${extension.id} 的 ${payload.name} 已更新。`,
+      )
+    ) {
+      extensionSecret.value = null;
+    }
   }
 
   onMounted(() => {
@@ -199,11 +234,13 @@ export function useSources() {
     changeSearxngRoute,
     saveGatewayRoute,
     saveEngineSecret,
+    openEngineSecret,
     loadExtensions,
     searchExtensions,
     installExtension,
     runExtensionSetup,
     removeExtension,
     saveExtensionSecret,
+    openExtensionSecret,
   };
 }

@@ -1,4 +1,4 @@
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useAppStatus } from "@/app/useAppStatus";
 import { useAsgServices } from "@/app/useAsgServices";
 import { useJobsStore } from "@/stores/jobs";
@@ -28,6 +28,7 @@ export function useSettings() {
   const secretField = ref<ConfigLeaf | null>(null);
   const forgetOpen = ref(false);
   const validated = ref<boolean | null>(null);
+  let configRequestRevision = 0;
 
   const groupLabels: Record<string, string> = {
     gateway: "网关",
@@ -88,19 +89,24 @@ export function useSettings() {
   }
 
   async function loadConfig(): Promise<void> {
+    const revision = ++configRequestRevision;
     loading.value = true;
     error.value = null;
     try {
-      config.value = await serviceClient.config.getAll();
+      const nextConfig = await serviceClient.config.getAll();
+      if (revision === configRequestRevision) config.value = nextConfig;
     } catch (cause) {
-      error.value = cause instanceof Error ? cause.message : String(cause);
+      if (revision === configRequestRevision) {
+        error.value = cause instanceof Error ? cause.message : String(cause);
+      }
     } finally {
-      loading.value = false;
+      if (revision === configRequestRevision) loading.value = false;
     }
   }
 
   function beginEdit(row: ConfigLeaf): void {
     if (row.secret) {
+      error.value = null;
       secretField.value = row;
       return;
     }
@@ -114,16 +120,18 @@ export function useSettings() {
   }
 
   async function saveSecret(payload: { secret: string }): Promise<void> {
-    if (!secretField.value) return;
+    const field = secretField.value;
+    if (!field) return;
     error.value = null;
     try {
-      await serviceClient.config.setSecret(secretField.value.path, payload.secret);
+      await serviceClient.config.setSecret(field.path, payload.secret);
     } catch (cause) {
       error.value = cause instanceof Error ? cause.message : String(cause);
-    } finally {
-      secretField.value = null;
-      await loadConfig();
+      return;
     }
+    secretField.value = null;
+    validated.value = null;
+    await loadConfig();
   }
 
   async function saveField(): Promise<void> {
@@ -166,6 +174,22 @@ export function useSettings() {
   onMounted(() => {
     void loadConfig();
   });
+
+  watch(
+    () => [session.root, session.rootValid] as const,
+    ([root, valid], [previousRoot]) => {
+      if (root === previousRoot) return;
+      if (!valid) {
+        configRequestRevision += 1;
+        config.value = null;
+        loading.value = false;
+        error.value = null;
+        return;
+      }
+      config.value = null;
+      void loadConfig();
+    },
+  );
 
   return {
     session,

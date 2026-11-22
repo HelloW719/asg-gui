@@ -15,6 +15,7 @@ export function useLogFeed() {
   const selectedServices = ref<string[]>(["gateway", "supervisor"]);
   const lines = ref<LogLine[]>([]);
   const query = ref("");
+  const starting = ref(false);
   const following = ref(false);
   const jobId = ref<string | null>(null);
   const followHandle = ref<FollowLogHandle | null>(null);
@@ -58,6 +59,7 @@ export function useLogFeed() {
   }
 
   async function toggleFollow(): Promise<void> {
+    if (starting.value) return;
     if (following.value) {
       await stopFollow();
       return;
@@ -67,6 +69,7 @@ export function useLogFeed() {
       return;
     }
     error.value = null;
+    starting.value = true;
     try {
       const running = await serviceClient.logs.follow(
         selectedServices.value,
@@ -75,23 +78,37 @@ export function useLogFeed() {
       jobId.value = running.jobId;
       followHandle.value = running;
       following.value = true;
+      const followJobId = running.jobId;
       void running.done
-        .catch(() => undefined)
+        .catch((cause) => {
+          if (followHandle.value?.jobId === followJobId) {
+            error.value = cause instanceof Error ? cause.message : String(cause);
+          }
+        })
         .finally(() => {
+          if (followHandle.value?.jobId !== followJobId) return;
           following.value = false;
           jobId.value = null;
           followHandle.value = null;
         });
     } catch (cause) {
       error.value = cause instanceof Error ? cause.message : String(cause);
+    } finally {
+      starting.value = false;
     }
   }
 
   async function stopFollow(): Promise<void> {
-    await followHandle.value?.cancel();
+    const running = followHandle.value;
+    if (!running) return;
+    followHandle.value = null;
     following.value = false;
     jobId.value = null;
-    followHandle.value = null;
+    try {
+      await running.cancel();
+    } catch (cause) {
+      error.value = cause instanceof Error ? cause.message : String(cause);
+    }
   }
 
   function clear(): void {
@@ -121,13 +138,16 @@ export function useLogFeed() {
   });
 
   onBeforeUnmount(() => {
-    void followHandle.value?.cancel();
+    const running = followHandle.value;
+    followHandle.value = null;
+    void running?.cancel();
   });
 
   return {
     selectedServices,
     lines,
     query,
+    starting,
     following,
     jobId,
     error,

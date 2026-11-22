@@ -230,6 +230,10 @@
   background: var(--surface-sunken);
 }
 
+.structured-field-error {
+  color: var(--danger);
+}
+
 @media (max-width: 900px) {
   .engine-grid { grid-template-columns: 1fr; }
   .source-row { grid-template-columns: 1fr; }

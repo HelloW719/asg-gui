@@ -35,7 +35,7 @@ const dashboard = useDashboard();
       tone="error"
       :message="dashboard.actionError.value ?? dashboard.jobs.lastError ?? ''"
       dismissible
-      @dismiss="dashboard.jobs.clearError"
+      @dismiss="dashboard.dismissError"
     />
 
     <StatusOverview

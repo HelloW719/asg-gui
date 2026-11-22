@@ -31,13 +31,14 @@ const autoScroll = ref(true);
         <BaseButton
           size="compact"
           variant="primary"
+          :loading="feed.starting.value"
           @click="feed.toggleFollow"
         >
           <template #icon>
             <Pause v-if="feed.following.value" :size="15" />
             <Play v-else :size="15" />
           </template>
-          {{ feed.following.value ? "暂停跟随" : "实时跟随" }}
+          {{ feed.starting.value ? "正在跟随" : feed.following.value ? "暂停跟随" : "实时跟随" }}
         </BaseButton>
       </template>
     </PageHeader>

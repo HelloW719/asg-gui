@@ -22,14 +22,18 @@ const settings = useSettings();
       description="每个字段单独通过 config set 校验、写入并整栈重启。"
     >
       <template #actions>
-        <BaseButton size="compact" :loading="settings.loading.value" @click="settings.validate">
+        <BaseButton
+          size="compact"
+          :loading="settings.loading.value || settings.jobs.hasRunningOperation"
+          @click="settings.validate"
+        >
           <template #icon><FileLock2 :size="15" /></template>
           校验配置
         </BaseButton>
         <BaseButton
           size="compact"
           variant="secondary"
-          :loading="settings.loading.value"
+          :loading="settings.loading.value || settings.jobs.hasRunningOperation"
           @click="settings.loadConfig"
         >
           <template #icon><Database :size="15" /></template>
@@ -58,6 +62,7 @@ const settings = useSettings();
 
       <InstallPathPanel
         :root="settings.session.root"
+        :busy="settings.jobs.hasRunningOperation"
         @change="settings.session.chooseRoot"
         @disconnect="settings.forgetOpen.value = true"
       />
@@ -95,6 +100,8 @@ const settings = useSettings();
       :open="Boolean(settings.secretField.value)"
       title="更新密钥"
       :description="settings.secretField.value?.path ?? ''"
+      :busy="settings.jobs.hasRunningOperation"
+      :error="settings.error.value"
       @update:open="(open) => !open && (settings.secretField.value = null)"
       @submit="settings.saveSecret"
     />

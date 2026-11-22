@@ -1,5 +1,5 @@
 import { reactive, ref } from "vue";
-import { open } from "@tauri-apps/plugin-dialog";
+import { useDesktopIntegration } from "@/app/useDesktopIntegration";
 import { useAsgServices } from "@/app/useAsgServices";
 import { useJobsStore } from "@/stores/jobs";
 import type { CommandTextResult } from "@/types/cli";
@@ -9,6 +9,7 @@ import { commandTextResultFromError } from "@/utils/cli";
 export function useExplorer() {
   const jobs = useJobsStore();
   const serviceClient = useAsgServices();
+  const desktop = useDesktopIntegration();
   const searchForm = reactive<SearchForm>({
     query: "",
     categories: "",
@@ -42,15 +43,8 @@ export function useExplorer() {
   }
 
   async function chooseImage(): Promise<void> {
-    const selected = await open({
-      title: "选择用于反向图搜的图片",
-      multiple: false,
-      directory: false,
-      filters: [
-        { name: "图片", extensions: ["png", "jpg", "jpeg", "webp", "gif"] },
-      ],
-    });
-    if (typeof selected === "string") searchForm.imagePath = selected;
+    const selected = await desktop.chooseImageFile();
+    if (selected) searchForm.imagePath = selected;
   }
 
   async function search(): Promise<void> {

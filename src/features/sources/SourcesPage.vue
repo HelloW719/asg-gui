@@ -14,6 +14,7 @@ import EnginesTab from "./components/EnginesTab.vue";
 import ExtensionConfigEditor from "./components/ExtensionConfigEditor.vue";
 import ExtensionsTab from "./components/ExtensionsTab.vue";
 import { useSources } from "./composables/useSources";
+import { engineSecretRequirements } from "./enginePresentation";
 
 const sources = useSources();
 </script>
@@ -62,7 +63,7 @@ const sources = useSources();
             @toggle="sources.toggleEngine"
             @route-change="sources.changeSearxngRoute"
             @save-route="sources.saveGatewayRoute"
-            @secret="(engine) => (sources.engineSecret.value = engine)"
+            @secret="sources.openEngineSecret"
           />
         </TabsContent>
 
@@ -79,7 +80,7 @@ const sources = useSources();
             @refresh="sources.loadExtensions"
             @setup="sources.runExtensionSetup"
             @configure="(extension) => (sources.configExtension.value = extension)"
-            @secret="(extension) => (sources.extensionSecret.value = extension)"
+            @secret="sources.openExtensionSecret"
             @remove="(extension) => (sources.extensionToRemove.value = extension)"
             @update:repo="sources.extensionRepo.value = $event"
             @update:query="sources.extensionQuery.value = $event"
@@ -107,7 +108,13 @@ const sources = useSources();
       :open="Boolean(sources.engineSecret.value)"
       :title="`更新 ${sources.engineSecret.value?.name ?? ''} 密钥`"
       :description="sources.engineSecret.value?.requires?.join(' · ') ?? ''"
-      :secret-names="sources.engineSecret.value?.requires"
+      :secret-names="
+        sources.engineSecret.value
+          ? engineSecretRequirements(sources.engineSecret.value)
+          : []
+      "
+      :busy="sources.jobs.hasRunningOperation"
+      :error="sources.error.value"
       @update:open="(open) => !open && (sources.engineSecret.value = null)"
       @submit="sources.saveEngineSecret"
     />
@@ -116,6 +123,8 @@ const sources = useSources();
       :title="`更新 ${sources.extensionSecret.value?.id ?? ''} 密钥`"
       description="密钥名由扩展定义；值只通过 stdin 发送。"
       editable-name
+      :busy="sources.jobs.hasRunningOperation"
+      :error="sources.error.value"
       @update:open="(open) => !open && (sources.extensionSecret.value = null)"
       @submit="sources.saveExtensionSecret"
     />

@@ -1,4 +1,8 @@
-import type { EngineGroup, EngineInfo } from "@/types/cli";
+import type {
+  EngineGroup,
+  EngineInfo,
+  EngineRouteDraft,
+} from "@/types/cli";
 
 const GROUP_LABELS: Record<EngineGroup, string> = {
   searxng: "SearXNG",
@@ -11,13 +15,26 @@ export function engineGroupLabel(group: EngineGroup): string {
   return GROUP_LABELS[group];
 }
 
-export function engineAvailabilityLabel(engine: EngineInfo): string {
-  if (engine.available) return "可用";
-  const needsSecret = engine.requires?.some(
+export function engineSecretRequirements(engine: EngineInfo): string[] {
+  return (engine.requires ?? []).filter(
     (requirement) =>
       requirement.startsWith("secrets.") || requirement.startsWith("secret:"),
   );
-  return needsSecret ? "待配置密钥" : "缺依赖";
+}
+
+export function engineRouteDraft(engine: EngineInfo): EngineRouteDraft {
+  const categories = engine.routing
+    .filter((item) => item.startsWith("category:"))
+    .map((item) => item.slice(9));
+  return {
+    category: categories[0] ?? "",
+    hotCategory: categories[1] ?? "",
+  };
+}
+
+export function engineAvailabilityLabel(engine: EngineInfo): string {
+  if (engine.available) return "可用";
+  return engineSecretRequirements(engine).length > 0 ? "待配置密钥" : "缺依赖";
 }
 
 export function engineGroupDescription(group: EngineGroup): string {

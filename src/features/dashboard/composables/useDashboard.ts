@@ -80,6 +80,11 @@ export function useDashboard() {
     void runLifecycle(action);
   }
 
+  function dismissError(): void {
+    actionError.value = null;
+    jobs.clearError();
+  }
+
   onMounted(loadRecentLogs);
 
   return {
@@ -96,5 +101,6 @@ export function useDashboard() {
     runDoctor,
     requestLifecycle,
     confirmPending,
+    dismissError,
   };
 }

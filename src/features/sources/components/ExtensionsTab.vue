@@ -40,12 +40,18 @@ const emit = defineEmits<{
     </div>
     <div class="inline-field">
       <input v-model="query" type="search" placeholder="搜索 GitHub 扩展" />
-      <BaseButton size="compact" @click="emit('search')">
+      <BaseButton size="compact" :disabled="busy" @click="emit('search')">
         <template #icon><Search :size="15" /></template>
         搜索
       </BaseButton>
     </div>
-    <button class="icon-button" type="button" title="刷新" @click="emit('refresh')">
+    <button
+      class="icon-button"
+      type="button"
+      title="刷新"
+      :disabled="busy || loading"
+      @click="emit('refresh')"
+    >
       <RefreshCw :size="16" />
     </button>
   </section>
@@ -103,17 +109,23 @@ const emit = defineEmits<{
           <BaseButton
             size="compact"
             variant="secondary"
+            :disabled="busy"
             @click="emit('configure', extension)"
           >
             <template #icon><Settings2 :size="15" /></template>
             配置
           </BaseButton>
-          <BaseButton size="compact" @click="emit('secret', extension)">
+          <BaseButton
+            size="compact"
+            :disabled="busy"
+            @click="emit('secret', extension)"
+          >
             密钥
           </BaseButton>
           <BaseButton
             size="compact"
             danger-text
+            :disabled="busy"
             @click="emit('remove', extension)"
           >
             <template #icon><Trash2 :size="15" /></template>

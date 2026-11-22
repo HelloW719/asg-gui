@@ -4,6 +4,7 @@ import BaseButton from "@/shared/ui/BaseButton.vue";
 
 defineProps<{
   root: string | null;
+  busy: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -20,10 +21,20 @@ const emit = defineEmits<{
       <strong>{{ root }}</strong>
       <p>切换安装根会停止 GUI 的状态轮询，但不会停止已有服务。</p>
     </div>
-    <BaseButton size="compact" variant="secondary" @click="emit('change')">
+    <BaseButton
+      size="compact"
+      variant="secondary"
+      :disabled="busy"
+      @click="emit('change')"
+    >
       切换目录
     </BaseButton>
-    <BaseButton size="compact" danger-text @click="emit('disconnect')">
+    <BaseButton
+      size="compact"
+      danger-text
+      :disabled="busy"
+      @click="emit('disconnect')"
+    >
       断开
     </BaseButton>
   </section>

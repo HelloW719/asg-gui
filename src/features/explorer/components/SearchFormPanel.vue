@@ -81,7 +81,11 @@ const emit = defineEmits<{
       </div>
       <div class="inline-field file-picker">
         <input v-model="form.imagePath" placeholder="本地图片路径，用于反向图搜" />
-        <BaseButton variant="secondary" @click="emit('chooseImage')">
+        <BaseButton
+          variant="secondary"
+          :disabled="busy"
+          @click="emit('chooseImage')"
+        >
           <template #icon><FileImage :size="16" /></template>
           选择图片
         </BaseButton>

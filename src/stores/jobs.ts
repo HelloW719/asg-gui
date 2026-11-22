@@ -10,36 +10,46 @@ import {
 import type { CliResult, VisualState } from "../types/cli";
 
 type StoreVisualState = VisualState | null;
+interface ActiveOperation {
+  id: number;
+  label: string;
+  visualState: StoreVisualState;
+}
 
 export const useJobsStore = defineStore("jobs", () => {
-  const active = ref(0);
-  const activeLabels = ref<string[]>([]);
-  const operationVisualState = ref<StoreVisualState>(null);
+  const operations = ref<ActiveOperation[]>([]);
   const lastResult = ref<CliResult | null>(null);
   const lastError = ref<string | null>(null);
+  let nextOperationId = 1;
 
-  let lastVisualState: StoreVisualState = null;
-
+  const active = computed(() => operations.value.length);
+  const activeLabels = computed(() =>
+    operations.value.map((operation) => operation.label),
+  );
+  const operationVisualState = computed(
+    () => operations.value.at(-1)?.visualState ?? null,
+  );
   const hasRunningOperation = computed(() => active.value > 0);
   const busyLabel = computed(() => activeLabels.value.at(-1) ?? "");
 
-  function startOperation(options: AsgRunOptions): void {
-    active.value += 1;
-    activeLabels.value.push(options.label);
-    lastVisualState = options.visualState ?? null;
-    operationVisualState.value = lastVisualState;
+  function startOperation(options: AsgRunOptions): number {
+    const id = nextOperationId++;
+    operations.value.push({
+      id,
+      label: options.label,
+      visualState: options.visualState ?? null,
+    });
     lastError.value = null;
+    return id;
   }
 
-  function finishOperation(): void {
-    active.value = Math.max(0, active.value - 1);
-    activeLabels.value.pop();
-    operationVisualState.value = active.value > 0 ? lastVisualState : null;
-    if (active.value === 0) lastVisualState = null;
+  function finishOperation(id: number): void {
+    const index = operations.value.findIndex((operation) => operation.id === id);
+    if (index >= 0) operations.value.splice(index, 1);
   }
 
   async function run<T>(args: string[], options: AsgRunOptions): Promise<T> {
-    startOperation(options);
+    const operationId = startOperation(options);
     try {
       const job = await jobClient.start(args, {
         stdin: options.stdin,
@@ -63,7 +73,7 @@ export const useJobsStore = defineStore("jobs", () => {
       lastError.value = error instanceof Error ? error.message : String(error);
       throw error;
     } finally {
-      finishOperation();
+      finishOperation(operationId);
     }
   }
 
@@ -71,7 +81,7 @@ export const useJobsStore = defineStore("jobs", () => {
     args: string[],
     options: AsgRunOptions,
   ): Promise<AsgStreamHandle<T>> {
-    startOperation(options);
+    const operationId = startOperation(options);
     try {
       const job = await jobClient.start(args, {
         stdin: options.stdin,
@@ -97,7 +107,7 @@ export const useJobsStore = defineStore("jobs", () => {
           lastError.value = error instanceof Error ? error.message : String(error);
           throw error;
         })
-        .finally(() => finishOperation());
+        .finally(() => finishOperation(operationId));
       return {
         jobId: job.jobId,
         cancellable: job.cancellable,
@@ -105,7 +115,7 @@ export const useJobsStore = defineStore("jobs", () => {
         cancel: job.cancel,
       };
     } catch (error) {
-      finishOperation();
+      finishOperation(operationId);
       lastError.value = error instanceof Error ? error.message : String(error);
       throw error;
     }

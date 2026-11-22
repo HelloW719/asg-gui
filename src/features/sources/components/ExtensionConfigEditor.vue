@@ -22,6 +22,8 @@ const config = ref<Record<string, unknown> | null>(null);
 const original = ref<Record<string, unknown> | null>(null);
 const fields = ref<ConfigFieldInfo[]>([]);
 const rawText = ref("");
+const structuredDrafts = ref<Record<string, string>>({});
+const fieldErrors = ref<Record<string, string>>({});
 const rawMode = ref(false);
 const saveOpen = ref(false);
 const loading = ref(false);
@@ -32,6 +34,8 @@ function reset(): void {
   original.value = null;
   fields.value = [];
   rawText.value = "";
+  structuredDrafts.value = {};
+  fieldErrors.value = {};
   rawMode.value = false;
   saveOpen.value = false;
   error.value = null;
@@ -52,6 +56,52 @@ function syncRawConfig(): boolean {
   }
 }
 
+function isStructuredField(type: string): boolean {
+  return !["string", "number", "integer", "boolean"].includes(type);
+}
+
+function initializeStructuredDrafts(): void {
+  if (!config.value) return;
+  structuredDrafts.value = Object.fromEntries(
+    fields.value
+      .filter((field) => isStructuredField(field.type))
+      .map((field) => [
+        field.key,
+        JSON.stringify(config.value?.[field.key], null, 2) ?? "null",
+      ]),
+  );
+}
+
+function parseStructuredField(field: ConfigFieldInfo): boolean {
+  if (!config.value) return false;
+  try {
+    const value = JSON.parse(structuredDrafts.value[field.key] ?? "") as unknown;
+    if (
+      field.type === "object" &&
+      (!value || Array.isArray(value) || typeof value !== "object")
+    ) {
+      throw new Error(`${field.key} 必须是 JSON 对象。`);
+    }
+    if (field.type === "array" && !Array.isArray(value)) {
+      throw new Error(`${field.key} 必须是 JSON 数组。`);
+    }
+    config.value[field.key] = value;
+    delete fieldErrors.value[field.key];
+    return true;
+  } catch (cause) {
+    fieldErrors.value[field.key] =
+      cause instanceof Error ? cause.message : String(cause);
+    return false;
+  }
+}
+
+function syncStructuredFields(): boolean {
+  const structuredFields = fields.value.filter((field) =>
+    isStructuredField(field.type),
+  );
+  return structuredFields.every(parseStructuredField);
+}
+
 async function save(): Promise<void> {
   saveOpen.value = false;
   const extension = props.extension;
@@ -59,6 +109,7 @@ async function save(): Promise<void> {
   const before = original.value;
   if (!extension || !current || !before) return;
   if (rawMode.value && !syncRawConfig()) return;
+  if (!rawMode.value && !syncStructuredFields()) return;
   try {
     const changed = await sources.saveExtensionConfig(extension.id, current, before);
     if (changed) {
@@ -84,6 +135,7 @@ watch(
       fields.value = snapshot.fields;
       rawText.value = JSON.stringify(snapshot.config, null, 2);
       rawMode.value = snapshot.fields.length === 0;
+      initializeStructuredDrafts();
     } catch (cause) {
       error.value = cause instanceof Error ? cause.message : String(cause);
     } finally {
@@ -135,9 +187,10 @@ watch(
             type="text"
           />
           <input
-            v-else-if="field.type === 'number'"
+            v-else-if="field.type === 'number' || field.type === 'integer'"
             v-model.number="config[field.key] as number"
             type="number"
+            :step="field.type === 'integer' ? '1' : 'any'"
           />
           <label v-else-if="field.type === 'boolean'" class="check-label">
             <input v-model="config[field.key] as boolean" type="checkbox" />
@@ -145,10 +198,18 @@ watch(
           </label>
           <textarea
             v-else
-            :value="JSON.stringify(config[field.key], null, 2)"
+            v-model="structuredDrafts[field.key]"
             rows="5"
-            @input="config[field.key] = JSON.parse(($event.target as HTMLTextAreaElement).value)"
+            spellcheck="false"
+            @input="delete fieldErrors[field.key]"
+            @blur="parseStructuredField(field)"
           />
+          <small
+            v-if="fieldErrors[field.key]"
+            class="structured-field-error"
+          >
+            {{ fieldErrors[field.key] }}
+          </small>
           <small v-if="field.description">{{ field.description }}</small>
         </label>
       </div>

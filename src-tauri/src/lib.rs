@@ -251,7 +251,7 @@ pub fn run() {
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "show" => show_main(app, None),
-                    "logs" => show_main(app, Some("/logs")),
+                    "logs" => show_main(app, Some("logs")),
                     "quit" => {
                         let state = app.state::<DesktopState>().inner().clone();
                         let quitting = state.quitting.clone();

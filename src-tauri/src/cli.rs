@@ -50,6 +50,7 @@ fn is_mutating(args: &[String]) -> bool {
                     && args
                         .iter()
                         .any(|arg| arg == "--set" || arg == "--unset" || arg == "--file"))
+                || (subcommand == "setup" && !args.iter().any(|arg| arg == "--status"))
         }
         "browser" => subcommand == "install",
         "update" => subcommand == "apply",
@@ -377,6 +378,19 @@ mod tests {
             "demo",
             "--set",
             "limit=20"
+        ])));
+        assert!(is_mutating(&args(&["extensions", "setup", "demo"])));
+        assert!(is_mutating(&args(&[
+            "extensions",
+            "setup",
+            "demo",
+            "--uninstall"
+        ])));
+        assert!(!is_mutating(&args(&[
+            "extensions",
+            "setup",
+            "demo",
+            "--status"
         ])));
         assert!(!is_mutating(&args(&["status"])));
         assert!(!is_mutating(&args(&["config", "get", "--all"])));

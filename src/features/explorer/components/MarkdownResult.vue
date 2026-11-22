@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { Copy } from "@lucide/vue";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { useDesktopIntegration } from "@/app/useDesktopIntegration";
 import { renderSafeMarkdown } from "@/utils/markdown";
-import { inTauri } from "@/services/desktop";
 
 const props = defineProps<{
   text: string;
@@ -12,6 +11,7 @@ const props = defineProps<{
 
 const raw = ref(false);
 const rendered = computed(() => renderSafeMarkdown(props.text));
+const desktop = useDesktopIntegration();
 
 async function copy(): Promise<void> {
   await navigator.clipboard.writeText(props.text);
@@ -25,11 +25,7 @@ async function handleContentClick(event: MouseEvent): Promise<void> {
   const url = new URL(anchor.href);
   if (url.protocol !== "http:" && url.protocol !== "https:") return;
   event.preventDefault();
-  if (inTauri) {
-    await openUrl(url.toString());
-  } else {
-    window.open(url.toString(), "_blank", "noopener,noreferrer");
-  }
+  await desktop.openExternalUrl(url.toString());
 }
 </script>
 

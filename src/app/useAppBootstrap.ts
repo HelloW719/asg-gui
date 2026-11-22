@@ -40,12 +40,13 @@ export function useAppBootstrap(options: AppBootstrapOptions): void {
   );
 
   watch(
-    () => session.rootValid,
-    (valid) => {
+    () => [session.root, session.rootValid] as const,
+    ([root, valid], [previousRoot]) => {
       if (!valid) {
         statusStore.clear();
         return;
       }
+      if (root !== previousRoot) statusStore.clear();
       void appStatus.refresh();
     },
   );
@@ -60,7 +61,9 @@ export function useAppBootstrap(options: AppBootstrapOptions): void {
 
     cleanups.push(
       await listenNavigate((route) => {
-        options.onNavigate(route === "logs" ? "/logs" : "/status");
+        const destination =
+          route.replace(/^\/+/, "") === "logs" ? "/logs" : "/status";
+        options.onNavigate(destination);
       }),
     );
     cleanups.push(
