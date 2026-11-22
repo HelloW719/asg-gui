@@ -506,6 +506,16 @@ select option {
   border-radius: var(--radius-full);
   background: var(--field-bg);
   color: var(--text-faint);
+  transition:
+    border-color var(--motion-fast-effects),
+    background-color var(--motion-fast-effects);
+}
+
+.search-field:focus-within {
+  border-color: var(--field-focus-border);
+  outline: 2px solid var(--sage-strong);
+  outline-offset: 2px;
+  background: var(--field-focus-bg);
 }
 
 .search-field input {
@@ -513,6 +523,10 @@ select option {
   padding: 0;
   border: 0;
   background: transparent;
+}
+
+.search-field input:focus-visible {
+  outline: none;
 }
 
 .dialog-overlay {

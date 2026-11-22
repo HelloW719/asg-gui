@@ -830,7 +830,13 @@ test.describe("feature pages", () => {
     await expect(page.getByRole("heading", { name: "主题与效果" })).toBeVisible();
     await expectIntegratedWorkspace(page, ".settings-workspace");
     await expect(page.getByRole("heading", { name: "高级设置" })).toBeVisible();
-    await expect(page.getByPlaceholder("搜索配置路径")).toBeVisible();
+    const configSearch = page.getByPlaceholder("搜索配置路径");
+    const configSearchField = page.locator(".config-search");
+    await expect(configSearch).toBeVisible();
+    await configSearch.click();
+    await expect(configSearch).toHaveCSS("outline-style", "none");
+    await expect(configSearchField).toHaveCSS("outline-style", "solid");
+    await expect(configSearchField).toHaveCSS("border-radius", "999px");
     const frameRate = page.getByLabel("玻璃动效帧率");
     await frameRate.selectOption("90");
     await expect(frameRate).toHaveValue("90");
@@ -843,7 +849,13 @@ test.describe("feature pages", () => {
     await page.getByRole("link", { name: "日志", exact: true }).click();
     await expectIntegratedWorkspace(page, ".logs-workspace");
     await expect(page.getByText("gateway listening on 127.0.0.1:3000")).toBeVisible();
-    await page.getByPlaceholder("筛选日志").fill("not-present");
+    const search = page.getByPlaceholder("筛选日志");
+    const searchField = page.locator(".log-toolbar .search-field");
+    await search.click();
+    await expect(search).toHaveCSS("outline-style", "none");
+    await expect(searchField).toHaveCSS("outline-style", "solid");
+    await expect(searchField).toHaveCSS("border-radius", "999px");
+    await search.fill("not-present");
     await expect(page.getByText("暂无匹配日志。启动服务或开启实时跟随后会显示新内容。")).toBeVisible();
   });
 
