@@ -6,7 +6,7 @@
 
 .maintenance-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
   overflow: hidden;
   border: 1px solid var(--surface-card-divider);
@@ -20,6 +20,11 @@
   padding: var(--space-5);
   border-radius: 0;
   background: var(--surface-sunken);
+}
+
+.maintenance-card:first-child {
+  grid-column: 1 / -1;
+  min-height: auto;
 }
 
 .maintenance-card__icon {
@@ -125,6 +130,52 @@
 }
 
 
-@media (max-width: 900px) {
-  .maintenance-grid { grid-template-columns: 1fr; }
+@media (min-width: 721px) {
+  .maintenance-card:first-child {
+    display: grid;
+    grid-template-columns: 40px minmax(150px, 0.3fr) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+  }
+
+  .maintenance-card:first-child .maintenance-card__icon {
+    margin: 0;
+    grid-row: 1 / span 2;
+  }
+
+  .maintenance-card:first-child h2 {
+    margin: 0;
+  }
+
+  .maintenance-card:first-child > p,
+  .maintenance-card:first-child > strong,
+  .maintenance-card:first-child > .compact-list {
+    grid-column: 3;
+    margin: 0;
+  }
+}
+
+@media (max-width: 1040px) {
+  .maintenance-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .maintenance-card:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .maintenance-card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .maintenance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .maintenance-card:first-child,
+  .maintenance-card:last-child {
+    grid-column: auto;
+  }
 }

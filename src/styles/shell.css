@@ -823,7 +823,7 @@ m3e-theme {
 
 .page::before {
   position: absolute;
-  top: var(--space-3);
+  top: 10px;
   right: auto;
   left: clamp(24px, 3vw, 44px);
   width: clamp(120px, 22vw, 220px);
@@ -843,9 +843,9 @@ m3e-theme {
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: start;
-  gap: var(--space-4);
-  margin-bottom: var(--space-5);
-  padding: 2px 0 0;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: 0;
 }
 
 .page-header::before {
@@ -856,8 +856,8 @@ m3e-theme {
   width: 6px;
   background: linear-gradient(
     180deg,
-    var(--tactical-state, var(--tactical-signal)) 0 42px,
-    var(--tactical-line-soft) 42px 100%
+    var(--tactical-state, var(--tactical-signal)) 0 34px,
+    var(--tactical-line-soft) 34px 100%
   );
   content: "";
 }
@@ -865,7 +865,7 @@ m3e-theme {
 .page-header__rail {
   display: flex;
   width: 18px;
-  height: 42px;
+  height: 34px;
   align-items: center;
   justify-content: center;
   gap: 3px;
@@ -890,7 +890,7 @@ m3e-theme {
 
 .page-header h1 {
   position: relative;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
   font-size: var(--type-page);
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-text);
@@ -899,14 +899,14 @@ m3e-theme {
 
 .page-header__ghost {
   position: absolute;
-  top: 12px;
-  right: 104px;
+  top: 3px;
+  right: 88px;
   left: auto;
   display: block;
   overflow: visible;
   color: var(--tactical-ghost);
   font-family: "Epilogue", "Microsoft YaHei UI", sans-serif;
-  font-size: clamp(3.5rem, 6.8vw, 6.75rem);
+  font-size: clamp(2.75rem, 4.6vw, 5rem);
   font-weight: var(--weight-semibold);
   font-synthesis: none;
   letter-spacing: -0.035em;

@@ -57,14 +57,16 @@ const settings = useSettings();
     />
 
     <div class="settings-workspace glass-surface">
-      <AppearancePanel />
+      <div class="settings-overview">
+        <AppearancePanel />
 
-      <InstallPathPanel
-        :root="settings.session.root"
-        :busy="settings.jobs.hasRunningOperation"
-        @change="settings.session.chooseRoot"
-        @disconnect="settings.forgetOpen.value = true"
-      />
+        <InstallPathPanel
+          :root="settings.session.root"
+          :busy="settings.jobs.hasRunningOperation"
+          @change="settings.session.chooseRoot"
+          @disconnect="settings.forgetOpen.value = true"
+        />
+      </div>
 
       <ConfigBrowser
         :search="settings.search.value"

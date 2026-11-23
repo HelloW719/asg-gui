@@ -4,9 +4,19 @@
   border-radius: var(--radius-lg);
 }
 
+.settings-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.75fr);
+  align-items: stretch;
+  gap: var(--space-4);
+}
+
 .settings-appearance {
   position: relative;
-  padding: 0 0 var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--surface-card-divider);
+  border-radius: var(--radius-md);
+  background: var(--surface-subtle);
 }
 
 .settings-row {
@@ -39,16 +49,24 @@
 .settings-install {
   display: flex;
   position: relative;
-  align-items: center;
-  gap: var(--space-4);
-  margin-top: var(--space-4);
-  padding: var(--space-4) 0 var(--space-1);
-  border-top: 1px solid var(--surface-card-divider);
+  min-width: 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--surface-card-divider);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
 }
 
 .settings-install > div {
   min-width: 0;
   flex: 1;
+}
+
+.settings-install > .action-row,
+.settings-install > m3e-button.button {
+  align-self: flex-start;
 }
 
 .settings-install strong {
@@ -171,4 +189,10 @@
   .config-field code { display: none; }
   .settings-row { align-items: flex-start; flex-direction: column; }
   .glass-frame-rate-select { width: 100%; flex-basis: auto; }
+}
+
+@media (max-width: 1040px) {
+  .settings-overview {
+    grid-template-columns: 1fr;
+  }
 }

@@ -43,6 +43,43 @@
   margin: 0;
 }
 
+.result-panel--empty {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--sage) 4%, transparent),
+      transparent 38%
+    ),
+    var(--surface-subtle);
+}
+
+.result-empty {
+  max-width: 420px;
+  text-align: center;
+}
+
+.result-empty__mark {
+  display: block;
+  width: 72px;
+  height: 2px;
+  margin: 0 auto var(--space-4);
+  background: linear-gradient(90deg, transparent, var(--sage), transparent);
+}
+
+.result-empty h2 {
+  margin-bottom: var(--space-2);
+  font-size: var(--type-title-md);
+}
+
+.result-empty p {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: var(--type-sm);
+}
+
 .raw-output {
   overflow: auto;
   max-height: 60vh;

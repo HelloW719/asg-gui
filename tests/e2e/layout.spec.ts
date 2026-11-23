@@ -638,18 +638,21 @@ test("keeps operational text readable and progressive at minimum width", async (
   );
   expect(Math.min(...fontSizes)).toBeGreaterThanOrEqual(12);
 
+  const deckColumns = await page
+    .locator(".status-deck")
+    .evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" "));
+  await expect(page.locator(".status-rail")).toBeVisible();
+
   if (test.info().project.name === "minimum-window") {
     await expect(page.locator(".nav-item__copy").first()).toBeHidden();
-    const columns = await page
-      .locator(".status-hero")
-      .evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" "));
-    expect(columns).toHaveLength(1);
+    expect(deckColumns).toHaveLength(1);
     expect(
       await page.getByText("FlareSolverr", { exact: true }).evaluate(
         (element) => element.scrollWidth <= element.clientWidth,
       ),
     ).toBe(true);
   } else {
+    expect(deckColumns).toHaveLength(2);
     await expect(page.locator(".nav-item--active .nav-item__copy small")).toBeVisible();
     await expect(
       page.locator(".nav-item:not(.nav-item--active) .nav-item__copy small").first(),
@@ -849,6 +852,7 @@ test.describe("glass shell navigation", () => {
     await page.getByRole("link", { name: "检索" }).click();
     await expect(page.getByRole("heading", { name: "检索与抓取" })).toBeVisible();
     await expect(page.getByPlaceholder("输入问题、关键词或站点范围")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "等待搜索结果" })).toBeVisible();
     await expect(page.locator(".glass-scene canvas")).toHaveCount(3);
     await page.waitForTimeout(1600);
     await page.screenshot({ path: `test-results/explorer-${size}.png`, fullPage: true });
@@ -988,6 +992,12 @@ test.describe("feature pages", () => {
     await expect(page.getByRole("heading", { name: "主题与效果" })).toBeVisible();
     await expectIntegratedWorkspace(page, ".settings-workspace");
     await expect(page.getByRole("heading", { name: "高级设置" })).toBeVisible();
+    const overviewColumns = await page
+      .locator(".settings-overview")
+      .evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" "));
+    expect(overviewColumns).toHaveLength(
+      test.info().project.name === "minimum-window" ? 1 : 2,
+    );
     const configSearch = page.getByPlaceholder("搜索配置路径");
     const configSearchField = page.locator(".config-search");
     await expect(configSearch).toBeVisible();

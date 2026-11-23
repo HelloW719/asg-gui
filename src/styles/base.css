@@ -123,15 +123,15 @@ p {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-5);
-  margin-bottom: var(--space-5);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .page-header p {
   max-width: 720px;
   margin-bottom: 0;
-  font-size: var(--type-body);
-  line-height: var(--line-body);
+  font-size: var(--type-sm);
+  line-height: var(--line-compact);
 }
 
 .eyebrow {
