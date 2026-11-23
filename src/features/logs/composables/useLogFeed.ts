@@ -3,6 +3,12 @@ import { useAsgServices } from "@/app/useAsgServices";
 import type { FollowLogHandle } from "@/services/asg";
 import type { JobEvent, LogLine } from "@/types/cli";
 
+export interface LogFeedLine extends LogLine {
+  id: number;
+}
+
+const MAX_LOG_LINES = 2_000;
+
 export const LOG_SERVICE_OPTIONS = [
   { value: "gateway", label: "Gateway" },
   { value: "searxng", label: "SearXNG" },
@@ -13,13 +19,37 @@ export const LOG_SERVICE_OPTIONS = [
 export function useLogFeed() {
   const serviceClient = useAsgServices();
   const selectedServices = ref<string[]>(["gateway", "supervisor"]);
-  const lines = ref<LogLine[]>([]);
+  const lines = ref<LogFeedLine[]>([]);
   const query = ref("");
   const starting = ref(false);
   const following = ref(false);
   const jobId = ref<string | null>(null);
   const followHandle = ref<FollowLogHandle | null>(null);
   const error = ref<string | null>(null);
+  let nextLineId = 1;
+  let historyRevision = 0;
+  let pendingLines: LogFeedLine[] = [];
+  let flushFrame: number | null = null;
+
+  function flushPendingLines(): void {
+    flushFrame = null;
+    if (pendingLines.length === 0) return;
+    const nextLines = lines.value.concat(pendingLines);
+    pendingLines = [];
+    lines.value =
+      nextLines.length > MAX_LOG_LINES
+        ? nextLines.slice(-MAX_LOG_LINES)
+        : nextLines;
+  }
+
+  function scheduleLineFlush(): void {
+    if (flushFrame !== null) return;
+    flushFrame = window.requestAnimationFrame(flushPendingLines);
+  }
+
+  function withLineId(line: LogLine): LogFeedLine {
+    return { ...line, id: nextLineId++ };
+  }
 
   const filteredLines = computed(() => {
     const needle = query.value.trim().toLowerCase();
@@ -32,10 +62,14 @@ export function useLogFeed() {
   });
 
   async function loadHistory(): Promise<void> {
+    const revision = ++historyRevision;
     error.value = null;
     try {
-      lines.value = await serviceClient.logs.read(400, selectedServices.value);
+      const history = await serviceClient.logs.read(400, selectedServices.value);
+      if (revision !== historyRevision) return;
+      lines.value = history.map(withLineId);
     } catch (cause) {
+      if (revision !== historyRevision) return;
       error.value = cause instanceof Error ? cause.message : String(cause);
     }
   }
@@ -48,14 +82,18 @@ export function useLogFeed() {
     if (data.type !== "event" || data.event !== "log" || typeof data.line !== "string") {
       return;
     }
-    lines.value.push({
-      service: typeof data.service === "string" ? data.service : "cli",
-      at: typeof data.at === "string" ? data.at : undefined,
-      line: data.line,
-    });
-    if (lines.value.length > 2_000) {
-      lines.value.splice(0, lines.value.length - 2_000);
+    historyRevision += 1;
+    pendingLines.push(
+      withLineId({
+        service: typeof data.service === "string" ? data.service : "cli",
+        at: typeof data.at === "string" ? data.at : undefined,
+        line: data.line,
+      }),
+    );
+    if (pendingLines.length > MAX_LOG_LINES) {
+      pendingLines.splice(0, pendingLines.length - MAX_LOG_LINES);
     }
+    scheduleLineFlush();
   }
 
   async function toggleFollow(): Promise<void> {
@@ -112,6 +150,12 @@ export function useLogFeed() {
   }
 
   function clear(): void {
+    historyRevision += 1;
+    pendingLines = [];
+    if (flushFrame !== null) {
+      window.cancelAnimationFrame(flushFrame);
+      flushFrame = null;
+    }
     lines.value = [];
   }
 
@@ -140,6 +184,11 @@ export function useLogFeed() {
   onBeforeUnmount(() => {
     const running = followHandle.value;
     followHandle.value = null;
+    pendingLines = [];
+    if (flushFrame !== null) {
+      window.cancelAnimationFrame(flushFrame);
+      flushFrame = null;
+    }
     void running?.cancel();
   });
 

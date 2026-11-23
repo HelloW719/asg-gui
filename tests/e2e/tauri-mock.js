@@ -131,6 +131,7 @@
       if (command !== "run_cli") return null;
 
       const id = `fixture-${++jobId}`;
+      window.__TAURI_TEST_LAST_JOB_ID__ = id;
       const cliArgs = args.args ?? [];
       const name = cliArgs[0];
       const subcommand = cliArgs[1];
@@ -157,6 +158,7 @@
         );
       } else if (name === "logs") {
         if (cliArgs.includes("-f")) {
+          window.__TAURI_TEST_LAST_FOLLOW_JOB_ID__ = id;
           if (scenario.followRuntimeError) {
             finish(id, failure("logs", "LOG_STREAM_FAILED", "日志流异常结束。"));
           }

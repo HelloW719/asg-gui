@@ -478,17 +478,45 @@ test("renders complete Chinese ghost titles without clipping", async ({
 
     const metrics = await ghost.evaluate((element) => {
       const style = getComputedStyle(element);
+      const textRange = document.createRange();
+      textRange.selectNodeContents(element);
+      const textBounds = textRange.getBoundingClientRect();
+      const clippingAncestors: string[] = [];
+      let ancestor = element.parentElement;
+      while (ancestor) {
+        const ancestorStyle = getComputedStyle(ancestor);
+        const ancestorBounds = ancestor.getBoundingClientRect();
+        const clipsHorizontal = ancestorStyle.overflowX !== "visible";
+        const clipsVertical = ancestorStyle.overflowY !== "visible";
+        if (
+          (clipsHorizontal &&
+            (textBounds.left < ancestorBounds.left - 1 ||
+              textBounds.right > ancestorBounds.right + 1)) ||
+          (clipsVertical &&
+            (textBounds.top < ancestorBounds.top - 1 ||
+              textBounds.bottom > ancestorBounds.bottom + 1))
+        ) {
+          clippingAncestors.push(
+            `${ancestor.tagName.toLowerCase()}.${ancestor.className}`,
+          );
+        }
+        ancestor = ancestor.parentElement;
+      }
       return {
+        textHeight: textBounds.height,
+        textWidth: textBounds.width,
+        clippingAncestors,
         clientHeight: element.clientHeight,
         clientWidth: element.clientWidth,
         overflow: style.overflow,
-        scrollHeight: element.scrollHeight,
         scrollWidth: element.scrollWidth,
       };
     });
 
     expect(metrics.overflow).toBe("visible");
-    expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.clientHeight + 1);
+    expect(metrics.textWidth).toBeGreaterThan(0);
+    expect(metrics.textHeight).toBeGreaterThan(0);
+    expect(metrics.clippingAncestors).toEqual([]);
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
   }
 });
@@ -862,6 +890,12 @@ test.describe("feature pages", () => {
     await expect(page.getByText("待配置密钥")).toBeVisible();
     await expect(
       page.getByText("通用查询时与 SearXNG 并发，结果由网关统一融合。"),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("checkbox", { name: "deepseek 的启用状态" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("checkbox", { name: "main search 的启用状态" }),
     ).toBeVisible();
     await expect(page.getByRole("tab", { name: "内置插件" })).toHaveCount(0);
     await page.getByRole("tab", { name: "扩展 V2" }).click();

@@ -6,7 +6,7 @@ export default defineConfig({
   workers: 4,
   timeout: 30_000,
   use: {
-    baseURL: "http://127.0.0.1:1420",
+    baseURL: "http://127.0.0.1:1421",
     trace: "retain-on-failure",
   },
   projects: [
@@ -20,9 +20,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
-    url: "http://127.0.0.1:1420",
-    reuseExistingServer: true,
+    command: "npm run dev -- --port 1421 --strictPort",
+    url: "http://127.0.0.1:1421",
+    reuseExistingServer: false,
   },
 });
 

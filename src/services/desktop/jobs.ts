@@ -12,7 +12,6 @@ export interface RunningJob {
 }
 
 interface InternalJob {
-  events: JobEvent[];
   listeners: Set<(event: JobEvent) => void>;
   result?: CliResult;
   resolve: (result: CliResult) => void;
@@ -20,7 +19,7 @@ interface InternalJob {
   done: Promise<CliResult>;
 }
 
-class JobClient {
+export class JobClient {
   private initialization: Promise<void> | null = null;
   private readonly jobs = new Map<string, InternalJob>();
   private readonly unbound = new Map<string, JobEvent[]>();
@@ -51,8 +50,7 @@ class JobClient {
       options.stdin ?? null,
       options.mode ?? "json",
     );
-    const job = this.ensure(started.jobId);
-    if (options.onEvent) job.listeners.add(options.onEvent);
+    const job = this.ensure(started.jobId, options.onEvent);
     return {
       jobId: started.jobId,
       cancellable: started.cancellable,
@@ -62,9 +60,15 @@ class JobClient {
     };
   }
 
-  private ensure(jobId: string): InternalJob {
+  private ensure(
+    jobId: string,
+    listener?: (event: JobEvent) => void,
+  ): InternalJob {
     const existing = this.jobs.get(jobId);
-    if (existing) return existing;
+    if (existing) {
+      if (listener) existing.listeners.add(listener);
+      return existing;
+    }
 
     let resolve!: (result: CliResult) => void;
     let reject!: (error: unknown) => void;
@@ -73,15 +77,16 @@ class JobClient {
       reject = rejectPromise;
     });
     const job: InternalJob = {
-      events: [],
       listeners: new Set(),
       resolve,
       reject,
       done,
     };
     this.jobs.set(jobId, job);
-    for (const event of this.unbound.get(jobId) ?? []) this.applyEvent(job, event);
+    if (listener) job.listeners.add(listener);
+    const buffered = this.unbound.get(jobId) ?? [];
     this.unbound.delete(jobId);
+    for (const event of buffered) this.applyEvent(job, event);
     return job;
   }
 
@@ -97,8 +102,13 @@ class JobClient {
   }
 
   private applyEvent(job: InternalJob, event: JobEvent): void {
-    job.events.push(event);
-    for (const listener of job.listeners) listener(event);
+    for (const listener of job.listeners) {
+      try {
+        listener(event);
+      } catch (error) {
+        console.error("ASG 任务事件订阅失败：", error);
+      }
+    }
 
     if (event.kind === "result") {
       const candidate = event.data;
@@ -107,6 +117,7 @@ class JobClient {
 
     if (event.kind === "cancelled") {
       job.reject(new Error("任务已取消"));
+      job.listeners.clear();
     }
 
     if (event.kind === "exit") {
@@ -119,6 +130,7 @@ class JobClient {
             : "";
         job.reject(new Error(`CLI 任务未返回结构化结果${code}`));
       }
+      job.listeners.clear();
       setTimeout(() => this.jobs.delete(event.jobId), 1_000);
     }
   }

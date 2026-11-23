@@ -76,6 +76,7 @@ function currentRoute(engine: EngineInfo): string {
         <label class="switch">
           <input
             type="checkbox"
+            :aria-label="`${engine.name} 的启用状态`"
             :checked="engine.enabled"
             :disabled="busy"
             @change="emit('toggle', engine)"
