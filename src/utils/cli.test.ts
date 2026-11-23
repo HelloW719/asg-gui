@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   commandTextResultFromError,
   isCliResult,
+  isJobEvent,
+  isLogCliEvent,
+  isStackStatus,
+  parseCliData,
   parseNdjson,
 } from "./cli";
 
@@ -70,6 +74,71 @@ describe("CLI output helpers", () => {
     );
     expect(values).toHaveLength(3);
     expect(values[1]).toBe("not-json");
+  });
+
+  it("rejects an event whose CLI schema version is unknown", () => {
+    expect(
+      isJobEvent({
+        jobId: "job-1",
+        kind: "stdout",
+        data: {
+          type: "event",
+          schema_version: 2,
+          event: "log",
+          service: "gateway",
+          line: "ignored",
+        },
+      }),
+    ).toBe(false);
+    expect(
+      isLogCliEvent({
+        type: "event",
+        schema_version: 2,
+        event: "log",
+        service: "gateway",
+        line: "ignored",
+      }),
+    ).toBe(false);
+  });
+
+  it("accepts only contract-complete stack status data", () => {
+    expect(
+      isStackStatus({
+        services: {
+          gateway: { up: true },
+          searxng: { up: false, error: "ECONNREFUSED" },
+          flaresolverr: { up: true },
+        },
+        supervisor: { managed: true, mode: "schtasks", active: true },
+      }),
+    ).toBe(true);
+    expect(
+      isStackStatus({
+        services: {
+          gateway: { up: true },
+          searxng: { up: false },
+          flaresolverr: { up: true },
+        },
+        supervisor: { managed: true, mode: "schtasks", active: true },
+      }),
+    ).toBe(false);
+    expect(
+      isStackStatus({
+        services: {
+          gateway: { up: true },
+          searxng: { up: true },
+          flaresolverr: { up: true },
+        },
+        supervisor: { managed: true, mode: ["pid"], active: true },
+      }),
+    ).toBe(false);
+  });
+
+  it("throws when a successful command returns a different data shape", () => {
+    const parseStatus = parseCliData("status", isStackStatus);
+    expect(() => parseStatus({ services: {} })).toThrow(
+      "ASG status 返回的数据不符合 schema_version 1 契约",
+    );
   });
 });
 

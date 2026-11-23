@@ -12,6 +12,7 @@ export type {
   AsgCommandRunner,
   AsgRunOptions,
   AsgStreamHandle,
+  CliDataParser,
 } from "./command";
 export type { FollowLogHandle } from "./logs";
 export type { ExtensionConfigSnapshot } from "./sources";

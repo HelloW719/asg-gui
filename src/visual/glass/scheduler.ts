@@ -30,7 +30,7 @@ export function sceneIntervalForLevel(level: number): number {
     SCENE_FRAME_INTERVALS_MS.length - 1,
     Math.max(0, Math.round(level)),
   );
-  return SCENE_FRAME_INTERVALS_MS[index];
+  return SCENE_FRAME_INTERVALS_MS[index] ?? SCENE_FRAME_INTERVAL_MS;
 }
 
 export function sceneIntervalForFrameRate(

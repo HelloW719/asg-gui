@@ -4,6 +4,7 @@ import { jobClient } from "../services/desktop";
 import {
   AsgCommandError,
   type AsgCommandRunner,
+  type CliDataParser,
   type AsgRunOptions,
   type AsgStreamHandle,
 } from "../services/asg";
@@ -48,19 +49,23 @@ export const useJobsStore = defineStore("jobs", () => {
     if (index >= 0) operations.value.splice(index, 1);
   }
 
-  async function run<T>(args: string[], options: AsgRunOptions): Promise<T> {
+  async function run<T>(
+    args: string[],
+    options: AsgRunOptions,
+    parseData: CliDataParser<T>,
+  ): Promise<T> {
     const operationId = startOperation(options);
     try {
       const job = await jobClient.start(args, {
-        stdin: options.stdin,
-        mode: options.mode,
-        onEvent: options.onEvent,
+        ...(options.stdin === undefined ? {} : { stdin: options.stdin }),
+        ...(options.mode === undefined ? {} : { mode: options.mode }),
+        ...(options.onEvent === undefined ? {} : { onEvent: options.onEvent }),
       });
-      const result = (await job.done) as CliResult<T>;
+      const result = await job.done;
       lastResult.value = result;
       if (!result.ok) {
         const error = new AsgCommandError(
-          result.error ?? { code: "unknown", message: `${options.label}失败。` },
+          result.error,
           result.command,
           `${options.label}失败。`,
           result.data,
@@ -68,7 +73,7 @@ export const useJobsStore = defineStore("jobs", () => {
         lastError.value = error.message;
         throw error;
       }
-      return result.data as T;
+      return parseData(result.data);
     } catch (error) {
       lastError.value = error instanceof Error ? error.message : String(error);
       throw error;
@@ -77,23 +82,23 @@ export const useJobsStore = defineStore("jobs", () => {
     }
   }
 
-  async function stream<T>(
+  async function stream(
     args: string[],
     options: AsgRunOptions,
-  ): Promise<AsgStreamHandle<T>> {
+  ): Promise<AsgStreamHandle<unknown>> {
     const operationId = startOperation(options);
     try {
       const job = await jobClient.start(args, {
-        stdin: options.stdin,
+        ...(options.stdin === undefined ? {} : { stdin: options.stdin }),
         mode: options.mode ?? "jsonl",
-        onEvent: options.onEvent,
+        ...(options.onEvent === undefined ? {} : { onEvent: options.onEvent }),
       });
       const done = job.done
         .then((result) => {
           lastResult.value = result;
           if (!result.ok) {
             const error = new AsgCommandError(
-              result.error ?? { code: "unknown", message: `${options.label}失败。` },
+              result.error,
               result.command,
               `${options.label}失败。`,
               result.data,
@@ -101,7 +106,7 @@ export const useJobsStore = defineStore("jobs", () => {
             lastError.value = error.message;
             throw error;
           }
-          return result.data as T;
+          return result.data;
         })
         .catch((error) => {
           lastError.value = error instanceof Error ? error.message : String(error);

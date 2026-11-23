@@ -18,7 +18,7 @@ function expectNoImports(
 ): void {
   const violations = files.flatMap(([path, source]) => {
     const imports = [...source.matchAll(/from\s+["']([^"']+)["']/g)].map(
-      (match) => match[1],
+      (match) => match[1] ?? "",
     );
     return imports.filter((target) => forbidden.test(target)).map(
       (target) => `${path} -> ${target}`,

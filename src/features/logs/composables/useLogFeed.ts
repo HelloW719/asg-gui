@@ -2,6 +2,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useAsgServices } from "@/app/useAsgServices";
 import type { FollowLogHandle } from "@/services/asg";
 import type { JobEvent, LogLine } from "@/types/cli";
+import { isLogCliEvent } from "@/utils/cli";
 
 export interface LogFeedLine extends LogLine {
   id: number;
@@ -75,19 +76,16 @@ export function useLogFeed() {
   }
 
   function handleEvent(event: JobEvent): void {
-    if (event.kind !== "stdout" || !event.data || typeof event.data !== "object") {
+    if (event.kind !== "stdout" || !isLogCliEvent(event.data)) {
       return;
     }
-    const data = event.data as Record<string, unknown>;
-    if (data.type !== "event" || data.event !== "log" || typeof data.line !== "string") {
-      return;
-    }
+    const data = event.data;
     historyRevision += 1;
     pendingLines.push(
       withLineId({
         service: typeof data.service === "string" ? data.service : "cli",
-        at: typeof data.at === "string" ? data.at : undefined,
         line: data.line,
+        ...(typeof data.at === "string" ? { at: data.at } : {}),
       }),
     );
     if (pendingLines.length > MAX_LOG_LINES) {

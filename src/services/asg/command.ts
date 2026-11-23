@@ -19,15 +19,24 @@ export interface AsgStreamHandle<T> {
   cancel: () => Promise<void>;
 }
 
+export type CliDataParser<T> = (value: unknown) => T;
+
 export interface AsgCommandRunner {
-  run<T>(args: string[], options: AsgRunOptions): Promise<T>;
-  stream<T>(args: string[], options: AsgRunOptions): Promise<AsgStreamHandle<T>>;
+  run<T>(
+    args: string[],
+    options: AsgRunOptions,
+    parseData: CliDataParser<T>,
+  ): Promise<T>;
+  stream(
+    args: string[],
+    options: AsgRunOptions,
+  ): Promise<AsgStreamHandle<unknown>>;
 }
 
 export class AsgCommandError extends Error {
   readonly code: string;
   readonly details?: unknown;
-  readonly command?: string;
+  readonly command: string | undefined;
   readonly data?: unknown;
 
   constructor(

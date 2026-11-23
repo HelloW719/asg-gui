@@ -21,7 +21,7 @@ export interface SelectOption {
 
 const props = withDefaults(
   defineProps<{
-    modelValue?: string;
+    modelValue?: string | undefined;
     options: ReadonlyArray<SelectOption>;
     accessibleLabel: string;
     disabled?: boolean;
@@ -53,7 +53,7 @@ function selectOption(value: unknown): void {
 <template>
   <div class="select-field">
     <SelectRoot
-      :model-value="selectedValue"
+      v-bind="selectedValue === undefined ? {} : { modelValue: selectedValue }"
       :disabled="disabled"
       @update:model-value="selectOption"
     >

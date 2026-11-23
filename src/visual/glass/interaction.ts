@@ -204,6 +204,7 @@ export function nearestBoundaryTargets(
 
   while (targets.length < count) {
     const fallback = nearest[targets.length % nearest.length];
+    if (!fallback) break;
     targets.push({ ...fallback, index: fallback.index + targets.length * 0.01 });
   }
   return targets;
@@ -315,11 +316,16 @@ export function drawPointerTransient(
       shape,
       pointer.exitPoint,
     );
+    const fallbackTarget = targets[0] ?? {
+      x: pointer.exitPoint.x * width,
+      y: pointer.exitPoint.y * height,
+      index: 0,
+    };
     const frames = PARTICLE_SPECS.map((spec, index) =>
       dissolvingParticleFrame(
         spec,
         pointer,
-        targets[index] ?? targets[0],
+        targets[index] ?? fallbackTarget,
         width,
         height,
       ),

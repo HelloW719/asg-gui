@@ -6,6 +6,15 @@ import type {
   ExtensionSearchItem,
   SecretPayload,
 } from "../../types/cli";
+import {
+  isEnginesResult,
+  isExtensionConfigFieldsResult,
+  isExtensionConfigResult,
+  isExtensionsResult,
+  isExtensionSearchResult,
+  parseCliData,
+  parseVoidData,
+} from "../../utils/cli";
 import type { AsgCommandRunner } from "./command";
 
 export interface ExtensionConfigSnapshot {
@@ -36,25 +45,34 @@ function changedConfigArgs(
 export function createSourcesService(runner: AsgCommandRunner) {
   return {
     async listEngines(all = false): Promise<EngineInfo[]> {
-      const result = await runner.run<{ engines: EngineInfo[] }>(
+      const result = await runner.run(
         all ? ["engines", "list", "--all"] : ["engines", "list"],
         { label: "读取引擎" },
+        parseCliData("engines list", isEnginesResult),
       );
-      return result.engines ?? [];
+      return result.engines;
     },
 
     async setEngineEnabled(id: string, enabled: boolean): Promise<void> {
-      await runner.run<unknown>(["engines", enabled ? "enable" : "disable", id], {
-        label: enabled ? "启用搜索引擎" : "禁用搜索引擎",
-        visualState: "restarting",
-      });
+      await runner.run(
+        ["engines", enabled ? "enable" : "disable", id],
+        {
+          label: enabled ? "启用搜索引擎" : "禁用搜索引擎",
+          visualState: "restarting",
+        },
+        parseVoidData,
+      );
     },
 
     async setSearxngRoute(id: string, route: string): Promise<void> {
-      await runner.run<unknown>(["engines", "route", id, route], {
-        label: "设置 SearXNG 路由",
-        visualState: "restarting",
-      });
+      await runner.run(
+        ["engines", "route", id, route],
+        {
+          label: "设置 SearXNG 路由",
+          visualState: "restarting",
+        },
+        parseVoidData,
+      );
     },
 
     async setGatewayRoute(id: string, draft: EngineRouteDraft): Promise<void> {
@@ -64,73 +82,100 @@ export function createSourcesService(runner: AsgCommandRunner) {
         args.push("--hot-category", draft.hotCategory.trim());
       }
       if (args.length === 3) args.push("--clear");
-      await runner.run<unknown>(args, {
-        label: "设置 Gateway 路由",
-        visualState: "restarting",
-      });
+      await runner.run(
+        args,
+        {
+          label: "设置 Gateway 路由",
+          visualState: "restarting",
+        },
+        parseVoidData,
+      );
     },
 
     async setEngineSecret(engine: EngineInfo, payload: SecretPayload): Promise<void> {
       const args = ["engines", "secret", engine.id];
       if (payload.name) args.push("--name", payload.name);
       args.push("--stdin");
-      await runner.run<unknown>(args, {
-        label: `更新 ${engine.name} 密钥`,
-        stdin: payload.secret,
-        visualState: "restarting",
-      });
+      await runner.run(
+        args,
+        {
+          label: `更新 ${engine.name} 密钥`,
+          stdin: payload.secret,
+          visualState: "restarting",
+        },
+        parseVoidData,
+      );
     },
 
     async listExtensions(): Promise<ExtensionInfo[]> {
-      const result = await runner.run<{ extensions: ExtensionInfo[] }>(
+      const result = await runner.run(
         ["extensions", "list"],
         { label: "读取 V2 扩展" },
+        parseCliData("extensions list", isExtensionsResult),
       );
-      return result.extensions ?? [];
+      return result.extensions;
     },
 
     async searchExtensions(query: string): Promise<ExtensionSearchItem[]> {
       const normalized = query.trim();
-      const result = await runner.run<{ results: ExtensionSearchItem[] }>(
+      const result = await runner.run(
         ["extensions", "search", ...(normalized ? [normalized] : [])],
         {
           label: "搜索 GitHub 扩展",
           visualState: "loading",
         },
+        parseCliData("extensions search", isExtensionSearchResult),
       );
-      return result.results ?? [];
+      return result.results;
     },
 
     async installExtension(repo: string): Promise<void> {
-      await runner.run<unknown>(["extensions", "install", repo], {
-        label: "安装 V2 扩展",
-        visualState: "loading",
-      });
+      await runner.run(
+        ["extensions", "install", repo],
+        {
+          label: "安装 V2 扩展",
+          visualState: "loading",
+        },
+        parseVoidData,
+      );
     },
 
     async setupExtension(extension: ExtensionInfo): Promise<void> {
-      await runner.run<unknown>(["extensions", "setup", extension.id], {
-        label: `运行 ${extension.name || extension.id} 后端 setup`,
-        visualState: "loading",
-      });
+      await runner.run(
+        ["extensions", "setup", extension.id],
+        {
+          label: `运行 ${extension.name || extension.id} 后端 setup`,
+          visualState: "loading",
+        },
+        parseVoidData,
+      );
     },
 
     async removeExtension(extension: ExtensionInfo): Promise<void> {
-      await runner.run<unknown>(["extensions", "remove", extension.id], {
-        label: `卸载扩展 ${extension.id}`,
-        visualState: "loading",
-      });
+      await runner.run(
+        ["extensions", "remove", extension.id],
+        {
+          label: `卸载扩展 ${extension.id}`,
+          visualState: "loading",
+        },
+        parseVoidData,
+      );
     },
 
     async loadExtensionConfig(extension: ExtensionInfo): Promise<ExtensionConfigSnapshot> {
       const [configResult, describeResult] = await Promise.all([
-        runner.run<{ config?: Record<string, unknown> }>(
+        runner.run(
           ["extensions", "config", extension.id],
           { label: "读取扩展配置" },
+          parseCliData("extensions config", isExtensionConfigResult),
         ),
-        runner.run<{ fields?: ConfigFieldInfo[] }>(
+        runner.run(
           ["extensions", "config", extension.id, "--describe"],
           { label: "读取扩展字段" },
+          parseCliData(
+            "extensions config --describe",
+            isExtensionConfigFieldsResult,
+          ),
         ),
       ]);
       return {
@@ -147,10 +192,14 @@ export function createSourcesService(runner: AsgCommandRunner) {
     ): Promise<boolean> {
       const args = changedConfigArgs(id, current, original);
       if (args.length === 3) return false;
-      await runner.run<unknown>(args, {
-        label: `保存扩展 ${id} 配置`,
-        visualState: "restarting",
-      });
+      await runner.run(
+        args,
+        {
+          label: `保存扩展 ${id} 配置`,
+          visualState: "restarting",
+        },
+        parseVoidData,
+      );
       return true;
     },
 
@@ -158,13 +207,14 @@ export function createSourcesService(runner: AsgCommandRunner) {
       extension: ExtensionInfo,
       payload: Required<SecretPayload>,
     ): Promise<void> {
-      await runner.run<unknown>(
+      await runner.run(
         ["extensions", "secret", extension.id, "--name", payload.name, "--stdin"],
         {
           label: `更新扩展 ${extension.id} 密钥`,
           stdin: payload.secret,
           visualState: "restarting",
         },
+        parseVoidData,
       );
     },
   };

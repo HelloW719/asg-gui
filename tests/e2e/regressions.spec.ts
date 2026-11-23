@@ -174,6 +174,7 @@ test("allows structured extension fields to be edited and validated", async ({
         name: "Object Extension",
         version: "1.0.0",
         provides: ["fetch"],
+        path: "C:\\ASG-Fixture\\data\\extensions\\object-extension",
         backends: [],
         fetch_channels: [{ id: "object:http", name: "HTTP" }],
         search_engines: [],

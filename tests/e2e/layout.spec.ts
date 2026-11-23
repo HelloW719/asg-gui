@@ -10,7 +10,10 @@ async function expectIntegratedWorkspace(
   expect(
     await workspace.evaluate((element) => {
       const style = getComputedStyle(element);
-      return style.backdropFilter || style.webkitBackdropFilter;
+      return (
+        style.getPropertyValue("backdrop-filter") ||
+        style.getPropertyValue("-webkit-backdrop-filter")
+      );
     }),
   ).toBe("none");
   expect(
@@ -92,7 +95,7 @@ test.describe("Neumorphic M3E button visual contract", () => {
         const shadow = getComputedStyle(element).boxShadow;
         const alphaValues = [
           ...shadow.matchAll(/(?:,\s*|\/\s*)([01](?:\.\d+)?)\)/g),
-        ].map((match) => Number.parseFloat(match[1]));
+        ].map((match) => Number.parseFloat(match[1] ?? "0"));
         return Math.max(0, ...alphaValues);
       });
 
@@ -166,9 +169,14 @@ test.describe("Neumorphic M3E button visual contract", () => {
     expect([
       ...new Set(buttonSurfaces.map((surface) => surface.backgroundColor)),
     ]).toEqual(["rgba(0, 0, 0, 0)"]);
-    expect(buttonSurfaces[0].labelColor).toBe(buttonSurfaces[1].labelColor);
-    expect(buttonSurfaces[0].labelColor).not.toBe(buttonSurfaces[2].labelColor);
-    expect(buttonSurfaces[0].labelColor).not.toBe(buttonSurfaces[3].labelColor);
+    const [primarySurface, secondarySurface, ghostSurface, dangerSurface] =
+      buttonSurfaces;
+    if (!primarySurface || !secondarySurface || !ghostSurface || !dangerSurface) {
+      throw new Error("missing button surface fixture");
+    }
+    expect(primarySurface.labelColor).toBe(secondarySurface.labelColor);
+    expect(primarySurface.labelColor).not.toBe(ghostSurface.labelColor);
+    expect(primarySurface.labelColor).not.toBe(dangerSurface.labelColor);
 
     await page.keyboard.press("Tab");
     await expect(primary).toBeFocused();
@@ -191,6 +199,10 @@ test.describe("Neumorphic M3E button visual contract", () => {
     const primaryBox = await primary.boundingBox();
     expect(primaryBox).not.toBeNull();
     if (!primaryBox) return;
+    const primaryRestingStyle = restingStyles["button-primary"];
+    if (!primaryRestingStyle) {
+      throw new Error("missing primary button resting style");
+    }
     await page.mouse.move(
       primaryBox.x + primaryBox.width / 2,
       primaryBox.y + primaryBox.height / 2,
@@ -199,7 +211,7 @@ test.describe("Neumorphic M3E button visual contract", () => {
       .poll(() =>
         primary.evaluate((element) => getComputedStyle(element).boxShadow),
       )
-      .not.toBe(restingStyles["button-primary"].boxShadow);
+      .not.toBe(primaryRestingStyle.boxShadow);
     await expect
       .poll(() =>
         primary.evaluate((element) => getComputedStyle(element).transform),
@@ -692,15 +704,16 @@ test.describe("dashboard fixture", () => {
 
     const samplePixels = (points: Array<{ x: number; y: number }>) =>
       canvas.evaluate((element, normalizedPoints) => {
-        const context = (element as HTMLCanvasElement).getContext("2d");
+        const sceneCanvas = element as HTMLCanvasElement;
+        const context = sceneCanvas.getContext("2d");
         if (!context) {
           return normalizedPoints.map(() => [0, 0, 0, 0]);
         }
         return normalizedPoints.map((point) =>
           Array.from(
             context.getImageData(
-              Math.round(point.x * element.width),
-              Math.round(point.y * element.height),
+              Math.round(point.x * sceneCanvas.width),
+              Math.round(point.y * sceneCanvas.height),
               1,
               1,
             ).data,
@@ -715,17 +728,18 @@ test.describe("dashboard fixture", () => {
         : { x: 0.3, y: 0.34 };
     const maxParticleAlpha = () =>
       particleCanvas.evaluate((element) => {
-        const context = (element as HTMLCanvasElement).getContext("2d");
+        const sceneCanvas = element as HTMLCanvasElement;
+        const context = sceneCanvas.getContext("2d");
         if (!context) return 0;
         const image = context.getImageData(
           0,
           0,
-          element.width,
-          element.height,
+          sceneCanvas.width,
+          sceneCanvas.height,
         );
         let maximum = 0;
         for (let index = 3; index < image.data.length; index += 4) {
-          maximum = Math.max(maximum, image.data[index]);
+          maximum = Math.max(maximum, image.data[index] ?? 0);
         }
         return maximum;
       });
@@ -745,11 +759,22 @@ test.describe("dashboard fixture", () => {
       point,
       { x: 0.75, y: 0.7 },
     ]);
+    if (!tracking || !geometryColor) {
+      throw new Error("missing sampled pixel fixture");
+    }
+    const channelDelta = (index: number): number => {
+      const trackingValue = tracking[index];
+      const geometryValue = geometryColor[index];
+      if (trackingValue === undefined || geometryValue === undefined) {
+        throw new Error("sampled pixel is missing an RGBA channel");
+      }
+      return Math.abs(trackingValue - geometryValue);
+    };
     expect(
       Math.max(
-        Math.abs(tracking[0] - geometryColor[0]),
-        Math.abs(tracking[1] - geometryColor[1]),
-        Math.abs(tracking[2] - geometryColor[2]),
+        channelDelta(0),
+        channelDelta(1),
+        channelDelta(2),
       ),
     ).toBeLessThanOrEqual(16);
 

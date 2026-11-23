@@ -195,7 +195,7 @@ function drawFusion(
 
   const image = blur.getImageData(0, 0, scaledWidth, scaledHeight);
   for (let index = 3; index < image.data.length; index += 4) {
-    let value = (image.data[index] - 122) / 28;
+    let value = ((image.data[index] ?? 0) - 122) / 28;
     if (value <= 0) value = 0;
     else if (value >= 1) value = 1;
     else value = value * value * (3 - 2 * value);

@@ -71,15 +71,17 @@ describe("glass pointer particles", () => {
       entryPoint: { x: 0.2, y: 0.3 },
       exitPoint: { x: 0.2, y: 0.3 },
     };
+    const spec = PARTICLE_SPECS[0];
+    if (!spec) throw new Error("missing particle fixture");
     const early = dissolvingParticleFrame(
-      PARTICLE_SPECS[0],
+      spec,
       start,
       target,
       width,
       height,
     );
     const late = dissolvingParticleFrame(
-      PARTICLE_SPECS[0],
+      spec,
       { ...start, phaseProgress: 1 },
       target,
       width,

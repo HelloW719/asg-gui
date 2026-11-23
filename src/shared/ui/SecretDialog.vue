@@ -53,12 +53,11 @@ watch(
 
 function submit(): void {
   if (props.busy || !secret.value.trim()) return;
-  emit("submit", {
-    name: props.editableName
-      ? customName.value.trim() || undefined
-      : selectedName.value || undefined,
-    secret: secret.value,
-  });
+  const name = props.editableName
+    ? customName.value.trim()
+    : selectedName.value;
+  const payload = { secret: secret.value };
+  emit("submit", name ? { name, ...payload } : payload);
 }
 </script>
 
