@@ -5,6 +5,12 @@ const router = createRouter({
   routes: [
     { path: "/", redirect: "/status" },
     {
+      path: "/welcome",
+      name: "welcome",
+      component: () => import("@/features/welcome/WelcomePage.vue"),
+      meta: { title: "欢迎使用" },
+    },
+    {
       path: "/status",
       name: "status",
       component: () => import("@/features/dashboard/DashboardPage.vue"),

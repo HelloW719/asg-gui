@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { LoaderCircle } from "@lucide/vue";
 import { useAppBootstrap } from "@/app/useAppBootstrap";
 import { useAppStatus } from "@/app/useAppStatus";
@@ -18,9 +18,34 @@ const appearance = useAppearanceStore();
 const jobs = useJobsStore();
 const appStatus = useAppStatus();
 const router = useRouter();
+const route = useRoute();
 const quitBlockedMessage = ref<string | null>(null);
 
 const showShell = computed(() => session.rootValid);
+const showSidebar = computed(
+  () => showShell.value && route.name !== "welcome",
+);
+
+watch(
+  () =>
+    [
+      session.hydrated,
+      session.rootValid,
+      session.onboardingCompleted,
+      route.name,
+    ] as const,
+  ([hydrated, rootValid, onboardingCompleted, routeName]) => {
+    if (
+      hydrated &&
+      rootValid &&
+      !onboardingCompleted &&
+      routeName !== "welcome"
+    ) {
+      void router.replace("/welcome");
+    }
+  },
+  { immediate: true },
+);
 
 useAppBootstrap({
   onNavigate: (route) => {
@@ -66,8 +91,12 @@ useAppBootstrap({
           </div>
         </div>
 
-        <div v-else class="app-workspace">
-          <AppSidebar v-if="showShell" />
+        <div
+          v-else
+          class="app-workspace"
+          :class="{ 'app-workspace--welcome': !showSidebar }"
+        >
+          <AppSidebar v-if="showSidebar" />
           <main class="app-content">
             <RouterView v-if="showShell" v-slot="{ Component }">
               <Transition name="page" mode="out-in">

@@ -626,6 +626,10 @@ m3e-theme {
   grid-template-columns: 184px minmax(0, 1fr);
 }
 
+.app-workspace--welcome {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .app-sidebar {
   isolation: isolate;
   gap: 7px;
@@ -1077,6 +1081,7 @@ m3e-theme {
 
 @media (max-width: 1120px) {
   .app-workspace { grid-template-columns: 72px minmax(0, 1fr); }
+  .app-workspace--welcome { grid-template-columns: minmax(0, 1fr); }
   .app-sidebar { padding-inline: 8px; }
   .app-sidebar__label,
   .app-sidebar__footer,

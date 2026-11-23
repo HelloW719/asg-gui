@@ -1,5 +1,5 @@
-use std::fs;
 use std::env;
+use std::fs;
 use std::path::{Path, PathBuf};
 
 use tauri::{AppHandle, Manager};
@@ -80,6 +80,10 @@ pub fn validate_root(path: &Path) -> RootSelection {
     }
 }
 
+pub fn default_root(home: &Path) -> PathBuf {
+    home.join("agent_search_gateway")
+}
+
 fn find_system_node() -> Option<PathBuf> {
     let executable = if cfg!(target_os = "windows") {
         "node.exe"
@@ -148,5 +152,14 @@ mod tests {
         } else {
             root.join("data/toolchain/node/bin/node")
         }
+    }
+
+    #[test]
+    fn resolves_the_installer_default_root_from_home() {
+        let home = PathBuf::from("/home/fixture");
+        assert_eq!(
+            default_root(&home),
+            PathBuf::from("/home/fixture/agent_search_gateway")
+        );
     }
 }

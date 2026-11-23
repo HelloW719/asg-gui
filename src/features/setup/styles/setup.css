@@ -120,6 +120,24 @@
   background: var(--line);
 }
 
+.setup-autodetect {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.setup-autodetect strong {
+  font-size: var(--type-body-strong);
+}
+
+.setup-autodetect p {
+  margin: var(--space-1) 0 0;
+  font-size: var(--type-sm);
+  line-height: var(--line-compact);
+}
+
 .setup-orbit {
   border-color: color-mix(in srgb, var(--md-sys-color-primary) 28%, transparent);
 }
@@ -137,4 +155,5 @@
   .setup-orbit { width: 92px; height: 92px; }
   .setup-orbit span:nth-child(1) { inset: 13px; }
   .setup-orbit span:nth-child(2) { top: 38px; }
+  .setup-autodetect { flex-direction: column; }
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
-import { FolderSearch, Link2, ShieldCheck } from "@lucide/vue";
+import { FolderSearch, Link2, Radar, ShieldCheck } from "@lucide/vue";
 import { useSessionStore } from "@/stores/session";
 import InlineNotice from "@/shared/ui/InlineNotice.vue";
 
@@ -31,6 +31,23 @@ async function usePath(): Promise<void> {
   try {
     const selection = await session.chooseRootPath(manualPath.value.trim());
     if (!selection.valid) error.value = selection.reason ?? "目录校验失败。";
+  } catch (cause) {
+    error.value = cause instanceof Error ? cause.message : String(cause);
+  } finally {
+    checking.value = false;
+  }
+}
+
+async function detectDefault(): Promise<void> {
+  checking.value = true;
+  error.value = null;
+  try {
+    const selection = await session.detectRoot();
+    if (!selection) {
+      error.value = "未在默认安装目录中找到 ASG。";
+    } else if (!selection.valid) {
+      error.value = selection.reason ?? "默认安装目录校验失败。";
+    }
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
   } finally {
@@ -80,6 +97,22 @@ async function usePath(): Promise<void> {
       </div>
 
       <div class="divider" />
+
+      <div v-if="!props.preview" class="setup-autodetect">
+        <div>
+          <strong>自动检测</strong>
+          <p>启动时已检查安装器默认目录。安装尚未完成时可以再次检测。</p>
+        </div>
+        <BaseButton
+          size="compact"
+          :loading="checking"
+          :disabled="props.preview || checking"
+          @click="detectDefault"
+        >
+          <template #icon><Radar :size="15" /></template>
+          重新检测
+        </BaseButton>
+      </div>
 
       <label class="field">
         <span>已有安装路径</span>

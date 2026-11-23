@@ -11,6 +11,10 @@ export async function getDesktopAppState(): Promise<DesktopAppState> {
   return invoke<DesktopAppState>("get_app_state");
 }
 
+export async function detectDefaultAsgRoot(): Promise<RootSelection | null> {
+  return invoke<RootSelection | null>("detect_default_asg_root");
+}
+
 export async function chooseAsgRoot(): Promise<RootSelection | null> {
   return invoke<RootSelection | null>("choose_asg_root");
 }
@@ -25,6 +29,12 @@ export async function clearAsgRoot(): Promise<void> {
 
 export async function setDesktopTheme(theme: ThemePreference): Promise<void> {
   await invoke("set_theme", { theme });
+}
+
+export async function setDesktopOnboardingCompleted(
+  completed: boolean,
+): Promise<void> {
+  await invoke("set_onboarding_completed", { completed });
 }
 
 export async function startCliJob(

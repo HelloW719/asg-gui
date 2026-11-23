@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Database, FileLock2 } from "@lucide/vue";
+import { Database, FileLock2, Route } from "@lucide/vue";
+import { useRouter } from "vue-router";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import ConfirmDialog from "@/shared/ui/ConfirmDialog.vue";
 import InlineNotice from "@/shared/ui/InlineNotice.vue";
@@ -12,6 +13,16 @@ import InstallPathPanel from "./components/InstallPathPanel.vue";
 import { useSettings } from "./composables/useSettings";
 
 const settings = useSettings();
+const router = useRouter();
+
+async function reopenWelcome(): Promise<void> {
+  try {
+    await settings.session.setOnboardingCompleted(false);
+    await router.push("/welcome");
+  } catch (cause) {
+    settings.error.value = cause instanceof Error ? cause.message : String(cause);
+  }
+}
 </script>
 
 <template>
@@ -21,6 +32,15 @@ const settings = useSettings();
       description="每个字段单独通过 config set 校验、写入并整栈重启。"
     >
       <template #actions>
+        <BaseButton
+          size="compact"
+          variant="secondary"
+          :disabled="settings.jobs.hasRunningOperation"
+          @click="reopenWelcome"
+        >
+          <template #icon><Route :size="15" /></template>
+          重新打开欢迎向导
+        </BaseButton>
         <BaseButton
           size="compact"
           :loading="settings.loading.value || settings.jobs.hasRunningOperation"

@@ -9,7 +9,9 @@
   const scenario = (window.__TAURI_TEST_SCENARIO__ ??= {});
   scenario.root ??= "C:\\ASG-Fixture";
   scenario.rootValid ??= true;
+  scenario.onboardingCompleted ??= true;
   scenario.selectedRoot ??= null;
+  scenario.detectedRoot ??= null;
   scenario.statusCallCount ??= 0;
   scenario.configCallCount ??= 0;
   window.__TAURI_TEST_INVOKES__ = testInvokes;
@@ -89,9 +91,20 @@
         return {
           root: scenario.root,
           rootValid: scenario.rootValid,
+          invalidReason: scenario.invalidReason ?? undefined,
           platform: "windows",
           version: "0.1.0",
           theme: "dark",
+          onboardingCompleted: scenario.onboardingCompleted,
+        };
+      }
+      if (command === "detect_default_asg_root") {
+        if (!scenario.detectedRoot) return null;
+        scenario.root = scenario.detectedRoot;
+        scenario.rootValid = true;
+        return {
+          path: scenario.detectedRoot,
+          valid: true,
         };
       }
       if (command === "set_asg_root") {
@@ -116,7 +129,15 @@
         scenario.rootValid = false;
         return null;
       }
-      if (command === "set_theme" || command === "show_window" || command === "hide_window") {
+      if (command === "set_onboarding_completed") {
+        scenario.onboardingCompleted = args.completed;
+        return null;
+      }
+      if (
+        command === "set_theme" ||
+        command === "show_window" ||
+        command === "hide_window"
+      ) {
         return null;
       }
       if (command === "cancel_cli") {
@@ -242,6 +263,28 @@
               }),
             );
           }
+        } else if (subcommand === "install") {
+          const repo = cliArgs[2] ?? "unknown/invalid";
+          const extensionId = repo
+            .split("/")
+            .at(-1)
+            ?.split("@")[0]
+            ?.replace(/^agent-search-gateway-plugin-/, "") ?? "unknown";
+          const installed = scenario.extensions ?? [];
+          scenario.extensions = [
+            ...installed.filter((extension) => extension.id !== extensionId),
+            {
+              id: extensionId,
+              name: extensionId,
+              version: "fixture",
+              provides: ["fetch"],
+              path: `C:\\ASG-Fixture\\data\\extensions\\${extensionId}`,
+              backends: [],
+              fetch_channels: [],
+              search_engines: [],
+            },
+          ];
+          finish(id, result("extensions", { extensions: scenario.extensions }));
         } else {
           finish(
             id,
@@ -288,13 +331,15 @@
         scenario.secretError
       ) {
         finish(id, failure("config.set", "SECRET_WRITE_FAILED", scenario.secretError));
+      } else if (name === "restart" && scenario.restartError) {
+        finish(id, failure("restart", "RESTART_FAILED", scenario.restartError));
       } else if (name === "config" && subcommand === "get") {
         scenario.configCallCount += 1;
         finish(
           id,
           result("config.get", {
             gateway: { port: 3000, root_marker: scenario.root },
-            secrets: { test: { api_key: "set" } },
+            secrets: scenario.secrets ?? { test: { api_key: "set" } },
           }),
         );
       } else {

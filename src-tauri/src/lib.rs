@@ -92,6 +92,7 @@ fn get_app_state(app: tauri::AppHandle, state: State<'_, DesktopState>) -> Deskt
         .clone();
     let root = state.root();
     let selection = root.as_ref().map(|path| config::validate_root(path));
+    let onboarding_completed = settings.effective_onboarding_completed();
     DesktopAppState {
         root: root.map(|path| path.to_string_lossy().to_string()),
         root_valid: selection.as_ref().is_some_and(|selection| selection.valid),
@@ -99,7 +100,38 @@ fn get_app_state(app: tauri::AppHandle, state: State<'_, DesktopState>) -> Deskt
         platform: models::platform_name().to_string(),
         version: app.package_info().version.to_string(),
         theme: settings.theme,
+        onboarding_completed,
     }
+}
+
+#[tauri::command]
+fn detect_default_asg_root(
+    app: tauri::AppHandle,
+    state: State<'_, DesktopState>,
+) -> Result<Option<RootSelection>, String> {
+    let home = app
+        .path()
+        .home_dir()
+        .map_err(|error| format!("无法定位用户主目录：{error}"))?;
+    let path = config::default_root(&home);
+    if !path.is_dir() {
+        return Ok(None);
+    }
+
+    let selection = config::validate_root(&path);
+    if selection.valid {
+        state.set_root(Some(path.clone()));
+        let mut settings = state
+            .settings
+            .write()
+            .map_err(|_| "GUI 设置锁不可用。".to_string())?;
+        if settings.root.is_none() && settings.onboarding_completed.is_none() {
+            settings.onboarding_completed = Some(false);
+        }
+        settings.root = Some(path.to_string_lossy().to_string());
+        config::save_settings(&app, &settings)?;
+    }
+    Ok(Some(selection))
 }
 
 #[tauri::command]
@@ -120,6 +152,9 @@ async fn choose_asg_root(
             .settings
             .write()
             .map_err(|_| "GUI 设置锁不可用。".to_string())?;
+        if settings.root.is_none() && settings.onboarding_completed.is_none() {
+            settings.onboarding_completed = Some(false);
+        }
         settings.root = Some(path.to_string_lossy().to_string());
         config::save_settings(&app, &settings)?;
     }
@@ -140,6 +175,9 @@ fn set_asg_root(
             .settings
             .write()
             .map_err(|_| "GUI 设置锁不可用。".to_string())?;
+        if settings.root.is_none() && settings.onboarding_completed.is_none() {
+            settings.onboarding_completed = Some(false);
+        }
         settings.root = Some(path.to_string_lossy().to_string());
         config::save_settings(&app, &settings)?;
     }
@@ -171,6 +209,20 @@ fn set_theme(
         .write()
         .map_err(|_| "GUI 设置锁不可用。".to_string())?;
     settings.theme = theme;
+    config::save_settings(&app, &settings)
+}
+
+#[tauri::command]
+fn set_onboarding_completed(
+    app: tauri::AppHandle,
+    state: State<'_, DesktopState>,
+    completed: bool,
+) -> Result<(), String> {
+    let mut settings = state
+        .settings
+        .write()
+        .map_err(|_| "GUI 设置锁不可用。".to_string())?;
+    settings.onboarding_completed = Some(completed);
     config::save_settings(&app, &settings)
 }
 
@@ -225,10 +277,12 @@ pub fn run() {
         .manage(state)
         .invoke_handler(tauri::generate_handler![
             get_app_state,
+            detect_default_asg_root,
             choose_asg_root,
             set_asg_root,
             clear_asg_root,
             set_theme,
+            set_onboarding_completed,
             cli::run_cli,
             cli::cancel_cli,
             show_window,

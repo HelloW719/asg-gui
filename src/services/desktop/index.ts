@@ -2,9 +2,11 @@ export {
   cancelCliJob,
   chooseAsgRoot,
   clearAsgRoot,
+  detectDefaultAsgRoot,
   getDesktopAppState,
   inTauri,
   setAsgRoot,
+  setDesktopOnboardingCompleted,
   setDesktopTheme,
   startCliJob,
 } from "./api";

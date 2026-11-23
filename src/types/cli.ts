@@ -91,6 +91,7 @@ export interface DesktopAppState {
   platform: "windows" | "macos" | "linux" | "unknown";
   version: string;
   theme: ThemePreference;
+  onboardingCompleted: boolean;
 }
 
 export interface JobStart {

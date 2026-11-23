@@ -55,7 +55,7 @@ describe("frontend architecture boundaries", () => {
   it("keeps feature modules from reaching into each other", () => {
     expectNoImports(
       filesIn("features"),
-      /(^|\/)features\/(dashboard|explorer|sources|settings|logs|maintenance|setup)(\/|$)/,
+      /(^|\/)features\/(dashboard|explorer|sources|settings|logs|maintenance|setup|welcome)(\/|$)/,
       "功能模块只能通过 app 层或共享 UI 进行跨模块协作",
     );
   });
