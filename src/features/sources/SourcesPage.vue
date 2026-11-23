@@ -22,7 +22,6 @@ const sources = useSources();
 <template>
   <div class="page sources-page">
     <PageHeader
-      eyebrow="能力来源"
       title="引擎与扩展"
       description="扩展仅展示 V2 manifest；后端 setup、配置和卸载均由 CLI 完成。"
     />

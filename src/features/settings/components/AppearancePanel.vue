@@ -34,7 +34,7 @@ function chooseFrameRate(value: string): void {
 
 <template>
   <section class="settings-appearance">
-    <SectionHeading eyebrow="应用外观" title="主题与效果">
+    <SectionHeading title="主题与效果">
       <Sparkles :size="21" />
     </SectionHeading>
     <div class="settings-row">

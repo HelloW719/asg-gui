@@ -50,7 +50,7 @@ test("renders the desktop bridge requirement without overflow", async ({ page })
       .evaluate((element) =>
         Number.parseFloat(getComputedStyle(element).fontSize),
       ),
-  ).toBeLessThanOrEqual(40.8);
+  ).toBeLessThanOrEqual(44);
 
   const dimensions = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
@@ -487,6 +487,10 @@ test("renders complete Chinese ghost titles without clipping", async ({
     const ghost = page.locator(".page-header__ghost");
     await expect(ghost).toHaveText(title);
     await expect(ghost).toHaveAttribute("aria-hidden", "true");
+    if (test.info().project.name === "minimum-window") {
+      await expect(ghost).toHaveCSS("display", "none");
+      continue;
+    }
 
     const metrics = await ghost.evaluate((element) => {
       const style = getComputedStyle(element);
@@ -610,6 +614,47 @@ test("uses the shared shape scale across feature surfaces", async ({ page }) => 
   await expectRadius(".maintenance-workspace", "18px");
   await expectRadius(".maintenance-grid", "14px");
   await expectRadius(".maintenance-card", "0px");
+});
+
+test("keeps operational text readable and progressive at minimum width", async ({
+  page,
+}) => {
+  await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
+
+  const fontSizes = await page.evaluate(() =>
+    [
+      ".page-header p",
+      ".status-summary dt",
+      ".service-card__label",
+      ".service-card__meta dt",
+      ".service-card__meta dd",
+    ].map((selector) =>
+      Number.parseFloat(
+        getComputedStyle(document.querySelector<HTMLElement>(selector)!).fontSize,
+      ),
+    ),
+  );
+  expect(Math.min(...fontSizes)).toBeGreaterThanOrEqual(12);
+
+  if (test.info().project.name === "minimum-window") {
+    await expect(page.locator(".nav-item__copy").first()).toBeHidden();
+    const columns = await page
+      .locator(".status-hero")
+      .evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" "));
+    expect(columns).toHaveLength(1);
+    expect(
+      await page.getByText("FlareSolverr", { exact: true }).evaluate(
+        (element) => element.scrollWidth <= element.clientWidth,
+      ),
+    ).toBe(true);
+  } else {
+    await expect(page.locator(".nav-item--active .nav-item__copy small")).toBeVisible();
+    await expect(
+      page.locator(".nav-item:not(.nav-item--active) .nav-item__copy small").first(),
+    ).toBeHidden();
+  }
 });
 
 test.describe("dashboard fixture", () => {
@@ -958,7 +1003,7 @@ test.describe("feature pages", () => {
     await expect(frameRateMenu).toBeVisible();
     await expect(frameRateMenu).toHaveCSS("border-radius", "14px");
     await expect(frameRateMenu).toHaveCSS("backdrop-filter", "none");
-    await expect(frameRateMenu).toHaveCSS("width", "170px");
+    await expect(frameRateMenu).toHaveCSS("width", "220px");
     await expect(frameRateMenu).toHaveCSS("max-height", "224px");
     expect(
       await page.getByRole("option", { name: "90 Hz" }).evaluate((element) =>

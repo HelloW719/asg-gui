@@ -18,7 +18,7 @@ const emit = defineEmits<{
 
 <template>
   <section class="editor-drawer">
-    <SectionHeading eyebrow="单字段编辑" :title="field.path">
+    <SectionHeading :title="field.path">
       <BaseButton size="compact" @click="emit('cancel')">关闭</BaseButton>
     </SectionHeading>
     <label class="field">

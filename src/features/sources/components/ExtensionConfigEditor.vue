@@ -150,7 +150,6 @@ watch(
   <section v-if="extension" class="extension-editor">
     <div class="section-heading">
       <div>
-        <span class="eyebrow">插件私有配置</span>
         <h2>{{ extension.id }}</h2>
       </div>
       <BaseButton size="compact" @click="emit('close')">关闭</BaseButton>

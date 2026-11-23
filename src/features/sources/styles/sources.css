@@ -1,6 +1,6 @@
 /* Sources feature styles */
 .sources-workspace {
-  padding: 14px;
+  padding: var(--space-4);
   border-radius: var(--radius-lg);
 }
 
@@ -9,13 +9,13 @@
 }
 
 .sources-workspace .tab-content {
-  padding-top: 12px;
+  padding-top: var(--space-3);
 }
 
 .source-toolbar {
   justify-content: flex-start;
-  margin-bottom: 12px;
-  padding: 10px 12px;
+  margin-bottom: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--surface-card-divider);
   border-radius: var(--radius-md);
   background: var(--surface-subtle);
@@ -38,7 +38,7 @@
 
 .engine-card {
   position: relative;
-  padding: 17px;
+  padding: var(--space-4);
   border-radius: 0;
   background: var(--surface-sunken);
 }
@@ -55,22 +55,22 @@
 }
 
 .engine-card h2 {
-  font-size: 1.22rem;
+  font-size: var(--type-title-md);
 }
 
 .token-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  margin: 11px 0;
+  gap: var(--space-1);
+  margin: var(--space-3) 0;
 }
 
 .token {
-  padding: 3px 7px;
+  padding: 3px var(--space-2);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xs);
   color: var(--text-faint);
-  font-size: 0.59rem;
+  font-size: var(--type-xs);
 }
 
 .token--ok {
@@ -84,7 +84,7 @@
 }
 
 .engine-group-note {
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .source-list,
@@ -92,7 +92,7 @@
   display: grid;
   gap: 1px;
   overflow: hidden;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
   border: 1px solid var(--surface-card-divider);
   border-radius: var(--radius-md);
   background: var(--surface-card-divider);
@@ -103,8 +103,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 16px;
-  padding: 15px 17px;
+  gap: var(--space-4);
+  padding: var(--space-4);
   border-radius: 0;
   background: var(--surface-sunken);
 }
@@ -120,7 +120,7 @@
 .source-row__main p {
   overflow: hidden;
   margin: 0;
-  font-size: 0.68rem;
+  font-size: var(--type-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -136,8 +136,8 @@
 
 .extension-row {
   display: grid;
-  gap: 14px;
-  padding: 17px;
+  gap: var(--space-4);
+  padding: var(--space-4);
   background: var(--surface-sunken);
 }
 
@@ -145,7 +145,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .extension-row__actions {
@@ -160,23 +160,23 @@
 
 .extension-capability {
   min-width: 0;
-  padding: 11px;
+  padding: var(--space-3);
   border: 1px solid var(--surface-card-divider);
   border-radius: var(--radius-sm);
   background: var(--field-bg);
 }
 
 .extension-capability h3 {
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
   color: var(--text-soft);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
+  font-size: var(--type-xs);
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
 }
 
 .extension-capability ul {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -199,12 +199,12 @@
 }
 
 .extension-capability li strong {
-  font-size: 0.75rem;
+  font-size: var(--type-sm);
 }
 
 .extension-capability li > div:first-child > span {
   color: var(--text-faint);
-  font-size: 0.6rem;
+  font-size: var(--type-xs);
 }
 
 .extension-capability .token-row {
@@ -215,7 +215,7 @@
 .extension-error {
   margin: 0;
   color: var(--text-faint);
-  font-size: 0.66rem;
+  font-size: var(--type-sm);
 }
 
 .extension-error {
@@ -223,8 +223,8 @@
 }
 
 .extension-editor {
-  margin-top: 15px;
-  padding: 17px;
+  margin-top: var(--space-4);
+  padding: var(--space-4);
   border: 1px solid var(--surface-card-divider);
   border-radius: var(--radius-md);
   background: var(--surface-sunken);

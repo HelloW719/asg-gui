@@ -17,7 +17,6 @@ const settings = useSettings();
 <template>
   <div class="page settings-page">
     <PageHeader
-      eyebrow="配置与外观"
       title="设置"
       description="每个字段单独通过 config set 校验、写入并整栈重启。"
     >

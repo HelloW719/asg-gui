@@ -15,7 +15,6 @@ const autoScroll = ref(true);
 <template>
   <div class="page logs-page">
     <PageHeader
-      eyebrow="实时日志流"
       title="日志"
       description="通过 logs --jsonl 读取事件；暂停只停止 GUI 的跟随任务。"
     >

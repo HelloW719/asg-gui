@@ -2,7 +2,7 @@
 .setup-wrap {
   display: grid;
   min-height: 0;
-  padding: 30px;
+  padding: var(--space-6);
   place-items: center;
 }
 
@@ -19,11 +19,11 @@
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(330px, 0.9fr);
   align-items: center;
-  gap: clamp(24px, 5vw, 70px);
+  gap: clamp(24px, 5vw, 64px);
   width: min(1040px, 100%);
   min-height: calc(100vh - 150px);
   margin: auto;
-  padding: 30px clamp(20px, 4vw, 60px);
+  padding: var(--space-6) clamp(20px, 4vw, 48px);
 }
 
 .setup-hero {
@@ -32,21 +32,22 @@
 
 .setup-hero h1 {
   max-width: 620px;
-  font-size: clamp(2rem, 4vw, 2.55rem);
-  font-weight: 500;
-  line-height: 1.06;
+  font-size: clamp(2.1rem, 4vw, 2.75rem);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-text);
+  line-height: 1.12;
 }
 
 .setup-hero > p {
   max-width: 620px;
-  margin-bottom: 28px;
+  margin-bottom: var(--space-6);
 }
 
 .setup-orbit {
   position: relative;
   width: 150px;
   height: 150px;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-5);
   border: 1px solid color-mix(in srgb, var(--sage) 30%, transparent);
   border-radius: 50%;
   animation: setup-orbit-turn 20s linear infinite;
@@ -86,15 +87,15 @@
 
 .setup-card {
   position: relative;
-  padding: 24px;
+  padding: var(--space-5);
   border-radius: var(--radius-lg);
 }
 
 .setup-card__item {
   display: flex;
   align-items: flex-start;
-  gap: 13px;
-  margin-bottom: 18px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .setup-card__item > svg {
@@ -103,18 +104,19 @@
 }
 
 .setup-card__item h2 {
-  margin-bottom: 5px;
-  font-size: 0.88rem;
+  margin-bottom: var(--space-1);
+  font-size: var(--type-title-sm);
 }
 
 .setup-card__item p {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: var(--type-sm);
+  line-height: var(--line-body);
 }
 
 .divider {
   height: 1px;
-  margin: 20px 0;
+  margin: var(--space-5) 0;
   background: var(--line);
 }
 

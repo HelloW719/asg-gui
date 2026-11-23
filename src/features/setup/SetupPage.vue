@@ -47,7 +47,6 @@ async function usePath(): Promise<void> {
         <span />
         <span />
       </div>
-      <span class="eyebrow">独立桌面控制面</span>
       <h1>连接你的 ASG 安装</h1>
       <p>
         GUI 只读取安装目录中的 CLI 入口，并通过结构化输出管理系统。配置文件、密钥、进程和日志仍由同一个

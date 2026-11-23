@@ -20,7 +20,7 @@ const failingChecks = computed(() => props.checks.filter((check) => !check.ok));
 
 <template>
   <section class="content-card glass-surface">
-    <SectionHeading eyebrow="环境健康" title="诊断摘要">
+    <SectionHeading title="诊断摘要">
       <BaseButton size="compact" :disabled="busy" @click="emit('run')">
         <template #icon><Stethoscope :size="15" /></template>
         运行诊断

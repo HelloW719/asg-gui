@@ -28,8 +28,7 @@ const activePath = computed(() => route.path);
     <div class="app-sidebar__label">
       <i aria-hidden="true" />
       <span>
-        <strong>控制矩阵</strong>
-        <small>CONTROL MATRIX</small>
+        <strong>功能导航</strong>
       </span>
     </div>
     <RouterLink
@@ -56,10 +55,7 @@ const activePath = computed(() => route.path);
     </RouterLink>
     <div class="app-sidebar__footer">
       <span class="app-sidebar__signal" />
-      <span>
-        <small>LOCAL CHANNEL</small>
-        仅通过 ASG CLI 工作
-      </span>
+      <span>通过 ASG CLI 工作</span>
     </div>
   </nav>
 </template>

@@ -23,10 +23,16 @@ const emit = defineEmits<{
 <template>
   <section class="status-hero glass-surface">
     <div class="status-hero__copy">
-      <span class="status-pill" :class="`status-pill--${visualState}`">
-        <Activity :size="15" />
-        {{ visualStateLabels[visualState] }}
-      </span>
+      <div class="status-kicker">
+        <span
+          class="status-pill"
+          :class="`status-pill--${visualState}`"
+          aria-hidden="true"
+        >
+          <Activity :size="16" />
+        </span>
+        <span>当前运行状态</span>
+      </div>
       <h2>{{ visualStateLabels[visualState] }}</h2>
       <p>{{ visualStateDescription(visualState) }}</p>
       <div class="action-row">

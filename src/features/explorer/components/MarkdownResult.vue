@@ -32,10 +32,7 @@ async function handleContentClick(event: MouseEvent): Promise<void> {
 <template>
   <section class="result-panel">
     <header class="result-panel__header">
-      <div>
-        <span class="eyebrow">结果</span>
-        <h2>{{ title ?? "CLI 返回内容" }}</h2>
-      </div>
+      <h2>{{ title ?? "CLI 返回内容" }}</h2>
       <div class="segmented-control">
         <button type="button" :class="{ active: !raw }" @click="raw = false">阅读</button>
         <button type="button" :class="{ active: raw }" @click="raw = true">原文</button>

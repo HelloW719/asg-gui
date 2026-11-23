@@ -15,7 +15,7 @@ const dashboard = useDashboard();
 
 <template>
   <div class="page dashboard-page">
-    <PageHeader eyebrow="实时控制面" title="系统状态">
+    <PageHeader title="系统状态">
       <template #description>
         <span class="path-copy status-hero__path">{{ dashboard.session.root }}</span>
       </template>

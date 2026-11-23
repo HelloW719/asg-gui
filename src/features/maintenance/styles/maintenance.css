@@ -1,6 +1,6 @@
 /* Maintenance feature styles */
 .maintenance-workspace {
-  padding: 14px;
+  padding: var(--space-4);
   border-radius: var(--radius-lg);
 }
 
@@ -17,7 +17,7 @@
 .maintenance-card {
   position: relative;
   min-height: 220px;
-  padding: 19px;
+  padding: var(--space-5);
   border-radius: 0;
   background: var(--surface-sunken);
 }
@@ -26,7 +26,7 @@
   display: grid;
   width: 40px;
   height: 40px;
-  margin-bottom: 18px;
+  margin-bottom: var(--space-4);
   border: 1px solid var(--glass-border);
   border-radius: 50%;
   background: color-mix(in srgb, var(--sage) 10%, transparent);
@@ -35,11 +35,13 @@
 }
 
 .maintenance-card h2 {
-  font-size: 1.4rem;
+  margin-top: var(--space-3);
+  font-size: var(--type-title-md);
 }
 
 .maintenance-card > p {
-  font-size: 0.73rem;
+  font-size: var(--type-body);
+  line-height: var(--line-body);
 }
 
 .maintenance-card .inline-field {
@@ -52,10 +54,11 @@
 
 .compact-list {
   display: grid;
-  gap: 7px;
+  gap: var(--space-2);
   padding: 0;
   color: var(--text-soft);
-  font-size: 0.69rem;
+  font-size: var(--type-sm);
+  line-height: var(--line-compact);
   list-style: none;
 }
 
@@ -70,8 +73,8 @@
 }
 
 .diagnostic-table {
-  margin-top: 14px;
-  padding: 18px 4px 2px;
+  margin-top: var(--space-5);
+  padding: var(--space-5) var(--space-1) var(--space-1);
   border-top: 1px solid var(--surface-card-divider);
 }
 
@@ -83,16 +86,16 @@
   display: grid;
   grid-template-columns: 20px 120px minmax(0, 1fr) 46px;
   align-items: center;
-  gap: 9px;
-  min-height: 39px;
-  padding: 7px 3px;
+  gap: var(--space-2);
+  min-height: 42px;
+  padding: var(--space-2) var(--space-1);
   border-top: 1px solid var(--line);
-  font-size: 0.7rem;
+  font-size: var(--type-sm);
 }
 
 .check-row strong {
-  font-family: "SFMono-Regular", monospace;
-  font-size: 0.68rem;
+  font-family: "SFMono-Regular", "Cascadia Code", monospace;
+  font-size: var(--type-sm);
 }
 
 .check-row span {
@@ -104,7 +107,7 @@
 
 .check-row em {
   color: var(--text-faint);
-  font-size: 0.6rem;
+  font-size: var(--type-xs);
   font-style: normal;
   text-align: right;
 }

@@ -10,9 +10,7 @@ defineProps<{
 
 <template>
   <section class="section-block">
-    <SectionHeading eyebrow="服务探针" title="整栈组件">
-      <span class="muted-copy">生命周期始终作用于整栈</span>
-    </SectionHeading>
+    <SectionHeading title="整栈组件" />
     <m3e-card class="service-board" variant="filled">
       <div slot="content" class="service-grid">
         <ServiceCard

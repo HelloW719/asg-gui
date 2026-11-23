@@ -28,7 +28,6 @@ const adLevelOptions = [
 <template>
   <div class="page maintenance-page">
     <PageHeader
-      eyebrow="环境与依赖"
       title="维护"
       description="诊断、浏览器运行时、广告过滤和 ASG 自身更新。"
     >
@@ -60,7 +59,7 @@ const adLevelOptions = [
 
     <div class="maintenance-workspace glass-surface">
       <section class="maintenance-grid">
-        <MaintenanceActionCard eyebrow="Doctor" title="环境诊断">
+        <MaintenanceActionCard title="环境诊断">
         <template #icon><Stethoscope :size="21" /></template>
         <p v-if="!maintenance.doctorLoaded.value">
           正在读取安装、Node、配置、端口与 supervisor 状态。
@@ -85,7 +84,7 @@ const adLevelOptions = [
         </template>
         </MaintenanceActionCard>
 
-        <MaintenanceActionCard eyebrow="Playwright" title="浏览器运行时">
+        <MaintenanceActionCard title="浏览器运行时">
         <template #icon><Download :size="21" /></template>
         <p v-if="maintenance.browser.value">
           headless shell：
@@ -115,7 +114,7 @@ const adLevelOptions = [
         </template>
         </MaintenanceActionCard>
 
-        <MaintenanceActionCard eyebrow="Ad filter" title="广告过滤列表">
+        <MaintenanceActionCard title="广告过滤列表">
         <template #icon><ShieldAlert :size="21" /></template>
         <p>下载后写入本地 hosts，并通过 CLI 重启整栈以刷新内存过滤集。</p>
         <template #actions>
@@ -137,7 +136,7 @@ const adLevelOptions = [
         </template>
         </MaintenanceActionCard>
 
-        <MaintenanceActionCard eyebrow="Self update" title="ASG 更新">
+        <MaintenanceActionCard title="ASG 更新">
         <template #icon><RefreshCw :size="21" /></template>
         <p v-if="maintenance.update.value">
           当前 {{ maintenance.update.value.current_version ?? "未知" }} · 可用

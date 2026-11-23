@@ -1,46 +1,48 @@
 /* Settings feature styles */
 .settings-workspace {
-  padding: 18px;
+  padding: var(--space-5);
   border-radius: var(--radius-lg);
 }
 
 .settings-appearance {
   position: relative;
-  padding: 0 0 6px;
+  padding: 0 0 var(--space-2);
 }
 
 .settings-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding: 13px 0;
+  gap: var(--space-5);
+  padding: var(--space-4) 0;
   border-top: 1px solid var(--line);
 }
 
 .settings-row strong,
 .settings-install strong {
-  font-size: 0.82rem;
+  font-size: var(--type-body-strong);
+  font-weight: var(--weight-semibold);
 }
 
 .settings-row p,
 .settings-install p {
-  margin: 4px 0 0;
-  font-size: 0.7rem;
+  margin: var(--space-1) 0 0;
+  font-size: var(--type-sm);
+  line-height: var(--line-compact);
 }
 
 .glass-frame-rate-select {
-  width: 170px;
-  flex: 0 0 170px;
+  width: 220px;
+  flex: 0 0 220px;
 }
 
 .settings-install {
   display: flex;
   position: relative;
   align-items: center;
-  gap: 13px;
-  margin-top: 13px;
-  padding: 17px 0 4px;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  padding: var(--space-4) 0 var(--space-1);
   border-top: 1px solid var(--surface-card-divider);
 }
 
@@ -57,8 +59,8 @@
 }
 
 .config-section {
-  margin-top: 17px;
-  padding-top: 17px;
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
   border-top: 1px solid var(--surface-card-divider);
 }
 
@@ -84,8 +86,8 @@
 .config-group > header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 13px 16px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--surface-card-divider);
   background: var(--surface-subtle);
 }
@@ -93,12 +95,12 @@
 .config-group > header h3 {
   flex: 1;
   margin: 0;
-  font-size: 0.8rem;
+  font-size: var(--type-body);
 }
 
 .config-group > header span {
   color: var(--text-faint);
-  font-size: 0.64rem;
+  font-size: var(--type-xs);
 }
 
 .config-table {
@@ -109,9 +111,9 @@
   display: grid;
   grid-template-columns: minmax(180px, 0.9fr) minmax(120px, 1.1fr) 24px;
   align-items: center;
-  gap: 12px;
-  min-height: 40px;
-  padding: 7px 16px;
+  gap: var(--space-3);
+  min-height: 42px;
+  padding: var(--space-2) var(--space-4);
   border: 0;
   border-bottom: 1px solid var(--surface-card-divider);
   background: transparent;
@@ -130,8 +132,8 @@
 .config-field__path {
   overflow: hidden;
   color: var(--text-soft);
-  font-family: "SFMono-Regular", monospace;
-  font-size: 0.66rem;
+  font-family: "SFMono-Regular", "Cascadia Code", monospace;
+  font-size: var(--type-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -139,7 +141,7 @@
 .config-field code {
   overflow: hidden;
   color: var(--text-faint);
-  font-size: 0.66rem;
+  font-size: var(--type-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -150,10 +152,10 @@
 
 .editor-drawer {
   position: sticky;
-  bottom: 14px;
+  bottom: var(--space-4);
   z-index: 10;
-  margin-top: 18px;
-  padding: 17px;
+  margin-top: var(--space-5);
+  padding: var(--space-4);
   border: 1px solid var(--surface-card-border);
   border-radius: var(--radius-md);
   background: var(--surface-subtle);
@@ -161,7 +163,7 @@
 }
 
 .editor-drawer .field {
-  margin-bottom: 14px;
+  margin-bottom: var(--space-4);
 }
 
 @media (max-width: 720px) {

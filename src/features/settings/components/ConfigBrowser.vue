@@ -25,7 +25,7 @@ function displayValue(value: unknown): string {
 
 <template>
   <section class="config-section">
-    <SectionHeading eyebrow="配置树" title="高级设置" :description="`${rowCount} 个可编辑字段`">
+    <SectionHeading title="高级设置" :description="`${rowCount} 个可编辑字段`">
       <label class="search-field config-search">
         <Search :size="15" />
         <input v-model="search" type="search" placeholder="搜索配置路径" />

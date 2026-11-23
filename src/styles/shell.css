@@ -107,9 +107,9 @@ m3e-theme {
 
 .app-titlebar__name {
   overflow: hidden;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.015em;
+  font-size: var(--type-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-text);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -120,7 +120,7 @@ m3e-theme {
   border-radius: var(--radius-full);
   background: var(--surface-subtle);
   color: var(--text-faint);
-  font-size: 0.61rem;
+  font-size: 0.6875rem;
 }
 
 .app-mark {
@@ -206,9 +206,9 @@ m3e-theme {
 .app-sidebar__label {
   margin: 0 11px 10px;
   color: var(--text-faint);
-  font-size: 0.67rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-size: var(--type-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
 }
 
@@ -216,12 +216,12 @@ m3e-theme {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 11px 12px;
+  gap: var(--space-3);
+  padding: var(--space-3);
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   color: var(--text-soft);
-  font-size: 0.86rem;
+  font-size: var(--type-body);
   text-decoration: none;
   transition:
     color var(--motion-fast-effects),
@@ -254,12 +254,12 @@ m3e-theme {
 .app-sidebar__footer {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-2);
   margin-top: auto;
-  padding: 10px 11px;
+  padding: var(--space-3);
   color: var(--text-faint);
-  font-size: 0.62rem;
-  line-height: 1.4;
+  font-size: var(--type-xs);
+  line-height: var(--line-compact);
 }
 
 .app-sidebar__signal {
@@ -582,8 +582,8 @@ m3e-theme {
 
 .app-titlebar__name {
   color: var(--text);
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
+  font-size: var(--type-sm);
+  letter-spacing: var(--tracking-text);
 }
 
 .app-titlebar__version {
@@ -597,8 +597,8 @@ m3e-theme {
 .app-titlebar__mode {
   color: var(--text-faint);
   font-family: "SFMono-Regular", "Cascadia Code", monospace;
-  font-size: 0.56rem;
-  letter-spacing: 0.12em;
+  font-size: 0.625rem;
+  letter-spacing: var(--tracking-label);
 }
 
 .app-mark i {
@@ -656,24 +656,16 @@ m3e-theme {
 
 .app-sidebar__label strong {
   color: var(--text-soft);
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-}
-
-.app-sidebar__label small {
-  color: var(--text-faint);
-  font-family: "SFMono-Regular", "Cascadia Code", monospace;
-  font-size: 0.46rem;
-  font-weight: 400;
-  letter-spacing: 0.11em;
+  font-size: var(--type-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
 }
 
 .nav-item {
   isolation: isolate;
-  gap: 10px;
-  min-height: 50px;
-  padding: 8px 12px 8px 7px;
+  gap: var(--space-3);
+  min-height: 46px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2);
   border: 0;
   border-radius: 0;
   color: var(--text-soft);
@@ -739,7 +731,7 @@ m3e-theme {
   flex: 0 0 16px;
   color: color-mix(in srgb, var(--text-faint) 62%, transparent);
   font-family: "SFMono-Regular", "Cascadia Code", monospace;
-  font-size: 0.47rem;
+  font-size: 0.625rem;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
 }
@@ -766,21 +758,22 @@ m3e-theme {
 .nav-item__copy strong {
   overflow: hidden;
   color: inherit;
-  font-size: 0.76rem;
-  font-weight: 600;
-  letter-spacing: 0.025em;
+  font-size: var(--type-body);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-text);
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .nav-item__copy small {
+  display: none;
   overflow: hidden;
-  color: var(--text-faint);
+  color: color-mix(in srgb, var(--text-faint) 82%, transparent);
   font-family: "SFMono-Regular", "Cascadia Code", monospace;
-  font-size: 0.43rem;
-  font-weight: 400;
-  letter-spacing: 0.11em;
+  font-size: 0.625rem;
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-label);
   line-height: 1.15;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -795,6 +788,10 @@ m3e-theme {
   color: var(--sage);
 }
 
+.nav-item--active .nav-item__copy small {
+  display: block;
+}
+
 .app-sidebar__footer {
   color: var(--text-faint);
 }
@@ -802,12 +799,6 @@ m3e-theme {
 .app-sidebar__footer > span:last-child {
   display: grid;
   gap: 2px;
-}
-
-.app-sidebar__footer small {
-  font-family: "SFMono-Regular", "Cascadia Code", monospace;
-  font-size: 0.48rem;
-  letter-spacing: 0.08em;
 }
 
 .app-sidebar__signal {
@@ -832,7 +823,7 @@ m3e-theme {
 
 .page::before {
   position: absolute;
-  top: 15px;
+  top: var(--space-3);
   right: auto;
   left: clamp(24px, 3vw, 44px);
   width: clamp(120px, 22vw, 220px);
@@ -852,8 +843,8 @@ m3e-theme {
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: start;
-  gap: 16px;
-  margin-bottom: 22px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
   padding: 2px 0 0;
 }
 
@@ -899,24 +890,26 @@ m3e-theme {
 
 .page-header h1 {
   position: relative;
-  margin-bottom: 6px;
-  font-size: clamp(1.8rem, 2.2vw, 2.55rem);
-  font-weight: 500;
-  letter-spacing: 0.005em;
+  margin-bottom: var(--space-2);
+  font-size: var(--type-page);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-text);
+  line-height: 1.12;
 }
 
 .page-header__ghost {
   position: absolute;
-  top: 44px;
-  left: 0;
+  top: 12px;
+  right: 104px;
+  left: auto;
   display: block;
   overflow: visible;
   color: var(--tactical-ghost);
   font-family: "Epilogue", "Microsoft YaHei UI", sans-serif;
-  font-size: clamp(3rem, 5.2vw, 5.5rem);
-  font-weight: 700;
+  font-size: clamp(3.5rem, 6.8vw, 6.75rem);
+  font-weight: var(--weight-semibold);
   font-synthesis: none;
-  letter-spacing: -0.08em;
+  letter-spacing: -0.035em;
   line-height: 1;
   pointer-events: none;
   text-align: right;
@@ -934,10 +927,10 @@ m3e-theme {
   display: inline-flex;
   margin-bottom: 6px;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   color: var(--text-faint);
-  font-size: 0.6rem;
-  letter-spacing: 0.12em;
+  font-size: var(--type-xs);
+  letter-spacing: var(--tracking-label);
 }
 
 .eyebrow::before {
@@ -962,9 +955,9 @@ m3e-theme {
   height: 100%;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--space-3);
   color: var(--text-soft);
-  font-size: 0.78rem;
+  font-size: var(--type-body);
 }
 
 .activity-strip {
@@ -974,8 +967,8 @@ m3e-theme {
   z-index: 30;
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 12px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   border: 1px solid var(--glass-border);
   border-radius: 0;
   background: var(--glass-bg-strong);
@@ -988,7 +981,7 @@ m3e-theme {
     100% 100%,
     0 100%
   );
-  font-size: 0.68rem;
+  font-size: var(--type-sm);
 }
 
 .activity-strip__detail {
@@ -1094,6 +1087,12 @@ m3e-theme {
   .nav-item {
     justify-content: center;
     padding-inline: 0;
+  }
+}
+
+@media (max-width: 1040px) {
+  .page-header__ghost {
+    display: none;
   }
 }
 

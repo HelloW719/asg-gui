@@ -1,6 +1,5 @@
 <script setup lang="ts">
 defineProps<{
-  eyebrow: string;
   title: string;
 }>();
 </script>
@@ -10,7 +9,6 @@ defineProps<{
     <div class="maintenance-card__icon">
       <slot name="icon" />
     </div>
-    <span class="eyebrow">{{ eyebrow }}</span>
     <h2>{{ title }}</h2>
     <slot />
     <div v-if="$slots.actions" class="action-row">

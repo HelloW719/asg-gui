@@ -19,7 +19,6 @@ const explorer = useExplorer();
 <template>
   <div class="page">
     <PageHeader
-      eyebrow="数据面冒烟与控制"
       title="检索与抓取"
       description="调用运行中的 gateway，不修改配置，也不会重启服务。"
     />

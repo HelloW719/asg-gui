@@ -1,58 +1,64 @@
 /* Explorer feature styles */
 .query-card {
   position: relative;
-  padding: 22px;
+  padding: var(--space-5);
 }
 
 .query-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .field--hero input {
   height: var(--field-height-hero);
-  padding: 0 16px;
+  padding: 0 var(--space-4);
   border-radius: var(--radius-md);
-  font-size: 1rem;
+  font-size: var(--type-body-strong);
 }
 
 .query-card > .disclosure-panel {
-  margin-top: 17px;
+  margin-top: var(--space-4);
 }
 
 .result-panel {
-  margin-top: 14px;
-  padding: 22px;
+  margin-top: var(--space-3);
+  padding: var(--space-5);
   border: 1px solid var(--surface-card-border);
   border-radius: var(--radius-lg);
   background: var(--surface-card);
+  backdrop-filter: none;
 }
 
 .result-panel__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
+
+.result-panel__header h2 {
+  margin: 0;
+}
+
 .raw-output {
   overflow: auto;
   max-height: 60vh;
   margin: 0;
-  padding: 16px;
+  padding: var(--space-4);
   border-radius: var(--radius-xs);
   background: var(--surface-code);
   color: var(--text-soft);
-  font-size: 0.72rem;
-  line-height: 1.65;
+  font-size: var(--type-sm);
+  line-height: var(--line-body);
   white-space: pre-wrap;
 }
 
 .markdown-body {
   color: var(--text-soft);
-  font-size: 0.82rem;
+  font-size: var(--type-body);
   line-height: 1.72;
 }
 
@@ -64,11 +70,11 @@
 }
 
 .markdown-body h1 {
-  font-size: 1.7rem;
+  font-size: 1.75rem;
 }
 
 .markdown-body h2 {
-  font-size: 1.15rem;
+  font-size: var(--type-title-md);
 }
 
 .markdown-body a {
@@ -84,37 +90,23 @@
 
 .markdown-body pre {
   overflow: auto;
-  padding: 12px;
+  padding: var(--space-3);
   border-radius: var(--radius-xs);
   background: var(--surface-code);
 }
 
 .markdown-body blockquote {
   margin-left: 0;
-  padding-left: 13px;
+  padding-left: var(--space-3);
   border-left: 2px solid var(--clay);
 }
 
 .result-meta {
-  margin-top: 14px;
-  padding: 11px 14px;
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
   color: var(--text-soft);
-  font-size: 0.72rem;
-}
-.query-card {
-  padding: 24px;
-}
-
-.field--hero input {
-  border-radius: var(--radius-md);
-  background: var(--field-bg);
-}
-
-.result-panel {
-  border-color: var(--surface-card-border);
-  background: var(--surface-card);
-  backdrop-filter: none;
+  font-size: var(--type-sm);
 }
 
 

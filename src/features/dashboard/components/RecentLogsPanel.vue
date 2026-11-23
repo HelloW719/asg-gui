@@ -10,7 +10,7 @@ defineProps<{
 
 <template>
   <section class="content-card glass-surface">
-    <SectionHeading eyebrow="最近活动" title="日志片段">
+    <SectionHeading title="日志片段">
       <RouterLink class="text-link" to="/logs">
         <FileClock :size="15" />
         打开日志
