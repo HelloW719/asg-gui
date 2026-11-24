@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   commandTextResultFromError,
   isCliResult,
+  isEngineSecretRequirement,
   isJobEvent,
   isLogCliEvent,
+  isSearxngApiKeyRequirement,
   isStackStatus,
   parseCliData,
   parseNdjson,
@@ -66,6 +68,28 @@ describe("CLI output helpers", () => {
       code: "SEARCH_UPSTREAM",
       text: "[SEARCH_UPSTREAM] unavailable",
     });
+  });
+
+  it("recognizes current engine secret requirement forms", () => {
+    expect(isSearxngApiKeyRequirement("searxng.engines.exaapi.api_key")).toBe(
+      true,
+    );
+    expect(
+      isSearxngApiKeyRequirement("searxng.engines.zhihu web.api_key"),
+    ).toBe(true);
+    expect(isSearxngApiKeyRequirement("config:extensions.demo.enabled")).toBe(
+      false,
+    );
+    expect(isEngineSecretRequirement("secrets.search.deepseek.api_key")).toBe(
+      true,
+    );
+    expect(isEngineSecretRequirement("secret:cookie")).toBe(true);
+    expect(isEngineSecretRequirement("searxng.engines.tavily.api_key")).toBe(
+      true,
+    );
+    expect(isEngineSecretRequirement("config:extensions.demo.enabled")).toBe(
+      false,
+    );
   });
 
   it("parses complete NDJSON records and preserves malformed lines", () => {

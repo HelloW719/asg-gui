@@ -43,6 +43,22 @@ function changedConfigArgs(
 }
 
 export function createSourcesService(runner: AsgCommandRunner) {
+  async function setEnginesEnabled(
+    ids: readonly string[],
+    enabled: boolean,
+  ): Promise<boolean> {
+    if (ids.length === 0) return false;
+    await runner.run(
+      ["engines", enabled ? "enable" : "disable", ...ids],
+      {
+        label: enabled ? "启用搜索引擎" : "禁用搜索引擎",
+        visualState: "restarting",
+      },
+      parseVoidData,
+    );
+    return true;
+  }
+
   return {
     async listEngines(all = false): Promise<EngineInfo[]> {
       const result = await runner.run(
@@ -53,15 +69,10 @@ export function createSourcesService(runner: AsgCommandRunner) {
       return result.engines;
     },
 
+    setEnginesEnabled,
+
     async setEngineEnabled(id: string, enabled: boolean): Promise<void> {
-      await runner.run(
-        ["engines", enabled ? "enable" : "disable", id],
-        {
-          label: enabled ? "启用搜索引擎" : "禁用搜索引擎",
-          visualState: "restarting",
-        },
-        parseVoidData,
-      );
+      await setEnginesEnabled([id], enabled);
     },
 
     async setSearxngRoute(id: string, route: string): Promise<void> {

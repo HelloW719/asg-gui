@@ -53,7 +53,11 @@ describe("welcome secret presentation", () => {
 
   it("maps extension requirement names to their secrets paths", () => {
     const candidates = deriveMissingSecretCandidates(
-      {},
+      {
+        secrets: {
+          gateway: { token: "set" },
+        },
+      },
       [engine("gateway.search:demo", ["secret:api_key"], "demo")],
     );
 
@@ -64,6 +68,72 @@ describe("welcome secret presentation", () => {
         description: "该密钥由当前搜索源声明为必需项。",
         priority: 100,
       },
+    ]);
+  });
+
+  it("includes missing SearXNG API keys and omits configured ones", () => {
+    const engines = [
+      {
+        ...engine("searxng:exaapi", [
+          "searxng.engines.exaapi.api_key",
+        ]),
+        group: "searxng" as const,
+        name: "exaapi",
+        kind: "searxng" as const,
+      },
+      {
+        ...engine("searxng:tavily", [
+          "searxng.engines.tavily.api_key",
+        ]),
+        group: "searxng" as const,
+        name: "tavily",
+        kind: "searxng" as const,
+        available: true,
+      },
+    ];
+
+    expect(
+      deriveMissingSecretCandidates(
+        {
+          secrets: {
+            gateway: { token: "set" },
+          },
+        },
+        engines,
+      ),
+    ).toEqual([
+      {
+        path: "searxng.engines.exaapi.api_key",
+        label: "exaapi API Key",
+        description:
+          "SearXNG 引擎 exaapi 声明了 API Key 依赖；保存后整栈重启。",
+        priority: 90,
+        engineId: "searxng:exaapi",
+        name: "api_key",
+      },
+    ]);
+  });
+
+  it("includes configured service and extension secrets outside engine requirements", () => {
+    const candidates = deriveMissingSecretCandidates(
+      {
+        gateway: {},
+        embedding: { enabled: true },
+        browser: { proxy_username: "proxy-user" },
+        extensions: {
+          bilibili: {
+            config: { enabled: false },
+          },
+        },
+      },
+      [],
+    );
+
+    expect(candidates.map((candidate) => candidate.path)).toEqual([
+      "secrets.gateway.token",
+      "secrets.embedding.api_key",
+      "secrets.extensions.bilibili.token",
+      "secrets.browser.proxy_password",
     ]);
   });
 });

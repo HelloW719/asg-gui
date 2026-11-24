@@ -3,6 +3,7 @@ import type {
   EngineInfo,
   EngineRouteDraft,
 } from "@/types/cli";
+import { isEngineSecretRequirement } from "@/utils/cli";
 
 const GROUP_LABELS: Record<EngineGroup, string> = {
   searxng: "SearXNG",
@@ -16,10 +17,7 @@ export function engineGroupLabel(group: EngineGroup): string {
 }
 
 export function engineSecretRequirements(engine: EngineInfo): string[] {
-  return (engine.requires ?? []).filter(
-    (requirement) =>
-      requirement.startsWith("secrets.") || requirement.startsWith("secret:"),
-  );
+  return (engine.requires ?? []).filter(isEngineSecretRequirement);
 }
 
 export function engineRouteDraft(engine: EngineInfo): EngineRouteDraft {
@@ -33,8 +31,12 @@ export function engineRouteDraft(engine: EngineInfo): EngineRouteDraft {
 }
 
 export function engineAvailabilityLabel(engine: EngineInfo): string {
-  if (engine.available) return "可用";
-  return engineSecretRequirements(engine).length > 0 ? "待配置密钥" : "缺依赖";
+  const secretRequirements = engineSecretRequirements(engine);
+  if (engine.available) {
+    if (secretRequirements.length > 0) return "可用 · 密钥已配置";
+    return engine.requires?.length ? "可用" : "可用 · 无需密钥";
+  }
+  return secretRequirements.length > 0 ? "待配置密钥" : "缺依赖";
 }
 
 export function engineGroupDescription(group: EngineGroup): string {

@@ -1,10 +1,18 @@
-import type { EngineInfo } from "@/types/cli";
+import type { EngineInfo, ExtensionInfo } from "@/types/cli";
+import { isRecord, isSearxngApiKeyRequirement } from "@/utils/cli";
 
 export interface SecretCandidate {
   path: string;
   label: string;
   description: string;
   priority: number;
+  engineId?: string;
+  name?: string;
+}
+
+interface RequirementTarget {
+  path: string;
+  engine?: EngineInfo;
 }
 
 const SECRET_DETAILS: Record<
@@ -31,7 +39,7 @@ const SECRET_DETAILS: Record<
     description: "用于需要鉴权的文本向量服务。",
     priority: 30,
   },
-  "secrets.bilibili.http.token": {
+  "secrets.extensions.bilibili.token": {
     label: "Bilibili HTTP Token",
     description: "用于连接受鉴权的 Bilibili HTTP 后端。",
     priority: 40,
@@ -59,16 +67,35 @@ function flattenSecrets(
   }
 }
 
-function requirementPath(requirement: string, engine: EngineInfo): string | null {
-  if (requirement.startsWith("secrets.")) return requirement;
+function requirementTarget(
+  requirement: string,
+  engine: EngineInfo,
+): RequirementTarget | null {
+  if (isSearxngApiKeyRequirement(requirement)) {
+    return { path: requirement, engine };
+  }
+  if (requirement.startsWith("secrets.")) return { path: requirement };
   if (requirement.startsWith("secret:") && engine.pluginId) {
     const name = requirement.slice("secret:".length);
-    return name ? `secrets.extensions.${engine.pluginId}.${name}` : null;
+    return name
+      ? { path: `secrets.extensions.${engine.pluginId}.${name}` }
+      : null;
   }
   return null;
 }
 
-function detailsFor(path: string): SecretCandidate {
+function detailsFor(path: string, engine?: EngineInfo): SecretCandidate {
+  if (engine) {
+    return {
+      path,
+      label: `${engine.name} API Key`,
+      description: `SearXNG 引擎 ${engine.name} 声明了 API Key 依赖；保存后整栈重启。`,
+      priority: 90,
+      engineId: engine.id,
+      name: "api_key",
+    };
+  }
+
   const details = SECRET_DETAILS[path];
   if (details) return { path, ...details };
 
@@ -81,24 +108,72 @@ function detailsFor(path: string): SecretCandidate {
   };
 }
 
+function valueAtPath(value: unknown, path: string): unknown {
+  let current = value;
+  for (const key of path.split(".")) {
+    if (!isRecord(current)) return undefined;
+    current = current[key];
+  }
+  return current;
+}
+
+function extensionIsConfigured(
+  config: Record<string, unknown>,
+  id: string,
+  installedExtensions: readonly ExtensionInfo[],
+): boolean {
+  const configured = valueAtPath(config, "extensions");
+  return (
+    (isRecord(configured) &&
+      Object.prototype.hasOwnProperty.call(configured, id)) ||
+    installedExtensions.some((extension) => extension.id === id)
+  );
+}
+
 export function deriveMissingSecretCandidates(
   config: Record<string, unknown>,
   engines: readonly EngineInfo[],
+  installedExtensions: readonly ExtensionInfo[] = [],
 ): SecretCandidate[] {
   const values = new Map<string, string>();
   flattenSecrets(config.secrets, "secrets", values);
 
-  const requirements = new Set<string>();
+  const requirements = new Map<string, RequirementTarget>();
+  const addConfiguredSecret = (path: string, wanted: boolean): void => {
+    if (wanted && values.get(path) !== "set") {
+      requirements.set(path, { path });
+    }
+  };
+
+  addConfiguredSecret("secrets.gateway.token", true);
+  addConfiguredSecret(
+    "secrets.embedding.api_key",
+    valueAtPath(config, "embedding.enabled") === true,
+  );
+  const proxyUsername = valueAtPath(config, "browser.proxy_username");
+  addConfiguredSecret(
+    "secrets.browser.proxy_password",
+    typeof proxyUsername === "string" && proxyUsername.trim().length > 0,
+  );
+  addConfiguredSecret(
+    "secrets.extensions.bilibili.token",
+    extensionIsConfigured(config, "bilibili", installedExtensions),
+  );
+
   for (const engine of engines) {
     for (const requirement of engine.requires ?? []) {
-      const path = requirementPath(requirement, engine);
-      if (path) requirements.add(path);
+      const target = requirementTarget(requirement, engine);
+      if (!target) continue;
+      if (target.engine) {
+        if (!target.engine.available) requirements.set(target.path, target);
+      } else if (values.get(target.path) !== "set") {
+        requirements.set(target.path, target);
+      }
     }
   }
 
-  return [...requirements]
-    .filter((path) => values.get(path) !== "set")
-    .map(detailsFor)
+  return [...requirements.values()]
+    .map((target) => detailsFor(target.path, target.engine))
     .sort(
       (left, right) =>
         left.priority - right.priority || left.path.localeCompare(right.path),

@@ -79,6 +79,18 @@ export function formatCliError(error: unknown): string {
   }
 }
 
+export function isSearxngApiKeyRequirement(requirement: string): boolean {
+  return /^searxng\.engines\..+\.api_key$/.test(requirement);
+}
+
+export function isEngineSecretRequirement(requirement: string): boolean {
+  return (
+    requirement.startsWith("secrets.") ||
+    requirement.startsWith("secret:") ||
+    isSearxngApiKeyRequirement(requirement)
+  );
+}
+
 export function parseNdjson(jsonl: string): unknown[] {
   return jsonl
     .split(/\r?\n/)

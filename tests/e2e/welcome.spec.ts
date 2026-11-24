@@ -25,6 +25,19 @@ async function readScenario(page: Page): Promise<Record<string, unknown>> {
   );
 }
 
+async function goToSecrets(
+  page: Page,
+  strength: RegExp = /低.*仅 SearXNG 原生引擎/,
+): Promise<void> {
+  await page.getByRole("button", { name: "继续", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "选择搜索强度" })).toBeVisible();
+  await page.getByRole("radio", { name: strength }).check();
+  await page
+    .getByRole("button", { name: "继续配置密钥", exact: true })
+    .click();
+  await expect(page.getByRole("heading", { name: "配置可选密钥" })).toBeVisible();
+}
+
 test("auto-detects a fresh install and completes skippable steps", async ({
   page,
 }) => {
@@ -43,8 +56,27 @@ test("auto-detects a fresh install and completes skippable steps", async ({
   await expectIntegratedWelcome(page);
 
   await page.getByRole("button", { name: "继续", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "选择搜索强度" })).toBeVisible();
+  await expect(
+    page.getByRole("radio", { name: /低.*仅 SearXNG 原生引擎/ }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("radio", { name: /中.*原生引擎 \+ DeepSeek/ }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("radio", { name: /高.*再加入 SearXNG 扩展/ }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("checkbox", { name: /tracemoe/ }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("checkbox", { name: /saucenao/ }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "继续配置密钥", exact: true })
+    .click();
   await expect(page.getByRole("heading", { name: "配置可选密钥" })).toBeVisible();
-  await expect(page.getByText("DeepSeek API Key")).toBeVisible();
+  await expect(page.getByText("DeepSeek API Key").first()).toBeVisible();
   await page.getByRole("button", { name: "跳过此步" }).click();
 
   await expect(page.getByRole("heading", { name: "下载 V2 扩展" })).toBeVisible();
@@ -64,6 +96,43 @@ test("auto-detects a fresh install and completes skippable steps", async ({
       ).__TAURI_TEST_CLI_COMMANDS__,
   );
   expect(commands.filter((command) => command === "restart")).toHaveLength(0);
+  expect((await readScenario(page)).engineMutations).toContainEqual([
+    "disable",
+    "searxng:bilibili",
+    "searxng:tavily",
+  ]);
+});
+
+test("applies high search strength and selected reverse-image sources", async ({
+  page,
+}) => {
+  await installMock(page, {
+    onboardingCompleted: false,
+  });
+  await page.goto("/");
+
+  await goToSecrets(page, /高.*再加入 SearXNG 扩展/);
+  await page.getByRole("button", { name: "上一步" }).click();
+  await page.getByRole("checkbox", { name: /saucenao/ }).check();
+  await page
+    .getByRole("button", { name: "继续配置密钥", exact: true })
+    .click();
+
+  const secretInput = page.getByPlaceholder("输入后仅通过 stdin 发送");
+  await secretInput.fill("deepseek-key");
+  await page.getByRole("button", { name: "保存密钥" }).click();
+  await expect(page.getByText("SauceNAO API Key")).toBeVisible();
+  await secretInput.fill("saucenao-key");
+  await page.getByRole("button", { name: "保存密钥" }).click();
+
+  await page.getByRole("button", { name: "应用并继续" }).click();
+  await expect(page.getByRole("heading", { name: "下载 V2 扩展" })).toBeVisible();
+
+  expect((await readScenario(page)).engineMutations).toContainEqual([
+    "enable",
+    "gateway.upstream:deepseek",
+    "gateway.reverse_image:saucenao",
+  ]);
 });
 
 test("keeps a failed secret input available", async ({ page }) => {
@@ -72,7 +141,7 @@ test("keeps a failed secret input available", async ({ page }) => {
     secretError: "密钥写入失败。",
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "继续", exact: true }).click();
+  await goToSecrets(page);
 
   const input = page.getByPlaceholder("输入后仅通过 stdin 发送");
   await input.fill("super-secret");
@@ -80,6 +149,44 @@ test("keeps a failed secret input available", async ({ page }) => {
 
   await expect(page.getByText("密钥写入失败。", { exact: true }).first()).toBeVisible();
   await expect(input).toHaveValue("super-secret");
+});
+
+test("sets a missing SearXNG API key through the engine secret command", async ({
+  page,
+}) => {
+  await installMock(page, {
+    onboardingCompleted: false,
+    engines: [
+      {
+        id: "searxng:exaapi",
+        group: "searxng",
+        name: "exaapi",
+        kind: "searxng",
+        enabled: true,
+        available: false,
+        routing: ["rotating"],
+        requires: ["searxng.engines.exaapi.api_key"],
+      },
+    ],
+  });
+  await page.goto("/");
+  await goToSecrets(page);
+
+  await expect(page.getByText("exaapi API Key")).toBeVisible();
+  const input = page.getByPlaceholder("输入后仅通过 stdin 发送");
+  await input.fill("exaapi-key");
+  await page.getByRole("button", { name: "保存密钥" }).click();
+
+  await expect(
+    page.getByText("当前要求配置的密钥均已就绪，可以继续。"),
+  ).toBeVisible();
+  expect((await readScenario(page)).secretMutations).toContainEqual([
+    "secret",
+    "searxng:exaapi",
+    "--name",
+    "api_key",
+    "--stdin",
+  ]);
 });
 
 test("restarts once after installing an extension during onboarding", async ({
@@ -90,7 +197,7 @@ test("restarts once after installing an extension during onboarding", async ({
     extensions: [],
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "继续", exact: true }).click();
+  await goToSecrets(page);
   await page.getByRole("button", { name: "跳过此步" }).click();
 
   const bilibili = page
@@ -98,7 +205,7 @@ test("restarts once after installing an extension during onboarding", async ({
     .filter({ hasText: "Bilibili" });
   await bilibili.getByRole("button", { name: "安装" }).click();
   await expect(
-    page.getByText(/agent-search-gateway-plugin-bilibili 已安装/),
+    page.getByText(/agent-search-gateway-plugin-bilibili(?:@\S+)? 已安装/),
   ).toBeVisible();
 
   await page.getByRole("button", { name: "完成并重启" }).click();
@@ -125,7 +232,7 @@ test("keeps onboarding open when the final restart fails and allows retry", asyn
     restartError: "整栈重启失败。",
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "继续", exact: true }).click();
+  await goToSecrets(page);
   await page.getByRole("button", { name: "跳过此步" }).click();
 
   const bilibili = page

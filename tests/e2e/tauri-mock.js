@@ -14,6 +14,8 @@
   scenario.detectedRoot ??= null;
   scenario.statusCallCount ??= 0;
   scenario.configCallCount ??= 0;
+  scenario.engineMutations ??= [];
+  scenario.secretMutations ??= [];
   window.__TAURI_TEST_INVOKES__ = testInvokes;
   window.__TAURI_TEST_CLI_COMMANDS__ = testCliCommands;
 
@@ -157,6 +159,15 @@
       const name = cliArgs[0];
       const subcommand = cliArgs[1];
       testCliCommands.push(name);
+      if (
+        name === "engines" &&
+        (subcommand === "enable" || subcommand === "disable")
+      ) {
+        scenario.engineMutations.push(cliArgs.slice(1));
+      }
+      if (name === "engines" && subcommand === "secret") {
+        scenario.secretMutations.push(cliArgs.slice(1));
+      }
       if (name === "logs" && cliArgs.includes("-f") && scenario.followStartDelay) {
         await new Promise((resolve) =>
           setTimeout(resolve, scenario.followStartDelay),
@@ -207,6 +218,73 @@
           }),
         );
       } else if (name === "engines") {
+        scenario.engines ??= [
+          {
+            id: "gateway.upstream:deepseek",
+            group: "gateway.upstream",
+            name: "deepseek",
+            kind: "gateway",
+            enabled: false,
+            available: false,
+            routing: ["general"],
+            requires: ["secrets.search.deepseek.api_key"],
+          },
+          {
+            id: "gateway.search:main",
+            group: "gateway.search",
+            name: "main search",
+            kind: "gateway",
+            enabled: true,
+            available: true,
+            routing: ["category:news"],
+          },
+          {
+            id: "searxng:bilibili",
+            group: "searxng",
+            name: "bilibili",
+            kind: "searxng",
+            enabled: true,
+            available: true,
+            routing: ["resident"],
+          },
+          {
+            id: "searxng:tavily",
+            group: "searxng",
+            name: "tavily",
+            kind: "searxng",
+            enabled: true,
+            available: true,
+            routing: ["rotating"],
+          },
+          {
+            id: "gateway.reverse_image:tracemoe",
+            group: "gateway.reverse_image",
+            name: "tracemoe",
+            kind: "gateway",
+            enabled: true,
+            available: true,
+            routing: ["source"],
+          },
+          {
+            id: "gateway.reverse_image:saucenao",
+            group: "gateway.reverse_image",
+            name: "saucenao",
+            kind: "gateway",
+            enabled: false,
+            available: false,
+            routing: ["source"],
+            requires: ["secrets.search.reverse_image.saucenao.api_key"],
+          },
+          {
+            id: "gateway.reverse_image:baidu",
+            group: "gateway.reverse_image",
+            name: "baidu",
+            kind: "gateway",
+            enabled: true,
+            available: true,
+            routing: ["source"],
+          },
+        ];
         if (
           (subcommand === "enable" || subcommand === "disable") &&
           scenario.engineMutationError
@@ -215,31 +293,38 @@
             id,
             failure("engines", "ENGINE_UPDATE_FAILED", scenario.engineMutationError),
           );
+        } else if (subcommand === "enable" || subcommand === "disable") {
+          const enabled = subcommand === "enable";
+          for (const id of cliArgs.slice(2)) {
+            const engine = scenario.engines.find((item) => item.id === id);
+            if (engine) engine.enabled = enabled;
+          }
+          finish(id, result("engines", { changed: cliArgs.slice(2) }));
+        } else if (subcommand === "secret") {
+          if (scenario.engineSecretError) {
+            finish(
+              id,
+              failure("engines", "SECRET_UPDATE_FAILED", scenario.engineSecretError),
+            );
+          } else {
+            const engine = scenario.engines.find(
+              (item) => item.id === cliArgs[2],
+            );
+            if (engine) engine.available = true;
+            finish(
+              id,
+              result("engines", {
+                engine: cliArgs[2],
+                changed: ["searxng.engines.exaapi.api_key"],
+                restarted: true,
+              }),
+            );
+          }
         } else {
           finish(
             id,
             result("engines", {
-              engines: [
-                {
-                  id: "gateway.upstream:deepseek",
-                  group: "gateway.upstream",
-                  name: "deepseek",
-                  kind: "gateway",
-                  enabled: false,
-                  available: false,
-                  routing: ["general"],
-                  requires: ["secrets.search.deepseek.api_key"],
-                },
-                {
-                  id: "gateway.search:main",
-                  group: "gateway.search",
-                  name: "main search",
-                  kind: "gateway",
-                  enabled: true,
-                  available: true,
-                  routing: ["category:news"],
-                },
-              ],
+              engines: scenario.engines,
             }),
           );
         }
@@ -327,10 +412,26 @@
       } else if (
         name === "config" &&
         subcommand === "set" &&
-        cliArgs.includes("--stdin") &&
-        scenario.secretError
+        cliArgs.includes("--stdin")
       ) {
-        finish(id, failure("config.set", "SECRET_WRITE_FAILED", scenario.secretError));
+        if (scenario.secretError) {
+          finish(id, failure("config.set", "SECRET_WRITE_FAILED", scenario.secretError));
+        } else {
+          const path = cliArgs[2];
+          scenario.secrets ??= {};
+          const segments = path.split(".").slice(1);
+          let cursor = scenario.secrets;
+          for (const segment of segments.slice(0, -1)) {
+            cursor[segment] ??= {};
+            cursor = cursor[segment];
+          }
+          cursor[segments.at(-1)] = "set";
+          const configuredEngine = scenario.engines?.find((engine) =>
+            (engine.requires ?? []).includes(path),
+          );
+          if (configuredEngine) configuredEngine.available = true;
+          finish(id, result("config.set", {}));
+        }
       } else if (name === "restart" && scenario.restartError) {
         finish(id, failure("restart", "RESTART_FAILED", scenario.restartError));
       } else if (name === "config" && subcommand === "get") {
@@ -339,7 +440,10 @@
           id,
           result("config.get", {
             gateway: { port: 3000, root_marker: scenario.root },
-            secrets: scenario.secrets ?? { test: { api_key: "set" } },
+            secrets: scenario.secrets ?? {
+              gateway: { token: "set" },
+              test: { api_key: "set" },
+            },
           }),
         );
       } else {

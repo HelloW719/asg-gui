@@ -961,7 +961,7 @@ test.describe("feature pages", () => {
     await expectIntegratedWorkspace(page, ".sources-workspace");
     await expect(page.getByText("通用上游")).toBeVisible();
     await expect(page.getByRole("heading", { name: "deepseek" })).toBeVisible();
-    await expect(page.getByText("待配置密钥")).toBeVisible();
+    await expect(page.getByText("待配置密钥").first()).toBeVisible();
     await expect(
       page.getByText("通用查询时与 SearXNG 并发，结果由网关统一融合。"),
     ).toBeVisible();

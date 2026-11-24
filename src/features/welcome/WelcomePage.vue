@@ -3,6 +3,8 @@ import {
   Blocks,
   CheckCircle2,
   Download,
+  Gauge,
+  Image,
   KeyRound,
   LoaderCircle,
   PackageCheck,
@@ -28,6 +30,7 @@ import {
   useWelcomeWizard,
   type WelcomeStep,
 } from "./useWelcomeWizard";
+import { SEARCH_STRENGTH_OPTIONS } from "./searchStrength";
 
 const router = useRouter();
 const wizard = useWelcomeWizard();
@@ -56,7 +59,7 @@ function isStep(step: WelcomeStep): boolean {
     <PageHeader
       eyebrow="SETUP"
       title="欢迎使用"
-      description="确认本地网关连接，并按需配置密钥与 V2 扩展。所有操作都通过 ASG CLI 完成。"
+      description="确认本地网关连接，并按需配置密钥、搜索强度与 V2 扩展。所有操作都通过 ASG CLI 完成。"
     />
 
     <div class="welcome-workspace glass-surface">
@@ -111,12 +114,30 @@ function isStep(step: WelcomeStep): boolean {
 
           <TabsContent value="secrets" class="tab-content">
             <SectionHeading
-              eyebrow="02 · SECRETS"
+              eyebrow="03 · SECRETS"
               title="配置可选密钥"
-              description="只显示当前搜索源实际声明且尚未配置的密钥。此步骤可以跳过。"
+              description="只显示当前能力、扩展或搜索源实际需要且尚未配置的密钥。此步骤可以跳过。"
             >
               <KeyRound :size="22" />
             </SectionHeading>
+
+            <div
+              v-if="wizard.searchProfileError.value"
+              class="welcome-profile-error"
+            >
+              <InlineNotice
+                tone="error"
+                :message="wizard.searchProfileError.value"
+              />
+              <BaseButton
+                size="compact"
+                variant="secondary"
+                :disabled="wizard.jobs.hasRunningOperation"
+                @click="wizard.previous"
+              >
+                返回搜索强度
+              </BaseButton>
+            </div>
 
             <p v-if="wizard.loadingSecrets.value" class="welcome-loading">
               <LoaderCircle class="spin" :size="17" />
@@ -192,9 +213,154 @@ function isStep(step: WelcomeStep): boolean {
             </template>
           </TabsContent>
 
+          <TabsContent value="strength" class="tab-content">
+            <SectionHeading
+              eyebrow="02 · SEARCH"
+              title="选择搜索强度"
+              description="强度逐级叠加搜索能力；返图源独立选择，在所有强度下都可使用。"
+            >
+              <Gauge :size="22" />
+            </SectionHeading>
+
+            <p
+              v-if="wizard.loadingSearchProfile.value"
+              class="welcome-loading"
+            >
+              <LoaderCircle class="spin" :size="17" />
+              正在读取当前引擎配置…
+            </p>
+
+            <div
+              v-if="wizard.searchProfileError.value"
+              class="welcome-profile-error"
+            >
+              <InlineNotice
+                tone="error"
+                :message="wizard.searchProfileError.value"
+              />
+              <BaseButton
+                size="compact"
+                variant="secondary"
+                :disabled="wizard.savingSearchProfile.value"
+                @click="wizard.loadSearchProfile"
+              >
+                重新读取
+              </BaseButton>
+            </div>
+
+            <fieldset
+              class="welcome-strength-options"
+              :disabled="
+                !wizard.searchProfileLoaded.value ||
+                wizard.loadingSearchProfile.value ||
+                wizard.savingSearchProfile.value
+              "
+            >
+              <legend class="welcome-strength-legend">选择搜索强度</legend>
+              <label
+                v-for="option in SEARCH_STRENGTH_OPTIONS"
+                :key="option.value"
+                class="welcome-strength-option"
+                :class="{
+                  'welcome-strength-option--active':
+                    wizard.searchStrength.value === option.value,
+                }"
+              >
+                <input
+                  v-model="wizard.searchStrength.value"
+                  type="radio"
+                  name="welcome-search-strength"
+                  :value="option.value"
+                  @change="wizard.searchProfileError.value = null"
+                />
+                <strong>{{ option.label }}</strong>
+                <span>{{ option.description }}</span>
+              </label>
+            </fieldset>
+
+            <p
+              v-if="
+                wizard.searchStrength.value !== 'low' &&
+                !wizard.deepseekReady.value
+              "
+              class="field-note welcome-profile-note"
+            >
+              中档和高档需要 DeepSeek，可在下一步配置 API Key。完成密钥配置后才会应用引擎设置。
+            </p>
+
+            <section
+              class="welcome-reverse-sources"
+              aria-labelledby="reverse-image-sources-title"
+            >
+              <div class="welcome-reverse-sources__heading">
+                <span class="welcome-feature-icon" aria-hidden="true">
+                  <Image :size="21" />
+                </span>
+                <div>
+                  <strong id="reverse-image-sources-title">可选返图源</strong>
+                  <p>选择可使用的以图搜图来源；该项不受搜索强度限制。</p>
+                </div>
+                <span class="token">全部强度可用</span>
+              </div>
+
+              <p
+                v-if="wizard.reverseImageEngines.value.length === 0"
+                class="welcome-empty-copy"
+              >
+                当前没有可配置的返图源。
+              </p>
+              <div v-else class="welcome-reverse-source-list">
+                <label
+                  v-for="engine in wizard.reverseImageEngines.value"
+                  :key="engine.id"
+                  class="welcome-reverse-source"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="
+                      wizard.selectedReverseImageIds.value.includes(engine.id)
+                    "
+                    :disabled="
+                      !wizard.searchProfileLoaded.value ||
+                      wizard.loadingSearchProfile.value ||
+                      wizard.savingSearchProfile.value
+                    "
+                    @change="
+                      wizard.toggleReverseImage(
+                        engine.id,
+                        ($event.target as HTMLInputElement).checked,
+                      )
+                    "
+                  />
+                  <span>
+                    <strong>{{ engine.name }}</strong>
+                    <small>
+                      {{
+                        engine.available
+                          ? "可直接启用"
+                          : engine.enabled
+                            ? "缺少密钥，建议关闭"
+                            : "可在下一步配置密钥"
+                      }}
+                    </small>
+                  </span>
+                  <span
+                    :class="
+                      engine.available
+                        ? 'token token--ok'
+                        : 'token token--warn'
+                    "
+                  >
+                    {{ engine.available ? "可用" : "需密钥" }}
+                  </span>
+                </label>
+              </div>
+            </section>
+          </TabsContent>
+
           <TabsContent value="extensions" class="tab-content">
             <SectionHeading
-              eyebrow="03 · EXTENSIONS"
+              eyebrow="04 · EXTENSIONS"
               title="下载 V2 扩展"
               description="安装官方站点扩展，或从可信的 ASG V2 仓库安装。此步骤可以跳过。"
             >
@@ -326,17 +492,35 @@ function isStep(step: WelcomeStep): boolean {
           v-if="isStep('root')"
           variant="primary"
           :disabled="!wizard.session.rootValid"
-          @click="wizard.continueToSecrets"
+          @click="wizard.continueToSearchProfile"
         >
           继续
         </BaseButton>
         <BaseButton
+          v-else-if="isStep('strength')"
+          variant="primary"
+          :disabled="
+            wizard.loadingSearchProfile.value ||
+            !wizard.searchProfileLoaded.value ||
+            wizard.savingSearchProfile.value ||
+            Boolean(wizard.searchProfileError.value)
+          "
+          @click="wizard.continueToSecrets"
+        >
+          继续配置密钥
+        </BaseButton>
+        <BaseButton
           v-else-if="isStep('secrets')"
           variant="primary"
-          :disabled="wizard.savingSecret.value || wizard.finishing.value"
+          :loading="wizard.savingSearchProfile.value"
+          :disabled="
+            wizard.savingSecret.value ||
+            wizard.savingSearchProfile.value ||
+            wizard.finishing.value
+          "
           @click="wizard.continueToExtensions"
         >
-          继续
+          应用并继续
         </BaseButton>
         <BaseButton
           v-else
