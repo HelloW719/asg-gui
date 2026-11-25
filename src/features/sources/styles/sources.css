@@ -98,6 +98,40 @@
   background: var(--surface-card-divider);
 }
 
+.extension-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface-sunken);
+}
+
+.extension-empty__icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border: 1px solid var(--surface-card-divider);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+  color: var(--sage-strong);
+  place-items: center;
+}
+
+.extension-empty__copy {
+  min-width: 0;
+}
+
+.extension-empty__copy strong {
+  font-size: var(--type-body-strong);
+}
+
+.extension-empty__copy p {
+  margin: var(--space-1) 0 0;
+  color: var(--text-faint);
+  font-size: var(--type-sm);
+}
+
 .source-row {
   position: relative;
   display: grid;

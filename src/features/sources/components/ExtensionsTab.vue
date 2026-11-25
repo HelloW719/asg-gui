@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { Download, RefreshCw, Search, Settings2, Trash2 } from "@lucide/vue";
+import {
+  Download,
+  PackageOpen,
+  RefreshCw,
+  Search,
+  Settings2,
+  Trash2,
+} from "@lucide/vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import type { ExtensionInfo, ExtensionSearchItem } from "@/types/cli";
 
@@ -197,6 +204,18 @@ const emit = defineEmits<{
         </section>
       </div>
     </article>
-    <p v-if="extensions.length === 0" class="empty-copy">尚未安装 V2 扩展。</p>
+    <div
+      v-if="extensions.length === 0"
+      class="extension-empty"
+      role="status"
+    >
+      <span class="extension-empty__icon" aria-hidden="true">
+        <PackageOpen :size="20" />
+      </span>
+      <div class="extension-empty__copy">
+        <strong>尚未安装 V2 扩展</strong>
+        <p>可从上方仓库安装，或先搜索 GitHub 扩展。</p>
+      </div>
+    </div>
   </div>
 </template>
