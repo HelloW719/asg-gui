@@ -230,6 +230,30 @@
   background: var(--surface-sunken);
 }
 
+/*
+ * Transparent light surfaces expose the parent divider used to paint grid
+ * gaps, so light grids switch to explicit item separators.
+ */
+:root[data-theme="light"] .engine-grid,
+:root[data-theme="light"] .source-list,
+:root[data-theme="light"] .extension-results {
+  gap: 0;
+  background: transparent;
+}
+
+:root[data-theme="light"] .engine-card:nth-child(n + 3) {
+  border-top: 1px solid var(--surface-card-divider);
+}
+
+:root[data-theme="light"] .engine-card:nth-child(even) {
+  border-left: 1px solid var(--surface-card-divider);
+}
+
+:root[data-theme="light"] .source-row + .source-row,
+:root[data-theme="light"] .extension-row + .extension-row {
+  border-top: 1px solid var(--surface-card-divider);
+}
+
 .structured-field-error {
   color: var(--danger);
 }
@@ -241,4 +265,12 @@
   .extension-capabilities { grid-template-columns: 1fr; }
   .extension-row__actions { justify-content: flex-start; }
   .source-row__actions { justify-self: start; }
+
+  :root[data-theme="light"] .engine-card:nth-child(n + 2) {
+    border-top: 1px solid var(--surface-card-divider);
+  }
+
+  :root[data-theme="light"] .engine-card:nth-child(even) {
+    border-left: 0;
+  }
 }

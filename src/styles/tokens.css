@@ -346,7 +346,8 @@
   --surface-card-highlight-bottom: rgba(42, 72, 77, 0.06);
   --surface-card-divider: rgba(42, 91, 93, 0.13);
   --surface-subtle: rgba(255, 255, 255, 0.18);
-  --surface-sunken: rgba(39, 57, 75, 0.05);
+  /* Light content regions use dividers instead of a dark sunken fill. */
+  --surface-sunken: transparent;
   --surface-code: rgba(39, 57, 75, 0.08);
   --surface-interaction: rgba(39, 57, 75, 0.05);
   --surface-selected: rgba(40, 127, 112, 0.11);
@@ -595,11 +596,7 @@
     var(--md-sys-color-surface-container-high, var(--background-raised)) 28%,
     transparent
   );
-  --surface-sunken: color-mix(
-    in srgb,
-    var(--md-sys-color-shadow, #000) 4%,
-    transparent
-  );
+  --surface-sunken: transparent;
   --surface-code: color-mix(
     in srgb,
     var(--md-sys-color-surface-container-high, var(--background-raised)) 26%,

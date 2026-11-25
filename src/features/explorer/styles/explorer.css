@@ -125,6 +125,10 @@
   font-size: 0.9em;
 }
 
+:root[data-theme="light"] .markdown-body code {
+  background: var(--surface-code);
+}
+
 .markdown-body pre {
   overflow: auto;
   padding: var(--space-3);

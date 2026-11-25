@@ -173,6 +173,8 @@ stores -> services
 - 页面样式留在对应 feature 目录，禁止在功能样式中覆盖其他页面的通用选择器。
 - 整个应用只能有一层全屏毛玻璃：`GlassShell` 中的 `.glass-frost-layer`。
 - 内容面板使用染色、边框和内阴影，不能分别再次添加 `backdrop-filter`。
+- 浅色模式的大块内容区、卡片网格、列表和展开区使用透明表面、留白与分隔线建立
+  层次；`--surface-sunken` 在浅色主题中保持透明，不得用半透明暗色填充制造灰影。
 - M3E 主题必须通过包裹 `.app-root` 的 `<m3e-theme>` 注入，使用
   `#5ad1c0` seed、expressive color/motion 和 strong focus；不得把
   `m3e-theme` 直接放在 `body` 下覆盖透明窗口背景。

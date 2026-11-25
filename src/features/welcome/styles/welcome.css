@@ -369,6 +369,11 @@
   border-top: 1px solid var(--surface-card-divider);
 }
 
+:root[data-theme="light"] .welcome-reverse-source-list,
+:root[data-theme="light"] .welcome-extension-list {
+  background: transparent;
+}
+
 .welcome-extension-copy {
   display: grid;
   min-width: 0;

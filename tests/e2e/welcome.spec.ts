@@ -103,6 +103,63 @@ test("auto-detects a fresh install and completes skippable steps", async ({
   ]);
 });
 
+test("removes welcome content surfaces in light mode", async ({ page }) => {
+  await installMock(page, { onboardingCompleted: false });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "欢迎使用" })).toBeVisible();
+  await page.getByRole("button", { name: "切换到浅色主题" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+  const lightSurface = page.locator(".welcome-surface");
+  await expect(lightSurface).toBeVisible();
+  expect(
+    await lightSurface.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        backgroundColor: style.backgroundColor,
+        backgroundImage: style.backgroundImage,
+        boxShadow: style.boxShadow,
+      };
+    }),
+  ).toEqual({
+    backgroundColor: "rgba(0, 0, 0, 0)",
+    backgroundImage: "none",
+    boxShadow: "none",
+  });
+
+  await page.getByRole("button", { name: "继续", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "选择搜索强度" }),
+  ).toBeVisible();
+  const sourceList = page.locator(".welcome-reverse-source-list");
+  await expect(sourceList).toBeVisible();
+  await expect(sourceList).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
+  );
+
+  await page
+    .getByRole("button", { name: "继续配置密钥", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "配置可选密钥" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "跳过此步" }).click();
+  await expect(
+    page.getByRole("heading", { name: "下载 V2 扩展" }),
+  ).toBeVisible();
+  const extensionList = page.locator(".welcome-extension-list");
+  await expect(extensionList).toBeVisible();
+  await expect(extensionList).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
+  );
+  await page.screenshot({
+    path: `test-results/welcome-${test.info().project.name}-light-flat.png`,
+    fullPage: true,
+  });
+});
+
 test("applies high search strength and selected reverse-image sources", async ({
   page,
 }) => {

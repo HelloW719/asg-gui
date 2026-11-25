@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 async function expectIntegratedWorkspace(
   page: Page,
@@ -34,6 +34,21 @@ async function expectButtonHeight(
     .getByTestId(testId)
     .evaluate((element) => element.getBoundingClientRect().height);
   expect(Math.abs(actual - height)).toBeLessThanOrEqual(0.5);
+}
+
+async function expectFlatLightSurface(locator: Locator): Promise<void> {
+  await expect(locator).toBeVisible();
+  const surface = await locator.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      backgroundImage: style.backgroundImage,
+      boxShadow: style.boxShadow,
+    };
+  });
+  expect(surface.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+  expect(surface.backgroundImage).toBe("none");
+  expect(surface.boxShadow).toBe("none");
 }
 
 test("renders the desktop bridge requirement without overflow", async ({ page }) => {
@@ -1114,6 +1129,102 @@ test.describe("feature pages", () => {
 
     await page.getByRole("button", { name: "重新诊断" }).click();
     await expect(page.getByText("installation")).toBeVisible();
+  });
+
+  test("removes light-mode sunken surfaces across feature pages", async ({
+    page,
+  }) => {
+    const size =
+      test.info().project.name === "minimum-window" ? "minimum" : "desktop";
+    await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
+    expect(
+      await page
+        .locator(".status-summary")
+        .evaluate((element) => getComputedStyle(element).backgroundColor),
+    ).not.toBe("rgba(0, 0, 0, 0)");
+
+    await page.getByRole("button", { name: "切换到浅色主题" }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    expect(
+      await page
+        .locator(".app-root")
+        .evaluate((element) =>
+          getComputedStyle(element).getPropertyValue("--surface-sunken").trim(),
+        ),
+    ).toBe("transparent");
+
+    await expectFlatLightSurface(page.locator(".status-summary"));
+    await expectFlatLightSurface(page.locator(".log-preview__line").first());
+    await expect(page.locator(".status-summary")).toHaveCSS(
+      "border-bottom-width",
+      "1px",
+    );
+
+    await page.getByRole("link", { name: "检索" }).click();
+    await expect(
+      page.getByRole("heading", { name: "检索与抓取" }),
+    ).toBeVisible();
+    await page.getByText("搜索参数", { exact: true }).click();
+    await expectFlatLightSurface(page.locator(".disclosure-panel__body"));
+
+    await page.getByRole("link", { name: "来源" }).click();
+    await expect(
+      page.getByRole("heading", { name: "引擎与扩展" }),
+    ).toBeVisible();
+    await expectFlatLightSurface(page.locator(".engine-grid"));
+    await expectFlatLightSurface(page.locator(".engine-card").first());
+    await expect(page.locator(".engine-card").nth(2)).toHaveCSS(
+      "border-top-width",
+      "1px",
+    );
+    await page.screenshot({
+      path: `test-results/sources-engine-${size}-light-flat.png`,
+      fullPage: true,
+    });
+    await page.getByRole("tab", { name: "扩展 V2" }).click();
+    await expect(page.locator(".source-list")).toBeVisible();
+    await expectFlatLightSurface(page.locator(".source-list"));
+    await expectFlatLightSurface(page.locator(".extension-row").first());
+    await expect(page.locator(".source-list")).toHaveCSS(
+      "border-top-width",
+      "1px",
+    );
+    await page.screenshot({
+      path: `test-results/sources-${size}-light-flat.png`,
+      fullPage: true,
+    });
+
+    await page.getByRole("link", { name: "日志", exact: true }).click();
+    await expect(page.locator(".log-console")).toBeVisible();
+    await expectFlatLightSurface(page.locator(".log-console"));
+
+    await page.getByRole("link", { name: "设置" }).click();
+    await expect(
+      page.getByRole("heading", { name: "主题与效果" }),
+    ).toBeVisible();
+    await expectFlatLightSurface(page.locator(".settings-install"));
+    await expect(page.locator(".config-groups")).toBeVisible();
+    await expectFlatLightSurface(page.locator(".config-groups"));
+
+    await page.getByRole("link", { name: "维护" }).click();
+    await expect(page.getByRole("heading", { name: "环境诊断" })).toBeVisible();
+    await expectFlatLightSurface(page.locator(".maintenance-grid"));
+    await expectFlatLightSurface(page.locator(".maintenance-card").first());
+    await expect(page.locator(".maintenance-card").nth(1)).toHaveCSS(
+      "border-top-width",
+      "1px",
+    );
+    await page.screenshot({
+      path: `test-results/maintenance-${size}-light-flat.png`,
+      fullPage: true,
+    });
+    expect(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth <=
+          document.documentElement.clientWidth,
+      ),
+    ).toBe(true);
   });
 });
 
