@@ -101,55 +101,43 @@ m3e-theme {
 }
 
 .app-titlebar__identity {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
   min-width: 0;
-  gap: 10px;
+  gap: 1px;
 }
 
 .app-titlebar__name {
   overflow: hidden;
-  font-size: var(--type-sm);
+  font-size: var(--type-body-strong);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-text);
+  line-height: 1.1;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.app-titlebar__version {
-  padding: 2px 7px;
-  border: 1px solid var(--outline-subtle);
-  border-radius: var(--radius-full);
-  background: var(--surface-subtle);
-  color: var(--text-faint);
-  font-size: 0.6875rem;
-}
-
-.app-mark {
-  position: relative;
-  display: inline-flex;
-  width: 19px;
-  height: 19px;
+.app-titlebar__meta {
+  display: flex;
+  min-width: 0;
   align-items: center;
-  justify-content: center;
+  gap: 7px;
+  color: var(--text-faint);
+  font-family: "SFMono-Regular", "Cascadia Code", monospace;
+  font-size: 0.6875rem;
+  letter-spacing: var(--tracking-label);
+  line-height: 1.15;
 }
 
-.app-mark i {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 1px solid var(--sage-strong);
-  border-radius: 50%;
+.app-titlebar__version {
+  color: inherit;
 }
 
-.app-mark i:nth-child(2) {
-  transform: translateX(4px) scale(0.72);
-  border-color: var(--clay);
-}
-
-.app-mark i:nth-child(3) {
-  width: 4px;
-  height: 4px;
-  border: 0;
-  background: var(--sage-strong);
+.app-titlebar__meta-divider {
+  width: 1px;
+  height: 8px;
+  background: var(--outline-subtle);
 }
 
 .app-titlebar__actions {
@@ -577,41 +565,21 @@ m3e-theme {
 }
 
 .app-titlebar__identity {
-  gap: 11px;
+  gap: 1px;
 }
 
 .app-titlebar__name {
   color: var(--text);
-  font-size: var(--type-sm);
+  font-size: var(--type-body-strong);
   letter-spacing: var(--tracking-text);
 }
 
 .app-titlebar__version {
-  border-color: var(--outline-subtle);
-  border-radius: 0;
-  background: var(--surface-subtle);
-  color: var(--text-faint);
-  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 0 100%);
+  color: inherit;
 }
 
 .app-titlebar__mode {
-  color: var(--text-faint);
-  font-family: "SFMono-Regular", "Cascadia Code", monospace;
-  font-size: 0.625rem;
-  letter-spacing: var(--tracking-label);
-}
-
-.app-mark i {
-  border-radius: 0;
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-}
-
-.app-mark i:first-child {
-  border-color: var(--md-sys-color-primary);
-}
-
-.app-mark i:nth-child(2) {
-  border-color: var(--md-sys-color-tertiary);
+  color: inherit;
 }
 
 .window-controls button {

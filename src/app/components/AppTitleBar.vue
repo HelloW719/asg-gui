@@ -42,14 +42,12 @@ async function close(): Promise<void> {
 <template>
   <header class="app-titlebar" @mousedown="beginWindowDrag">
     <div class="app-titlebar__identity">
-      <span class="app-mark" aria-hidden="true">
-        <i />
-        <i />
-        <i />
-      </span>
       <span class="app-titlebar__name">Agent Search Gateway</span>
-      <span class="app-titlebar__version">{{ session.guiVersion }}</span>
-      <span class="app-titlebar__mode">LOCAL CONTROL</span>
+      <span class="app-titlebar__meta">
+        <span class="app-titlebar__mode">LOCAL CONTROL</span>
+        <span class="app-titlebar__meta-divider" aria-hidden="true" />
+        <span class="app-titlebar__version">{{ session.guiVersion }}</span>
+      </span>
     </div>
 
     <div class="app-titlebar__actions">
