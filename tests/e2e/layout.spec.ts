@@ -471,21 +471,21 @@ test("renders a continuous squircle window without a border", async ({
   ).toEqual(["none", "none", "none"]);
 });
 
-test("renders complete Chinese ghost titles without clipping", async ({
+test("renders oversized edge-cropped route-code ghost marks without overflow", async ({
   page,
 }) => {
   await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
 
-  for (const [route, title] of [
-    ["/#/status", "系统状态"],
-    ["/#/explore", "检索与抓取"],
-    ["/#/sources", "引擎与扩展"],
+  for (const [route, title, ghostText] of [
+    ["/#/status", "系统状态", "STATUS"],
+    ["/#/explore", "检索与抓取", "SEARCH"],
+    ["/#/sources", "引擎与扩展", "SOURCES"],
   ] as const) {
     await page.goto(route);
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
 
     const ghost = page.locator(".page-header__ghost");
-    await expect(ghost).toHaveText(title);
+    await expect(ghost).toHaveText(ghostText);
     await expect(ghost).toHaveAttribute("aria-hidden", "true");
     if (test.info().project.name === "minimum-window") {
       await expect(ghost).toHaveCSS("display", "none");
@@ -494,46 +494,27 @@ test("renders complete Chinese ghost titles without clipping", async ({
 
     const metrics = await ghost.evaluate((element) => {
       const style = getComputedStyle(element);
-      const textRange = document.createRange();
-      textRange.selectNodeContents(element);
-      const textBounds = textRange.getBoundingClientRect();
-      const clippingAncestors: string[] = [];
-      let ancestor = element.parentElement;
-      while (ancestor) {
-        const ancestorStyle = getComputedStyle(ancestor);
-        const ancestorBounds = ancestor.getBoundingClientRect();
-        const clipsHorizontal = ancestorStyle.overflowX !== "visible";
-        const clipsVertical = ancestorStyle.overflowY !== "visible";
-        if (
-          (clipsHorizontal &&
-            (textBounds.left < ancestorBounds.left - 1 ||
-              textBounds.right > ancestorBounds.right + 1)) ||
-          (clipsVertical &&
-            (textBounds.top < ancestorBounds.top - 1 ||
-              textBounds.bottom > ancestorBounds.bottom + 1))
-        ) {
-          clippingAncestors.push(
-            `${ancestor.tagName.toLowerCase()}.${ancestor.className}`,
-          );
-        }
-        ancestor = ancestor.parentElement;
-      }
       return {
-        textHeight: textBounds.height,
-        textWidth: textBounds.width,
-        clippingAncestors,
-        clientHeight: element.clientHeight,
-        clientWidth: element.clientWidth,
-        overflow: style.overflow,
-        scrollWidth: element.scrollWidth,
+        backgroundImage: style.backgroundImage,
+        clipPath: style.clipPath,
+        color: style.color,
+        textFillColor: style.webkitTextFillColor,
+        textTransform: style.textTransform,
       };
     });
 
-    expect(metrics.overflow).toBe("visible");
-    expect(metrics.textWidth).toBeGreaterThan(0);
-    expect(metrics.textHeight).toBeGreaterThan(0);
-    expect(metrics.clippingAncestors).toEqual([]);
-    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
+    expect(metrics.backgroundImage).toBe("none");
+    expect(metrics.clipPath).not.toBe("none");
+    expect(metrics.color).not.toBe("rgba(0, 0, 0, 0)");
+    expect(metrics.textFillColor).toBe(metrics.color);
+    expect(metrics.textTransform).toBe("uppercase");
+    expect(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth <=
+          document.documentElement.clientWidth,
+      ),
+    ).toBe(true);
   }
 });
 

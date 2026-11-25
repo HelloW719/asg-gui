@@ -28,8 +28,10 @@ defineProps<{
       <p v-if="description || $slots.description">
         <slot name="description">{{ description }}</slot>
       </p>
+      <span class="page-header__ghost" aria-hidden="true">
+        {{ label || title }}
+      </span>
     </div>
-    <span class="page-header__ghost" aria-hidden="true">{{ title }}</span>
     <div v-if="$slots.actions" class="action-row">
       <slot name="actions" />
     </div>

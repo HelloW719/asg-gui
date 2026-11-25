@@ -58,7 +58,7 @@
   --tactical-grid-major: rgba(222, 242, 240, 0.075);
   --tactical-line: rgba(139, 225, 210, 0.2);
   --tactical-line-soft: rgba(218, 239, 246, 0.1);
-  --tactical-ghost: rgba(218, 239, 246, 0.055);
+  --tactical-ghost: rgba(233, 240, 248, 0.08);
   --tactical-scan: rgba(225, 255, 250, 0.12);
   --m3e-fallback-on-surface: #e9f0f8;
   --m3e-fallback-on-surface-variant: #b4c0ce;
@@ -231,7 +231,7 @@
   --tactical-grid-major: rgba(39, 57, 75, 0.085);
   --tactical-line: rgba(40, 127, 112, 0.2);
   --tactical-line-soft: rgba(39, 57, 75, 0.11);
-  --tactical-ghost: rgba(39, 57, 75, 0.06);
+  --tactical-ghost: rgba(39, 57, 75, 0.08);
   --tactical-scan: rgba(255, 255, 255, 0.34);
   --m3e-fallback-on-surface: #172332;
   --m3e-fallback-on-surface-variant: #4d5e70;
@@ -550,7 +550,7 @@
   );
   --tactical-ghost: color-mix(
     in srgb,
-    var(--md-sys-color-on-surface, var(--m3e-fallback-on-surface)) 4%,
+    var(--md-sys-color-on-surface, var(--m3e-fallback-on-surface)) 8%,
     transparent
   );
   --tactical-scan: color-mix(
