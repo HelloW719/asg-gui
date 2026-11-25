@@ -537,6 +537,34 @@ test("renders complete Chinese ghost titles without clipping", async ({
   }
 });
 
+test("uses an architectural baseline instead of a scrollbar-like rail", async ({
+  page,
+}) => {
+  await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
+  await page.goto("/#/status");
+  await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
+
+  const baseline = page.locator(".page-header__baseline");
+  await expect(baseline).toHaveAttribute("aria-hidden", "true");
+  const metrics = await baseline.evaluate((element) => {
+    const bounds = element.getBoundingClientRect();
+    return {
+      width: bounds.width,
+      height: bounds.height,
+      headerBeforeContent: getComputedStyle(
+        element.closest(".page-header")!,
+        "::before",
+      ).content,
+    };
+  });
+
+  expect(metrics.width).toBeGreaterThan(metrics.height * 20);
+  expect(metrics.headerBeforeContent).toBe("none");
+  await expect(page.locator(".page-header__rail")).toHaveCount(0);
+  await expect(page.locator(".page-header__signal")).toHaveCount(0);
+  await expect(page.locator(".page-header__context")).toHaveText("01 // STATUS");
+});
+
 test("uses the shared shape scale across feature surfaces", async ({ page }) => {
   await page.addInitScript({ path: "tests/e2e/tauri-mock.js" });
   await page.goto("/");

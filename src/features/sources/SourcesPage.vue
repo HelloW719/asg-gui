@@ -23,6 +23,8 @@ const sources = useSources();
   <div class="page sources-page">
     <PageHeader
       title="引擎与扩展"
+      index="03"
+      label="SOURCES"
       description="扩展仅展示 V2 manifest；后端 setup、配置和卸载均由 CLI 完成。"
     />
 

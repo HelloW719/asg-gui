@@ -29,6 +29,8 @@ async function reopenWelcome(): Promise<void> {
   <div class="page settings-page">
     <PageHeader
       title="设置"
+      index="05"
+      label="SETTINGS"
       description="每个字段单独通过 config set 校验、写入并整栈重启。"
     >
       <template #actions>

@@ -20,6 +20,8 @@ const explorer = useExplorer();
   <div class="page">
     <PageHeader
       title="检索与抓取"
+      index="02"
+      label="SEARCH"
       description="调用运行中的 gateway，不修改配置，也不会重启服务。"
     />
 

@@ -813,45 +813,40 @@ m3e-theme {
 .page-header {
   position: relative;
   display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
   gap: var(--space-3);
   margin-bottom: var(--space-4);
   padding: 0;
 }
 
-.page-header::before {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 6px;
-  background: linear-gradient(
-    180deg,
-    var(--tactical-state, var(--tactical-signal)) 0 34px,
-    var(--tactical-line-soft) 34px 100%
-  );
+.page-header__baseline {
+  position: relative;
+  grid-column: 1 / -1;
+  display: flex;
+  height: 4px;
+  align-items: center;
+  margin-top: calc(var(--space-2) * -1);
+}
+
+.page-header__baseline::before {
+  width: 64px;
+  height: 4px;
+  flex: 0 0 auto;
+  background: var(--tactical-state, var(--tactical-signal));
   content: "";
 }
 
-.page-header__rail {
-  display: flex;
-  width: 18px;
-  height: 34px;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-}
-
-.page-header__rail i {
-  width: 2px;
-  height: 5px;
-  background: var(--tactical-line);
-}
-
-.page-header__rail i:nth-child(2) {
-  height: 9px;
-  background: var(--tactical-state, var(--tactical-signal));
+.page-header__baseline::after {
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(
+    90deg,
+    var(--tactical-line) 0,
+    var(--tactical-line-soft) 38%,
+    transparent 92%
+  );
+  content: "";
 }
 
 .page-header__copy {
@@ -864,9 +859,19 @@ m3e-theme {
   position: relative;
   margin-bottom: var(--space-1);
   font-size: var(--type-page);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-text);
   line-height: 1.12;
+}
+
+.page-header__context {
+  color: var(--text-faint);
+  font-family: "SFMono-Regular", "Cascadia Code", monospace;
+  font-size: var(--type-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .page-header__ghost {
@@ -1078,7 +1083,7 @@ m3e-theme {
 
 @media (max-width: 720px) {
   .page-header {
-    grid-template-columns: 18px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .page-header__ghost {
@@ -1086,7 +1091,7 @@ m3e-theme {
   }
 
   .page-header .action-row {
-    grid-column: 2;
+    grid-column: 1;
     justify-content: flex-start;
   }
 

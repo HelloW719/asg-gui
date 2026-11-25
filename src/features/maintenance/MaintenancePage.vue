@@ -29,6 +29,8 @@ const adLevelOptions = [
   <div class="page maintenance-page">
     <PageHeader
       title="维护"
+      index="06"
+      label="MAINTENANCE"
       description="诊断、浏览器运行时、广告过滤和 ASG 自身更新。"
     >
       <template #actions>
