@@ -864,15 +864,6 @@
   .welcome-rail__note {
     display: none;
   }
-
-  .welcome-extension-row,
-  .welcome-custom-repo {
-    grid-template-columns: 1fr;
-  }
-
-  .welcome-extension-row .button {
-    justify-self: start;
-  }
 }
 
 @media (max-width: 720px) {
@@ -898,6 +889,16 @@
 
   .welcome-surface {
     padding: var(--space-4);
+  }
+
+  .welcome-extension-row,
+  .welcome-custom-repo {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-extension-row .button,
+  .welcome-custom-repo .button {
+    justify-self: start;
   }
 
   .welcome-strength-options {
