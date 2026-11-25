@@ -29,13 +29,15 @@ async function goToSecrets(
   page: Page,
   strength: RegExp = /低.*仅 SearXNG 原生引擎/,
 ): Promise<void> {
-  await page.getByRole("button", { name: "继续", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "选择搜索强度" })).toBeVisible();
+  await page
+    .getByRole("button", { name: "开始配置", exact: true })
+    .click();
+  await expect(page.getByRole("heading", { name: "选择搜索能力" })).toBeVisible();
   await page.getByRole("radio", { name: strength }).check();
   await page
-    .getByRole("button", { name: "继续配置密钥", exact: true })
+    .getByRole("button", { name: "下一步：配置密钥", exact: true })
     .click();
-  await expect(page.getByRole("heading", { name: "配置可选密钥" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "补齐可选密钥" })).toBeVisible();
 }
 
 test("auto-detects a fresh install and completes skippable steps", async ({
@@ -55,8 +57,10 @@ test("auto-detects a fresh install and completes skippable steps", async ({
   ).toBeVisible();
   await expectIntegratedWelcome(page);
 
-  await page.getByRole("button", { name: "继续", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "选择搜索强度" })).toBeVisible();
+  await page
+    .getByRole("button", { name: "开始配置", exact: true })
+    .click();
+  await expect(page.getByRole("heading", { name: "选择搜索能力" })).toBeVisible();
   await expect(
     page.getByRole("radio", { name: /低.*仅 SearXNG 原生引擎/ }),
   ).toBeVisible();
@@ -73,17 +77,24 @@ test("auto-detects a fresh install and completes skippable steps", async ({
     page.getByRole("checkbox", { name: /saucenao/ }),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "继续配置密钥", exact: true })
+    .getByRole("button", { name: "下一步：配置密钥", exact: true })
     .click();
-  await expect(page.getByRole("heading", { name: "配置可选密钥" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "补齐可选密钥" })).toBeVisible();
   await expect(page.getByText("DeepSeek API Key").first()).toBeVisible();
-  await page.getByRole("button", { name: "跳过此步" }).click();
+  await page.getByRole("button", { name: "暂时跳过密钥" }).click();
 
-  await expect(page.getByRole("heading", { name: "下载 V2 扩展" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "按需添加站点扩展" }),
+  ).toBeVisible();
   await expect(page.getByText("Bilibili", { exact: true })).toBeVisible();
   await expect(page.getByText("微博", { exact: true })).toBeVisible();
   await expect(page.getByText("知网", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "跳过并完成" }).click();
+  await expect(
+    page.getByRole("heading", { name: "完成前检查" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "完成并进入控制台", exact: true })
+    .click();
 
   await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
   expect((await readScenario(page)).onboardingCompleted).toBe(true);
@@ -101,6 +112,33 @@ test("auto-detects a fresh install and completes skippable steps", async ({
     "searxng:bilibili",
     "searxng:tavily",
   ]);
+});
+
+test("makes progress, optional steps, and the key queue explicit", async ({
+  page,
+}) => {
+  await installMock(page, { onboardingCompleted: false });
+  await page.goto("/");
+
+  const steps = page.locator(".welcome-step-trigger");
+  await expect(steps).toHaveCount(4);
+  await expect(page.locator(".welcome-progress-count")).toHaveText("1 / 4");
+  await expect(page.locator(".welcome-step-optional")).toHaveCount(2);
+  await expectIntegratedWelcome(page);
+
+  await page
+    .getByRole("button", { name: "开始配置", exact: true })
+    .click();
+  await expect(page.getByRole("heading", { name: "选择搜索能力" })).toBeVisible();
+  await expect(page.locator(".welcome-step-trigger[data-complete='true']")).toHaveCount(1);
+  await expect(page.locator(".welcome-progress-count")).toHaveText("2 / 4");
+
+  await page
+    .getByRole("button", { name: "下一步：配置密钥", exact: true })
+    .click();
+  await expect(page.getByRole("heading", { name: "补齐可选密钥" })).toBeVisible();
+  await expect(page.locator(".welcome-secret-queue__item").first()).toBeVisible();
+  await expect(page.locator(".welcome-progress-count")).toHaveText("3 / 4");
 });
 
 test("removes welcome content surfaces in light mode", async ({ page }) => {
@@ -127,9 +165,11 @@ test("removes welcome content surfaces in light mode", async ({ page }) => {
     boxShadow: "none",
   });
 
-  await page.getByRole("button", { name: "继续", exact: true }).click();
+  await page
+    .getByRole("button", { name: "开始配置", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "选择搜索强度" }),
+    page.getByRole("heading", { name: "选择搜索能力" }),
   ).toBeVisible();
   const sourceList = page.locator(".welcome-reverse-source-list");
   await expect(sourceList).toBeVisible();
@@ -139,14 +179,14 @@ test("removes welcome content surfaces in light mode", async ({ page }) => {
   );
 
   await page
-    .getByRole("button", { name: "继续配置密钥", exact: true })
+    .getByRole("button", { name: "下一步：配置密钥", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "配置可选密钥" }),
+    page.getByRole("heading", { name: "补齐可选密钥" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "跳过此步" }).click();
+  await page.getByRole("button", { name: "暂时跳过密钥" }).click();
   await expect(
-    page.getByRole("heading", { name: "下载 V2 扩展" }),
+    page.getByRole("heading", { name: "按需添加站点扩展" }),
   ).toBeVisible();
   const extensionList = page.locator(".welcome-extension-list");
   await expect(extensionList).toBeVisible();
@@ -172,7 +212,7 @@ test("applies high search strength and selected reverse-image sources", async ({
   await page.getByRole("button", { name: "上一步" }).click();
   await page.getByRole("checkbox", { name: /saucenao/ }).check();
   await page
-    .getByRole("button", { name: "继续配置密钥", exact: true })
+    .getByRole("button", { name: "下一步：配置密钥", exact: true })
     .click();
 
   const secretInput = page.getByPlaceholder("输入后仅通过 stdin 发送");
@@ -182,8 +222,10 @@ test("applies high search strength and selected reverse-image sources", async ({
   await secretInput.fill("saucenao-key");
   await page.getByRole("button", { name: "保存密钥" }).click();
 
-  await page.getByRole("button", { name: "应用并继续" }).click();
-  await expect(page.getByRole("heading", { name: "下载 V2 扩展" })).toBeVisible();
+  await page.getByRole("button", { name: "应用设置并继续" }).click();
+  await expect(
+    page.getByRole("heading", { name: "按需添加站点扩展" }),
+  ).toBeVisible();
 
   expect((await readScenario(page)).engineMutations).toContainEqual([
     "enable",
@@ -229,13 +271,13 @@ test("sets a missing SearXNG API key through the engine secret command", async (
   await page.goto("/");
   await goToSecrets(page);
 
-  await expect(page.getByText("exaapi API Key")).toBeVisible();
+  await expect(page.getByText("exaapi API Key").first()).toBeVisible();
   const input = page.getByPlaceholder("输入后仅通过 stdin 发送");
   await input.fill("exaapi-key");
   await page.getByRole("button", { name: "保存密钥" }).click();
 
   await expect(
-    page.getByText("当前要求配置的密钥均已就绪，可以继续。"),
+    page.getByText("没有待配置的密钥", { exact: true }),
   ).toBeVisible();
   expect((await readScenario(page)).secretMutations).toContainEqual([
     "secret",
@@ -255,7 +297,7 @@ test("restarts once after installing an extension during onboarding", async ({
   });
   await page.goto("/");
   await goToSecrets(page);
-  await page.getByRole("button", { name: "跳过此步" }).click();
+  await page.getByRole("button", { name: "暂时跳过密钥" }).click();
 
   const bilibili = page
     .locator(".welcome-extension-row")
@@ -265,7 +307,9 @@ test("restarts once after installing an extension during onboarding", async ({
     page.getByText(/agent-search-gateway-plugin-bilibili(?:@\S+)? 已安装/),
   ).toBeVisible();
 
-  await page.getByRole("button", { name: "完成并重启" }).click();
+  await page
+    .getByRole("button", { name: "完成、重启并进入控制台" })
+    .click();
   await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
 
   const commands = await page.evaluate(
@@ -290,19 +334,23 @@ test("keeps onboarding open when the final restart fails and allows retry", asyn
   });
   await page.goto("/");
   await goToSecrets(page);
-  await page.getByRole("button", { name: "跳过此步" }).click();
+  await page.getByRole("button", { name: "暂时跳过密钥" }).click();
 
   const bilibili = page
     .locator(".welcome-extension-row")
     .filter({ hasText: "Bilibili" });
   await bilibili.getByRole("button", { name: "安装" }).click();
   await expect(bilibili.getByRole("button", { name: "已安装" })).toBeVisible();
-  await page.getByRole("button", { name: "完成并重启" }).click();
+  await page
+    .getByRole("button", { name: "完成、重启并进入控制台" })
+    .click();
 
   await expect(
     page.getByText("整栈重启失败。", { exact: true }).first(),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "下载 V2 扩展" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "按需添加站点扩展" }),
+  ).toBeVisible();
   expect((await readScenario(page)).onboardingCompleted).toBe(false);
 
   await page.evaluate(() => {
@@ -312,7 +360,9 @@ test("keeps onboarding open when the final restart fails and allows retry", asyn
       }
     ).__TAURI_TEST_SCENARIO__.restartError;
   });
-  await page.getByRole("button", { name: "完成并重启" }).click();
+  await page
+    .getByRole("button", { name: "完成、重启并进入控制台" })
+    .click();
   await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
   expect((await readScenario(page)).onboardingCompleted).toBe(true);
 });

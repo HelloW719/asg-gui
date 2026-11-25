@@ -31,11 +31,37 @@ export const WELCOME_STEPS: ReadonlyArray<{
   value: WelcomeStep;
   index: string;
   label: string;
+  description: string;
+  optional: boolean;
 }> = [
-  { value: "root", index: "01", label: "接入系统" },
-  { value: "strength", index: "02", label: "搜索强度" },
-  { value: "secrets", index: "03", label: "配置密钥" },
-  { value: "extensions", index: "04", label: "下载扩展" },
+  {
+    value: "root",
+    index: "01",
+    label: "接入系统",
+    description: "确认本地 CLI",
+    optional: false,
+  },
+  {
+    value: "strength",
+    index: "02",
+    label: "搜索强度",
+    description: "选择检索能力",
+    optional: false,
+  },
+  {
+    value: "secrets",
+    index: "03",
+    label: "配置密钥",
+    description: "补齐可选服务",
+    optional: true,
+  },
+  {
+    value: "extensions",
+    index: "04",
+    label: "下载扩展",
+    description: "添加站点抓取",
+    optional: true,
+  },
 ];
 
 export const OFFICIAL_EXTENSIONS: readonly OfficialExtension[] = [
@@ -432,3 +458,5 @@ export function useWelcomeWizard() {
     finish,
   };
 }
+
+export type WelcomeWizard = ReturnType<typeof useWelcomeWizard>;
