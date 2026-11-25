@@ -75,6 +75,8 @@ const sources = useSources();
             :extensions="sources.extensions.value"
             :results="sources.extensionResults.value"
             :loading="sources.loading.extensions"
+            :searching="sources.loading.extensionSearch"
+            :search-completed="sources.extensionSearchCompleted.value"
             :busy="sources.jobs.hasRunningOperation"
             @install="(repo) => sources.installExtension(repo)"
             @search="sources.searchExtensions"

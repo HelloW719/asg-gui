@@ -20,9 +20,14 @@ export function useSources() {
   const extensionResults = ref<ExtensionSearchItem[]>([]);
   const extensionRepo = ref("");
   const extensionQuery = ref("");
+  const extensionSearchCompleted = ref(false);
   const error = ref<string | null>(null);
   const success = ref<string | null>(null);
-  const loading = reactive({ engines: false, extensions: false });
+  const loading = reactive({
+    engines: false,
+    extensions: false,
+    extensionSearch: false,
+  });
   const extensionToRemove = ref<ExtensionInfo | null>(null);
   const engineSecret = ref<EngineInfo | null>(null);
   const extensionSecret = ref<ExtensionInfo | null>(null);
@@ -144,12 +149,17 @@ export function useSources() {
 
   async function searchExtensions(): Promise<void> {
     error.value = null;
+    extensionSearchCompleted.value = false;
+    loading.extensionSearch = true;
     try {
       extensionResults.value = await serviceClient.sources.searchExtensions(
         extensionQuery.value,
       );
+      extensionSearchCompleted.value = true;
     } catch (cause) {
       setError(cause);
+    } finally {
+      loading.extensionSearch = false;
     }
   }
 
@@ -221,6 +231,7 @@ export function useSources() {
     extensionResults,
     extensionRepo,
     extensionQuery,
+    extensionSearchCompleted,
     error,
     success,
     loading,

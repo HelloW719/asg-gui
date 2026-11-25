@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { FileClock } from "@lucide/vue";
+import EmptyState from "@/shared/ui/EmptyState.vue";
 import SectionHeading from "@/shared/ui/SectionHeading.vue";
 import type { LogLine } from "@/types/cli";
 
@@ -26,8 +27,13 @@ defineProps<{
         <code>{{ entry.line }}</code>
       </div>
     </div>
-    <p v-else class="empty-copy">
-      暂无可用日志。服务启动后，这里会显示最近的输出。
-    </p>
+    <EmptyState
+      v-else
+      compact
+      title="暂无可用日志"
+      description="服务启动后，这里会显示最近的输出。"
+    >
+      <template #icon><FileClock :size="18" /></template>
+    </EmptyState>
   </section>
 </template>

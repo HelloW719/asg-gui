@@ -24,10 +24,13 @@
   display: grid;
   height: 100%;
   padding: var(--space-6);
-  color: var(--text-faint);
-  font-size: var(--type-body);
-  text-align: center;
   place-items: center;
+}
+
+.log-empty__state {
+  max-width: 520px;
+  border: 0;
+  background: transparent;
 }
 
 .log-line {

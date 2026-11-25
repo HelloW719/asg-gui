@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { CircleCheck, CircleX } from "@lucide/vue";
+import { CircleCheck, CircleX, Stethoscope } from "@lucide/vue";
+import EmptyState from "@/shared/ui/EmptyState.vue";
 import SectionHeading from "@/shared/ui/SectionHeading.vue";
 import type { DoctorCheck } from "@/types/cli";
 
@@ -24,6 +25,13 @@ const props = defineProps<{
         <em>{{ check.level }}</em>
       </div>
     </div>
-    <p v-else class="empty-copy">诊断结果将在这里显示。</p>
+    <EmptyState
+      v-else
+      compact
+      title="尚无诊断结果"
+      description="运行一次环境诊断后，检查项与结果会显示在这里。"
+    >
+      <template #icon><Stethoscope :size="18" /></template>
+    </EmptyState>
   </section>
 </template>

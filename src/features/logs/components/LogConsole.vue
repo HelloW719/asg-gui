@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { ScrollText } from "@lucide/vue";
 import { nextTick, onBeforeUnmount, ref, watch } from "vue";
+import EmptyState from "@/shared/ui/EmptyState.vue";
 import type { LogFeedLine } from "../composables/useLogFeed";
 
 const props = defineProps<{
@@ -47,7 +49,13 @@ onBeforeUnmount(() => {
 <template>
   <section ref="logBox" class="log-console">
     <div v-if="lines.length === 0" class="log-empty">
-      暂无匹配日志。启动服务或开启实时跟随后会显示新内容。
+      <EmptyState
+        class="log-empty__state"
+        title="暂无匹配日志"
+        description="启动服务或开启实时跟随后，新内容会显示在这里。"
+      >
+        <template #icon><ScrollText :size="20" /></template>
+      </EmptyState>
     </div>
     <div
       v-for="entry in lines"

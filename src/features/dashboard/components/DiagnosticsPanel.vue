@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { Stethoscope } from "@lucide/vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
+import EmptyState from "@/shared/ui/EmptyState.vue";
 import SectionHeading from "@/shared/ui/SectionHeading.vue";
 import type { DoctorCheck } from "@/types/cli";
 
@@ -46,8 +47,13 @@ const failingChecks = computed(() => props.checks.filter((check) => !check.ok));
         </div>
       </div>
     </template>
-    <p v-else class="empty-copy">
-      运行诊断可检查安装、Node、配置、端口、supervisor 与浏览器状态。
-    </p>
+    <EmptyState
+      v-else
+      compact
+      title="尚未运行诊断"
+      description="运行诊断可检查安装、Node、配置、端口、Supervisor 与浏览器状态。"
+    >
+      <template #icon><Stethoscope :size="18" /></template>
+    </EmptyState>
   </section>
 </template>

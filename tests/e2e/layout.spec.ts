@@ -1011,6 +1011,29 @@ test.describe("feature pages", () => {
     ).toBe(true);
   });
 
+  test("explains empty searches and pending data states", async ({ page }) => {
+    await page.getByRole("link", { name: "来源" }).click();
+    await page.getByRole("tab", { name: "扩展 V2" }).click();
+    await page.getByPlaceholder("搜索 GitHub 扩展").fill("missing-extension");
+    await page.getByRole("button", { name: "搜索", exact: true }).click();
+    await expect(
+      page.getByText("没有找到匹配的扩展", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("可以换一个关键词，或直接使用上方仓库地址安装。"),
+    ).toBeVisible();
+
+    await page.getByRole("link", { name: "设置" }).click();
+    await expect(
+      page.getByRole("heading", { name: "主题与效果" }),
+    ).toBeVisible();
+    await page.getByPlaceholder("搜索配置路径").fill("not-a-real-field");
+    await expect(
+      page.getByText("没有匹配的配置字段", { exact: true }),
+    ).toBeVisible();
+    await expect(page.getByText("尝试缩短搜索内容或清除筛选。")).toBeVisible();
+  });
+
   test("renders settings panels and configuration browser", async ({ page }) => {
     await page.getByRole("link", { name: "设置" }).click();
     await expect(page.getByRole("heading", { name: "主题与效果" })).toBeVisible();
@@ -1099,7 +1122,10 @@ test.describe("feature pages", () => {
     await expect(searchField).toHaveCSS("outline-style", "solid");
     await expect(searchField).toHaveCSS("border-radius", "999px");
     await search.fill("not-present");
-    await expect(page.getByText("暂无匹配日志。启动服务或开启实时跟随后会显示新内容。")).toBeVisible();
+    await expect(page.getByText("暂无匹配日志", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("启动服务或开启实时跟随后，新内容会显示在这里。"),
+    ).toBeVisible();
   });
 
   test("runs maintenance diagnostics from the report components", async ({ page }) => {

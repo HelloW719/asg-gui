@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Eye, Search, SlidersHorizontal } from "@lucide/vue";
+import { Eye, Search, SearchX, SlidersHorizontal } from "@lucide/vue";
+import EmptyState from "@/shared/ui/EmptyState.vue";
 import SectionHeading from "@/shared/ui/SectionHeading.vue";
 import type { ConfigGroup, ConfigLeaf } from "../composables/useSettings";
 
@@ -33,9 +34,18 @@ function displayValue(value: unknown): string {
     </SectionHeading>
 
     <p v-if="loading" class="empty-copy">正在读取掩码配置…</p>
-    <div v-else-if="groups.length === 0" class="empty-copy">
-      没有匹配的配置字段。
-    </div>
+    <EmptyState
+      v-else-if="groups.length === 0"
+      compact
+      :title="search.trim() ? '没有匹配的配置字段' : '没有可显示的配置字段'"
+      :description="
+        search.trim()
+          ? '尝试缩短搜索内容或清除筛选。'
+          : '配置读取完成后，可编辑字段会按分组显示。'
+      "
+    >
+      <template #icon><SearchX :size="18" /></template>
+    </EmptyState>
     <div v-else class="config-groups">
       <div
         v-for="[group, fields] in groups"

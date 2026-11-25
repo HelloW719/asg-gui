@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RefreshCw } from "@lucide/vue";
+import { RefreshCw, Search } from "@lucide/vue";
 import {
   engineAvailabilityLabel,
   engineGroupDescription,
@@ -8,6 +8,7 @@ import {
 } from "../enginePresentation";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import DisclosurePanel from "@/shared/ui/DisclosurePanel.vue";
+import EmptyState from "@/shared/ui/EmptyState.vue";
 import SelectField from "@/shared/ui/SelectField.vue";
 import type { EngineInfo, EngineRouteDraft } from "@/types/cli";
 
@@ -61,7 +62,14 @@ function currentRoute(engine: EngineInfo): string {
   </section>
 
   <p v-if="loading" class="empty-copy">正在读取引擎…</p>
-  <p v-else-if="engines.length === 0" class="empty-copy">没有可显示的搜索引擎。</p>
+  <EmptyState
+    v-else-if="engines.length === 0"
+    class="sources-empty"
+    title="没有可显示的搜索引擎"
+    description="重新读取本地引擎，或包含远端目录获取更多来源。"
+  >
+    <template #icon><Search :size="20" /></template>
+  </EmptyState>
   <div v-else class="engine-grid">
     <article
       v-for="engine in engines"

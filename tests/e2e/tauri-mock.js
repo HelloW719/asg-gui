@@ -348,6 +348,13 @@
               }),
             );
           }
+        } else if (subcommand === "search") {
+          finish(
+            id,
+            result("extensions.search", {
+              results: scenario.extensionSearchResults ?? [],
+            }),
+          );
         } else if (subcommand === "install") {
           const repo = cliArgs[2] ?? "unknown/invalid";
           const extensionId = repo
