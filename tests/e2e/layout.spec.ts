@@ -56,12 +56,16 @@ async function expectReadableFloatingSurface(locator: Locator): Promise<void> {
   const surface = await locator.evaluate((element) => {
     const style = getComputedStyle(element);
     return {
+      backgroundColor: style.backgroundColor,
       backgroundImage: style.backgroundImage,
       backdropFilter:
         style.getPropertyValue("backdrop-filter") ||
         style.getPropertyValue("-webkit-backdrop-filter"),
     };
   });
+  const alphaMatch = surface.backgroundColor.match(/rgba\([^)]*,\s*([\d.]+)\)$/);
+  const alpha = alphaMatch ? Number.parseFloat(alphaMatch[1]!) : 1;
+  expect(alpha).toBeGreaterThanOrEqual(0.9);
   expect(surface.backgroundImage).toContain("linear-gradient");
   expect(surface.backdropFilter).toBe("none");
 }
@@ -1118,6 +1122,7 @@ test.describe("feature pages", () => {
     await safeSearch.click();
     const safeSearchMenu = page.getByRole("listbox");
     await expect(safeSearchMenu).toBeVisible();
+    await expectReadableFloatingSurface(page.locator(".select-field__content"));
     await expect(safeSearchMenu).toHaveCSS("border-radius", "14px");
     await expect(safeSearchMenu).toHaveCSS("backdrop-filter", "none");
     await page.getByRole("option", { name: "2 · 严格" }).click();
@@ -1128,6 +1133,10 @@ test.describe("feature pages", () => {
     await expect(
       page.getByRole("heading", { name: "引擎与扩展" }),
     ).toBeVisible();
+    await page.getByRole("combobox", { name: "bilibili 路由" }).click();
+    await expect(page.getByRole("listbox")).toBeVisible();
+    await expectReadableFloatingSurface(page.locator(".select-field__content"));
+    await page.keyboard.press("Escape");
     const routeTrigger = page.getByText("编辑类别路由", { exact: true });
     await routeTrigger.click();
     const routePanel = page.locator(".route-editor");

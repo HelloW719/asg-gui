@@ -403,27 +403,6 @@
     var(--md-sys-color-surface-container, var(--background-raised)) 45%,
     transparent
   );
-  --glass-bg-strong: color-mix(
-      in srgb,
-      var(--background-raised) 91%,
-      var(--md-sys-color-primary, var(--m3e-fallback-primary)) 3%,
-      transparent 6%
-    );
-  --glass-bg-strong-image:
-    linear-gradient(
-      145deg,
-      color-mix(
-        in srgb,
-        var(--md-sys-color-on-surface, var(--m3e-fallback-on-surface)) 6%,
-        transparent
-      ),
-      transparent 54%,
-      color-mix(
-        in srgb,
-        var(--md-sys-color-primary, var(--m3e-fallback-primary)) 4%,
-        transparent
-      )
-    );
   --glass-border: color-mix(
     in srgb,
     var(--md-sys-color-outline-variant, var(--m3e-fallback-line)) 62%,
@@ -620,19 +599,6 @@
 }
 
 :root[data-theme="light"] .app-root {
-  --glass-bg-strong: color-mix(
-    in srgb,
-    var(--background-raised) 91%,
-    var(--md-sys-color-primary, #287f70) 3%,
-    transparent 6%
-  );
-  --glass-bg-strong-image:
-    linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.28),
-      transparent 54%,
-      rgba(40, 127, 112, 0.04)
-    );
   --surface-card:
     linear-gradient(
       145deg,
