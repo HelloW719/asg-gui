@@ -180,7 +180,7 @@ light:
 | `--glass-blur-radius` | `20px`。全应用唯一一层 backdrop blur。 |
 | `--glass-blur-saturation` | `1.3`。保留琉璃色的饱和度。 |
 | `--glass-bg` | 内容面板染色，默认绑定 `surface-container`。 |
-| `--glass-bg-strong` | 对话框、抽屉、浮层的可读表面；在接近不透明的中性表面上叠加轻微受光和主色染色，兼顾可读性与玻璃感。 |
+| `--glass-bg-strong` | 对话框、抽屉、浮层的可读表面；底色与表单触发条保持一致，深色使用深青绿、浅色使用浅青绿，再叠加轻微受光，兼顾可读性与视觉连续性。 |
 | `--glass-bg-strong-image` | 浮层受光渐变；必须与 `--glass-bg-strong` 分别写入 `background-image` 和 `background-color`，避免自定义属性中的多层背景被浏览器判为无效。 |
 | `--glass-border` | 内容面板边界，来自 `outline-variant`。 |
 | `--glass-highlight` | 面板顶部受光，来自 `on-surface`。 |

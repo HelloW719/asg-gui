@@ -70,13 +70,13 @@
   --m3e-fallback-line: rgba(219, 235, 250, 0.08);
   --glass-tint: 46, 60, 82;
   --glass-bg: rgba(20, 31, 46, 0.22);
-  --glass-bg-strong: rgba(16, 27, 41, 0.94);
+  --glass-bg-strong: rgba(29, 58, 54, 0.95);
   --glass-bg-strong-image:
     linear-gradient(
       145deg,
-      rgba(228, 246, 247, 0.08),
-      transparent 52%,
-      rgba(2, 8, 16, 0.04)
+      rgba(228, 246, 247, 0.045),
+      transparent 56%,
+      rgba(2, 8, 16, 0.045)
     );
   --glass-tint-alpha: 0.55;
   --glass-blur-radius: 20px;
@@ -251,13 +251,13 @@
   --m3e-fallback-line: rgba(39, 57, 75, 0.09);
   --glass-tint: 222, 231, 239;
   --glass-bg: rgba(255, 255, 255, 0.24);
-  --glass-bg-strong: rgba(236, 244, 246, 0.95);
+  --glass-bg-strong: rgba(207, 235, 231, 0.96);
   --glass-bg-strong-image:
     linear-gradient(
       145deg,
-      rgba(255, 255, 255, 0.28),
-      transparent 54%,
-      rgba(40, 127, 112, 0.04)
+      rgba(255, 255, 255, 0.2),
+      transparent 56%,
+      rgba(40, 127, 112, 0.035)
     );
   --glass-tint-alpha: 0.55;
   --glass-border: rgba(36, 54, 72, 0.12);
