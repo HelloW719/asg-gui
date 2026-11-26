@@ -27,7 +27,7 @@ const emit = defineEmits<{
   <DialogRoot :open="open" @update:open="emit('update:open', $event)">
     <DialogPortal>
       <DialogOverlay class="dialog-overlay" />
-      <DialogContent class="dialog-content glass-surface">
+      <DialogContent class="dialog-content">
         <DialogTitle class="dialog-title">{{ title }}</DialogTitle>
         <DialogDescription class="dialog-description">{{ description }}</DialogDescription>
         <div class="dialog-actions">

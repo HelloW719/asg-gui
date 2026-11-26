@@ -51,6 +51,21 @@ async function expectFlatLightSurface(locator: Locator): Promise<void> {
   expect(surface.boxShadow).toBe("none");
 }
 
+async function expectReadableFloatingSurface(locator: Locator): Promise<void> {
+  await expect(locator).toBeVisible();
+  const surface = await locator.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundImage: style.backgroundImage,
+      backdropFilter:
+        style.getPropertyValue("backdrop-filter") ||
+        style.getPropertyValue("-webkit-backdrop-filter"),
+    };
+  });
+  expect(surface.backgroundImage).toContain("linear-gradient");
+  expect(surface.backdropFilter).toBe("none");
+}
+
 test("renders the desktop bridge requirement without overflow", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("当前是浏览器预览")).toBeVisible();
@@ -1058,6 +1073,7 @@ test.describe("feature pages", () => {
     await frameRate.click();
     const frameRateMenu = page.getByRole("listbox");
     await expect(frameRateMenu).toBeVisible();
+    await expectReadableFloatingSurface(page.locator(".select-field__content"));
     await expect(frameRateMenu).toHaveCSS("border-radius", "14px");
     await expect(frameRateMenu).toHaveCSS("backdrop-filter", "none");
     await expect(frameRateMenu).toHaveCSS("width", "220px");
@@ -1074,6 +1090,15 @@ test.describe("feature pages", () => {
     await expect(
       page.getByRole("combobox", { name: "玻璃动效帧率" }),
     ).toContainText("90 Hz");
+
+    const configField = page.locator(".config-field").first();
+    await configField.click();
+    const configEditor = page.locator(".config-editor");
+    await expect(configEditor).toBeVisible();
+    await expect(configEditor).toHaveCSS("position", "relative");
+    await expect(configField).toHaveAttribute("aria-expanded", "true");
+    await configEditor.getByRole("button", { name: "保存并重启" }).click();
+    await expectReadableFloatingSurface(page.getByRole("dialog"));
   });
 
   test("uses shared glass styling for selects and disclosures", async ({ page }) => {

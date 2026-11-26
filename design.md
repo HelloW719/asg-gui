@@ -180,7 +180,7 @@ light:
 | `--glass-blur-radius` | `20px`。全应用唯一一层 backdrop blur。 |
 | `--glass-blur-saturation` | `1.3`。保留琉璃色的饱和度。 |
 | `--glass-bg` | 内容面板染色，默认绑定 `surface-container`。 |
-| `--glass-bg-strong` | 对话框、抽屉、浮层染色，默认绑定 `surface-container-high`。 |
+| `--glass-bg-strong` | 对话框、抽屉、浮层的可读表面；在接近不透明的中性表面上叠加轻微受光和主色染色，兼顾可读性与玻璃感。 |
 | `--glass-border` | 内容面板边界，来自 `outline-variant`。 |
 | `--glass-highlight` | 面板顶部受光，来自 `on-surface`。 |
 | `--glass-shadow` | 轻量外投影，来自 `shadow`。 |
@@ -378,6 +378,12 @@ M3E 与玻璃层级规范。
 - 一个连续数据集合使用一个外层玻璃面板；工具栏、表头、行和编辑区只做内部结构。
 - `.glass-surface` 只做染色、边界、内高光，不得添加 backdrop blur。
 - 浮层使用 `--glass-bg-strong`；页面内容使用 `--surface-card`。
+- 对话框、抽屉和下拉菜单这类会遮挡正文的浮层，必须使用接近不透明的
+  `--glass-bg-strong`，任何情况下都不得复用页面内容的 `.glass-surface`
+  透明染色，避免底层文字透出而造成阅读干扰。
+- 配置编辑器在所选配置行下方就地展开，保持当前列表上下文；不得用大面积
+  底部悬浮面板遮住其他配置行。浅色主题只增加轻微主色状态层和分隔线，不增加
+  新的灰色玻璃盒。
 - 卡片和面板不是新拟物控件，不得添加 raised、pressed 或 concave 立体状态。
 
 ### 7.3 表单与选择

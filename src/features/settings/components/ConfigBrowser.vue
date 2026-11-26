@@ -11,6 +11,7 @@ defineProps<{
   rowCount: number;
   loading: boolean;
   groupLabels: Record<string, string>;
+  editingPath?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -58,17 +59,24 @@ function displayValue(value: unknown): string {
           <span>{{ fields.length }}</span>
         </header>
         <div class="config-table">
-          <button
-            v-for="row in fields"
-            :key="row.path"
-            class="config-field"
-            type="button"
-            @click="emit('edit', row)"
-          >
-            <span class="config-field__path">{{ row.path }}</span>
-            <code>{{ row.secret ? "••••••" : displayValue(row.value) }}</code>
-            <Eye :size="15" />
-          </button>
+          <template v-for="row in fields" :key="row.path">
+            <button
+              class="config-field"
+              :class="{ 'config-field--active': row.path === editingPath }"
+              type="button"
+              :aria-expanded="row.path === editingPath"
+              @click="emit('edit', row)"
+            >
+              <span class="config-field__path">{{ row.path }}</span>
+              <code>{{ row.secret ? "••••••" : displayValue(row.value) }}</code>
+              <Eye :size="15" />
+            </button>
+            <slot
+              v-if="row.path === editingPath"
+              name="editor"
+              :field="row"
+            />
+          </template>
         </div>
       </div>
     </div>

@@ -147,6 +147,14 @@
   background: var(--surface-interaction);
 }
 
+.config-field--active {
+  background: var(--surface-selected);
+}
+
+.config-field--active .config-field__path {
+  color: var(--text);
+}
+
 .config-field__path {
   overflow: hidden;
   color: var(--text-soft);
@@ -168,20 +176,58 @@
   color: var(--text-faint);
 }
 
-.editor-drawer {
-  position: sticky;
-  bottom: var(--space-4);
-  z-index: 10;
-  margin-top: var(--space-5);
+.config-editor {
+  position: relative;
+  display: grid;
+  gap: var(--space-4);
   padding: var(--space-4);
-  border: 1px solid var(--surface-card-border);
-  border-radius: var(--radius-md);
-  background: var(--surface-subtle);
-  box-shadow: var(--shadow-overlay);
+  border-bottom: 1px solid var(--surface-card-divider);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--sage) 7%, transparent),
+      transparent 54%
+    ),
+    var(--surface-subtle);
+  animation: config-editor-in var(--motion-fast-spatial);
 }
 
-.editor-drawer .field {
-  margin-bottom: var(--space-4);
+.config-editor .section-heading {
+  margin: 0;
+}
+
+.config-editor .section-heading h2 {
+  font-size: var(--type-body-strong);
+}
+
+.config-editor .section-heading__description {
+  margin-top: var(--space-1);
+}
+
+.config-editor textarea {
+  min-height: 126px;
+  background: var(--field-bg);
+}
+
+.config-editor .action-row {
+  justify-content: flex-end;
+}
+
+:root[data-theme="light"] .config-editor {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--sage) 5%, transparent),
+      transparent 58%
+    );
+  box-shadow: none;
+}
+
+@keyframes config-editor-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
 }
 
 @media (max-width: 720px) {

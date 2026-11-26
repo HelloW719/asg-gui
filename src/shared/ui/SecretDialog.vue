@@ -68,7 +68,7 @@ function submit(): void {
   >
     <DialogPortal>
       <DialogOverlay class="dialog-overlay" />
-      <DialogContent class="dialog-content glass-surface">
+      <DialogContent class="dialog-content">
         <DialogTitle class="dialog-title">{{ title }}</DialogTitle>
         <DialogDescription class="dialog-description">{{ description }}</DialogDescription>
         <div v-if="secretNames && secretNames.length > 1" class="field">

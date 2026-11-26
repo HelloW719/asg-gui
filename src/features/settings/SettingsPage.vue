@@ -96,19 +96,22 @@ async function reopenWelcome(): Promise<void> {
         :row-count="settings.rows.value.length"
         :loading="settings.loading.value"
         :group-labels="settings.groupLabels"
+        :editing-path="settings.editing.value?.path ?? null"
         @update:search="settings.search.value = $event"
         @edit="settings.beginEdit"
-      />
-
-      <ConfigEditor
-        v-if="settings.editing.value"
-        :field="settings.editing.value"
-        :value="settings.editValue.value"
-        :busy="settings.jobs.hasRunningOperation"
-        @update:value="settings.editValue.value = $event"
-        @cancel="settings.cancelEdit"
-        @save="settings.pendingSave.value = settings.editing.value"
-      />
+      >
+        <template #editor>
+          <ConfigEditor
+            v-if="settings.editing.value"
+            :field="settings.editing.value"
+            :value="settings.editValue.value"
+            :busy="settings.jobs.hasRunningOperation"
+            @update:value="settings.editValue.value = $event"
+            @cancel="settings.cancelEdit"
+            @save="settings.pendingSave.value = settings.editing.value"
+          />
+        </template>
+      </ConfigBrowser>
     </div>
 
     <ConfirmDialog
