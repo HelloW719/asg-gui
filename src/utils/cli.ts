@@ -5,26 +5,52 @@ import type {
   CliEvent,
   CliResult,
   CommandTextResult,
+  AdFilterLevel,
+  AdlistUpdateResult,
   ConfigFieldInfo,
+  ConfigMutationResult,
+  ConfigValidationResult,
   DoctorCheck,
   EngineInfo,
   ExtensionBackendInfo,
   ExtensionFetchChannelInfo,
   ExtensionInfo,
+  ExtensionOperationResult,
   ExtensionSearchEngineInfo,
   ExtensionSearchItem,
   JobEvent,
+  LifecycleResult,
   LogCliEvent,
   LogLine,
   ProgressCliEvent,
   StackStatus,
+  SupervisorStatus,
+  UpdateApplyStatus,
   UpdateCheckStatus,
 } from "../types/cli";
 
 export type CliDataGuard<T> = (value: unknown) => value is T;
 
+const cliDataParserBrand: unique symbol = Symbol("cliDataParserBrand");
+
+export interface CliDataParser<T> {
+  (value: unknown): T;
+  readonly [cliDataParserBrand]: true;
+}
+
+function brandedParser<T>(
+  parser: (value: unknown) => T,
+): CliDataParser<T> {
+  return Object.assign(parser, { [cliDataParserBrand]: true as const });
+}
+
 export type LogReadResult = {
   lines: LogLine[];
+};
+
+export type LogFollowResult = {
+  streamed: true;
+  services: string[];
 };
 
 export type DoctorResult = {
@@ -43,27 +69,36 @@ export type ExtensionSearchResult = {
   results: ExtensionSearchItem[];
 };
 
-export type ExtensionConfigResult = {
-  config?: Record<string, unknown>;
-};
+export type ExtensionConfigResult =
+  | {
+      id: string;
+      config: Record<string, unknown>;
+      valid: true;
+      error?: never;
+    }
+  | {
+      id: string;
+      config: Record<string, unknown>;
+      valid: false;
+      error: string;
+    };
 
 export type ExtensionConfigFieldsResult = {
-  fields?: ConfigFieldInfo[];
+  id: string;
+  fields: ConfigFieldInfo[];
 };
 
 export function parseCliData<T>(
   command: string,
   guard: CliDataGuard<T>,
-): (value: unknown) => T {
-  return (value) => {
+): CliDataParser<T> {
+  return brandedParser((value) => {
     if (!guard(value)) {
       throw new Error(`ASG ${command} 返回的数据不符合 schema_version 1 契约。`);
     }
     return value;
-  };
+  });
 }
-
-export function parseVoidData(_value: unknown): void {}
 
 export function cliData<T>(result: CliResult, guard: CliDataGuard<T>): T | null {
   return result.ok && guard(result.data) ? result.data : null;
@@ -163,6 +198,14 @@ export function isLogReadResult(value: unknown): value is LogReadResult {
   return isRecord(value) && isArrayOf(value.lines, isLogLine);
 }
 
+export function isLogFollowResult(value: unknown): value is LogFollowResult {
+  return (
+    isRecord(value) &&
+    value.streamed === true &&
+    isStringArray(value.services)
+  );
+}
+
 function isServiceProbe(value: unknown): boolean {
   return (
     isRecord(value) &&
@@ -230,6 +273,76 @@ export function isUpdateCheckStatus(
   );
 }
 
+export function isUpdateApplyStatus(
+  value: unknown,
+): value is UpdateApplyStatus {
+  return (
+    isRecord(value) &&
+    value.action === "apply" &&
+    (value.version === null || typeof value.version === "string") &&
+    typeof value.restarted === "boolean"
+  );
+}
+
+export function isAdlistUpdateResult(
+  value: unknown,
+): value is AdlistUpdateResult {
+  return (
+    isRecord(value) &&
+    isAdFilterLevel(value.level) &&
+    typeof value.entries === "number" &&
+    Number.isFinite(value.entries) &&
+    typeof value.path === "string" &&
+    value.restart === "all" &&
+    typeof value.restarted === "boolean"
+  );
+}
+
+export function isConfigMutationResult(
+  value: unknown,
+): value is ConfigMutationResult {
+  return (
+    isRecord(value) &&
+    isStringArray(value.changed) &&
+    value.restart === "all" &&
+    typeof value.restarted === "boolean"
+  );
+}
+
+export function isConfigValidationResult(
+  value: unknown,
+): value is ConfigValidationResult {
+  return (
+    isRecord(value) &&
+    value.valid === true &&
+    isStringArray(value.warnings)
+  );
+}
+
+export function isExtensionOperationResult(
+  value: unknown,
+): value is ExtensionOperationResult {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.plugin_id === "string" &&
+    value.id === value.plugin_id &&
+    isStringArray(value.backend_ids) &&
+    typeof value.restarted === "boolean"
+  );
+}
+
+export function isLifecycleResult(value: unknown): value is LifecycleResult {
+  if (!isRecord(value)) return false;
+  if (value.state === "stopped" || value.state === "already_stopped") {
+    return true;
+  }
+  return (
+    (value.state === "started" || value.state === "already_running") &&
+    isSupervisorStatus(value.supervisor)
+  );
+}
+
 export function isEnginesResult(value: unknown): value is EnginesResult {
   return isRecord(value) && isArrayOf(value.engines, isEngineInfo);
 }
@@ -251,7 +364,11 @@ export function isExtensionConfigResult(
 ): value is ExtensionConfigResult {
   return (
     isRecord(value) &&
-    (value.config === undefined || isRecord(value.config))
+    typeof value.id === "string" &&
+    isRecord(value.config) &&
+    typeof value.valid === "boolean" &&
+    ((value.valid && value.error === undefined) ||
+      (!value.valid && typeof value.error === "string"))
   );
 }
 
@@ -260,7 +377,8 @@ export function isExtensionConfigFieldsResult(
 ): value is ExtensionConfigFieldsResult {
   return (
     isRecord(value) &&
-    (value.fields === undefined || isArrayOf(value.fields, isConfigFieldInfo))
+    typeof value.id === "string" &&
+    isArrayOf(value.fields, isConfigFieldInfo)
   );
 }
 
@@ -463,6 +581,28 @@ function isArrayOf<T>(
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function isAdFilterLevel(value: unknown): value is AdFilterLevel {
+  return (
+    value === "off" ||
+    value === "ads" ||
+    value === "ads+tracking" ||
+    value === "full"
+  );
+}
+
+function isSupervisorStatus(value: unknown): value is SupervisorStatus {
+  return (
+    isRecord(value) &&
+    typeof value.managed === "boolean" &&
+    typeof value.active === "boolean" &&
+    (value.mode === "systemd" ||
+      value.mode === "launchd" ||
+      value.mode === "schtasks" ||
+      value.mode === "pid" ||
+      value.mode === "none")
+  );
 }
 
 function isOptionalString(value: unknown): value is string | undefined {

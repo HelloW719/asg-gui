@@ -28,6 +28,7 @@ const rawMode = ref(false);
 const saveOpen = ref(false);
 const loading = ref(false);
 const error = ref<string | null>(null);
+const configurationValid = ref(true);
 
 function reset(): void {
   config.value = null;
@@ -39,6 +40,7 @@ function reset(): void {
   rawMode.value = false;
   saveOpen.value = false;
   error.value = null;
+  configurationValid.value = true;
 }
 
 function syncRawConfig(): boolean {
@@ -133,9 +135,14 @@ watch(
       config.value = structuredClone(snapshot.config);
       original.value = structuredClone(snapshot.config);
       fields.value = snapshot.fields;
+      configurationValid.value = snapshot.valid;
       rawText.value = JSON.stringify(snapshot.config, null, 2);
       rawMode.value = snapshot.fields.length === 0;
       initializeStructuredDrafts();
+      if (!snapshot.valid) {
+        error.value =
+          snapshot.error ?? "当前扩展配置未通过插件 schema 校验。";
+      }
     } catch (cause) {
       error.value = cause instanceof Error ? cause.message : String(cause);
     } finally {
@@ -162,6 +169,9 @@ watch(
       dismissible
       @dismiss="error = null"
     />
+    <p v-if="!configurationValid && !error" class="field-note">
+      当前配置未通过插件校验；编辑后保存时会由 CLI 再次校验。
+    </p>
     <p v-if="loading" class="empty-copy">正在读取扩展配置…</p>
 
     <template v-else-if="config">

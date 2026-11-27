@@ -82,10 +82,11 @@ export const useJobsStore = defineStore("jobs", () => {
     }
   }
 
-  async function stream(
+  async function stream<T>(
     args: string[],
     options: AsgRunOptions,
-  ): Promise<AsgStreamHandle<unknown>> {
+    parseData: CliDataParser<T>,
+  ): Promise<AsgStreamHandle<T>> {
     const operationId = startOperation(options);
     try {
       const job = await jobClient.start(args, {
@@ -106,7 +107,7 @@ export const useJobsStore = defineStore("jobs", () => {
             lastError.value = error.message;
             throw error;
           }
-          return result.data;
+          return parseData(result.data);
         })
         .catch((error) => {
           lastError.value = error instanceof Error ? error.message : String(error);

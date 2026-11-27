@@ -28,6 +28,7 @@ export function useSettings() {
   const secretField = ref<ConfigLeaf | null>(null);
   const forgetOpen = ref(false);
   const validated = ref<boolean | null>(null);
+  const validationWarnings = ref<string[]>([]);
   let configRequestRevision = 0;
 
   const groupLabels: Record<string, string> = {
@@ -94,7 +95,11 @@ export function useSettings() {
     error.value = null;
     try {
       const nextConfig = await serviceClient.config.getAll();
-      if (revision === configRequestRevision) config.value = nextConfig;
+      if (revision === configRequestRevision) {
+        config.value = nextConfig;
+        validated.value = null;
+        validationWarnings.value = [];
+      }
     } catch (cause) {
       if (revision === configRequestRevision) {
         error.value = cause instanceof Error ? cause.message : String(cause);
@@ -131,6 +136,7 @@ export function useSettings() {
     }
     secretField.value = null;
     validated.value = null;
+    validationWarnings.value = [];
     await loadConfig();
   }
 
@@ -147,6 +153,7 @@ export function useSettings() {
       );
       cancelEdit();
       validated.value = null;
+      validationWarnings.value = [];
       await appStatus.refresh();
       await loadConfig();
     } catch (cause) {
@@ -157,9 +164,11 @@ export function useSettings() {
   async function validate(): Promise<void> {
     error.value = null;
     validated.value = null;
+    validationWarnings.value = [];
     try {
-      await serviceClient.config.validate();
-      validated.value = true;
+      const result = await serviceClient.config.validate();
+      validated.value = result.valid;
+      validationWarnings.value = result.warnings;
     } catch (cause) {
       validated.value = false;
       error.value = cause instanceof Error ? cause.message : String(cause);
@@ -184,6 +193,8 @@ export function useSettings() {
         config.value = null;
         loading.value = false;
         error.value = null;
+        validated.value = null;
+        validationWarnings.value = [];
         return;
       }
       config.value = null;
@@ -204,6 +215,7 @@ export function useSettings() {
     secretField,
     forgetOpen,
     validated,
+    validationWarnings,
     groupLabels,
     rows,
     groupedRows,

@@ -1,16 +1,20 @@
 import type {
+  AdFilterLevel,
+  AdlistUpdateResult,
   BrowserInstallStatus,
   BrowserStatus,
   DoctorCheck,
+  UpdateApplyStatus,
   UpdateCheckStatus,
 } from "../../types/cli";
 import {
+  isAdlistUpdateResult,
   isBrowserInstallStatus,
   isBrowserStatus,
   isDoctorResult,
+  isUpdateApplyStatus,
   isUpdateCheckStatus,
   parseCliData,
-  parseVoidData,
 } from "../../utils/cli";
 import type { AsgCommandRunner } from "./command";
 
@@ -48,14 +52,14 @@ export function createMaintenanceService(runner: AsgCommandRunner) {
       );
     },
 
-    async updateAdlist(level: string): Promise<void> {
-      await runner.run(
+    updateAdlist(level: AdFilterLevel): Promise<AdlistUpdateResult> {
+      return runner.run(
         ["adlist", "update", "--level", level],
         {
           label: "更新广告列表",
           visualState: "restarting",
         },
-        parseVoidData,
+        parseCliData("adlist update", isAdlistUpdateResult),
       );
     },
 
@@ -69,14 +73,14 @@ export function createMaintenanceService(runner: AsgCommandRunner) {
       );
     },
 
-    async applyUpdate(): Promise<void> {
-      await runner.run(
+    applyUpdate(): Promise<UpdateApplyStatus> {
+      return runner.run(
         ["update", "apply"],
         {
           label: "下载并应用更新",
           visualState: "restarting",
         },
-        parseVoidData,
+        parseCliData("update apply", isUpdateApplyStatus),
       );
     },
   };

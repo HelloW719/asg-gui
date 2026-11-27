@@ -71,7 +71,17 @@ async function reopenWelcome(): Promise<void> {
       @dismiss="settings.error.value = null"
     />
     <InlineNotice
-      v-if="settings.validated.value === true"
+      v-else-if="
+        settings.validated.value === true &&
+        settings.validationWarnings.value.length > 0
+      "
+      tone="info"
+      :message="`配置校验通过，但有 ${settings.validationWarnings.value.length} 条警告：${settings.validationWarnings.value.join('；')}`"
+      dismissible
+      @dismiss="settings.validated.value = null"
+    />
+    <InlineNotice
+      v-else-if="settings.validated.value === true"
       tone="success"
       message="配置校验通过。"
       dismissible

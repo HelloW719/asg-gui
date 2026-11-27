@@ -25,6 +25,15 @@
     command,
     data,
   });
+  const mutationResult = (changed) => ({
+    changed,
+    restart: "all",
+    restarted: true,
+  });
+  const lifecycleResult = (state) => ({
+    state,
+    supervisor: { managed: true, mode: "schtasks", active: true },
+  });
 
   const emitEvent = (event, payload) => {
     const handlerId = eventHandlers.get(event);
@@ -289,6 +298,16 @@
             ],
           }),
         );
+      } else if (name === "browser") {
+        finish(
+          id,
+          result("browser", {
+            path: "C:\\ASG-Fixture\\browsers",
+            headless_shell: true,
+            chromium: true,
+            ...(subcommand === "install" ? { full: cliArgs.includes("--full") } : {}),
+          }),
+        );
       } else if (name === "engines") {
         scenario.engines ??= [
           {
@@ -371,7 +390,7 @@
             const engine = scenario.engines.find((item) => item.id === id);
             if (engine) engine.enabled = enabled;
           }
-          finish(id, result("engines", { changed: cliArgs.slice(2) }));
+          finish(id, result("engines", mutationResult(cliArgs.slice(2))));
         } else if (subcommand === "secret") {
           if (scenario.engineSecretError) {
             finish(
@@ -388,10 +407,19 @@
               result("engines", {
                 engine: cliArgs[2],
                 changed: ["searxng.engines.exaapi.api_key"],
+                restart: "all",
                 restarted: true,
               }),
             );
           }
+        } else if (subcommand === "route") {
+          finish(
+            id,
+            result(
+              "engines",
+              mutationResult([`extensions.${cliArgs[2]}.routing`]),
+            ),
+          );
         } else {
           finish(
             id,
@@ -411,12 +439,29 @@
                 fields: scenario.extensionConfigFields ?? [],
               }),
             );
+          } else if (
+            args.some(
+              (argument) =>
+                argument === "--set" ||
+                argument === "--unset" ||
+                argument.startsWith("--set=") ||
+                argument.startsWith("--unset="),
+            )
+          ) {
+            finish(
+              id,
+              result(
+                "extensions.config",
+                mutationResult([`extensions.${args[0]}.config`]),
+              ),
+            );
           } else {
             finish(
               id,
               result("extensions.config", {
                 id: args[0],
                 config: scenario.extensionConfig ?? {},
+                valid: true,
               }),
             );
           }
@@ -448,7 +493,25 @@
               search_engines: [],
             },
           ];
-          finish(id, result("extensions", { extensions: scenario.extensions }));
+          finish(
+            id,
+            result("extensions", {
+              id: extensionId,
+              plugin_id: extensionId,
+              backend_ids: [],
+              restarted: false,
+            }),
+          );
+        } else if (subcommand === "setup" || subcommand === "remove") {
+          finish(
+            id,
+            result("extensions", {
+              id: cliArgs[2] ?? "unknown",
+              plugin_id: cliArgs[2] ?? "unknown",
+              backend_ids: [],
+              restarted: false,
+            }),
+          );
         } else {
           finish(
             id,
@@ -509,10 +572,57 @@
             (engine.requires ?? []).includes(path),
           );
           if (configuredEngine) configuredEngine.available = true;
-          finish(id, result("config.set", {}));
+          finish(
+            id,
+            result("config.set", mutationResult([path])),
+          );
         }
+      } else if (name === "config" && subcommand === "set") {
+        finish(
+          id,
+          result("config.set", mutationResult([cliArgs[2] ?? "unknown"])),
+        );
+      } else if (name === "config" && subcommand === "validate") {
+        finish(id, result("config.validate", { valid: true, warnings: [] }));
       } else if (name === "restart" && scenario.restartError) {
         finish(id, failure("restart", "RESTART_FAILED", scenario.restartError));
+      } else if (name === "start" || name === "restart") {
+        finish(id, result(name, lifecycleResult("started")));
+      } else if (name === "stop") {
+        finish(id, result(name, { state: "stopped" }));
+      } else if (name === "adlist") {
+        const levelIndex = cliArgs.indexOf("--level");
+        const level = levelIndex >= 0 ? cliArgs[levelIndex + 1] : "ads";
+        finish(
+          id,
+          result("adlist", {
+            level,
+            entries: level === "off" ? 0 : 42,
+            path: "C:\\ASG-Fixture\\data\\adblock\\hosts",
+            restart: "all",
+            restarted: level !== "off",
+          }),
+        );
+      } else if (name === "update" && subcommand === "check") {
+        finish(
+          id,
+          result("update", {
+            action: "check",
+            version: "0.5.0",
+            current_version: "0.4.1",
+            up_to_date: false,
+            restarted: false,
+          }),
+        );
+      } else if (name === "update" && subcommand === "apply") {
+        finish(
+          id,
+          result("update", {
+            action: "apply",
+            version: "0.5.0",
+            restarted: true,
+          }),
+        );
       } else if (name === "config" && subcommand === "get") {
         scenario.configCallCount += 1;
         finish(

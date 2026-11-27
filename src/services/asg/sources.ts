@@ -1,19 +1,22 @@
 import type {
   ConfigFieldInfo,
+  ConfigMutationResult,
   EngineInfo,
   EngineRouteDraft,
   ExtensionInfo,
+  ExtensionOperationResult,
   ExtensionSearchItem,
   SecretPayload,
 } from "../../types/cli";
 import {
+  isConfigMutationResult,
   isEnginesResult,
+  isExtensionOperationResult,
   isExtensionConfigFieldsResult,
   isExtensionConfigResult,
   isExtensionsResult,
   isExtensionSearchResult,
   parseCliData,
-  parseVoidData,
 } from "../../utils/cli";
 import type { AsgCommandRunner } from "./command";
 
@@ -21,6 +24,8 @@ export interface ExtensionConfigSnapshot {
   id: string;
   config: Record<string, unknown>;
   fields: ConfigFieldInfo[];
+  valid: boolean;
+  error?: string;
 }
 
 function changedConfigArgs(
@@ -54,7 +59,7 @@ export function createSourcesService(runner: AsgCommandRunner) {
         label: enabled ? "启用搜索引擎" : "禁用搜索引擎",
         visualState: "restarting",
       },
-      parseVoidData,
+      parseCliData("engines", isConfigMutationResult),
     );
     return true;
   }
@@ -75,46 +80,52 @@ export function createSourcesService(runner: AsgCommandRunner) {
       await setEnginesEnabled([id], enabled);
     },
 
-    async setSearxngRoute(id: string, route: string): Promise<void> {
-      await runner.run(
+    setSearxngRoute(id: string, route: string): Promise<ConfigMutationResult> {
+      return runner.run(
         ["engines", "route", id, route],
         {
           label: "设置 SearXNG 路由",
           visualState: "restarting",
         },
-        parseVoidData,
+        parseCliData("engines route", isConfigMutationResult),
       );
     },
 
-    async setGatewayRoute(id: string, draft: EngineRouteDraft): Promise<void> {
+    setGatewayRoute(
+      id: string,
+      draft: EngineRouteDraft,
+    ): Promise<ConfigMutationResult> {
       const args = ["engines", "route", id];
       if (draft.category.trim()) args.push("--category", draft.category.trim());
       if (draft.hotCategory.trim()) {
         args.push("--hot-category", draft.hotCategory.trim());
       }
       if (args.length === 3) args.push("--clear");
-      await runner.run(
+      return runner.run(
         args,
         {
           label: "设置 Gateway 路由",
           visualState: "restarting",
         },
-        parseVoidData,
+        parseCliData("engines route", isConfigMutationResult),
       );
     },
 
-    async setEngineSecret(engine: EngineInfo, payload: SecretPayload): Promise<void> {
+    setEngineSecret(
+      engine: EngineInfo,
+      payload: SecretPayload,
+    ): Promise<ConfigMutationResult> {
       const args = ["engines", "secret", engine.id];
       if (payload.name) args.push("--name", payload.name);
       args.push("--stdin");
-      await runner.run(
+      return runner.run(
         args,
         {
           label: `更新 ${engine.name} 密钥`,
           stdin: payload.secret,
           visualState: "restarting",
         },
-        parseVoidData,
+        parseCliData("engines secret", isConfigMutationResult),
       );
     },
 
@@ -140,36 +151,40 @@ export function createSourcesService(runner: AsgCommandRunner) {
       return result.results;
     },
 
-    async installExtension(repo: string): Promise<void> {
-      await runner.run(
+    installExtension(repo: string): Promise<ExtensionOperationResult> {
+      return runner.run(
         ["extensions", "install", repo],
         {
           label: "安装 V2 扩展",
           visualState: "loading",
         },
-        parseVoidData,
+        parseCliData("extensions install", isExtensionOperationResult),
       );
     },
 
-    async setupExtension(extension: ExtensionInfo): Promise<void> {
-      await runner.run(
+    setupExtension(
+      extension: ExtensionInfo,
+    ): Promise<ExtensionOperationResult> {
+      return runner.run(
         ["extensions", "setup", extension.id],
         {
           label: `运行 ${extension.name || extension.id} 后端 setup`,
           visualState: "loading",
         },
-        parseVoidData,
+        parseCliData("extensions setup", isExtensionOperationResult),
       );
     },
 
-    async removeExtension(extension: ExtensionInfo): Promise<void> {
-      await runner.run(
+    removeExtension(
+      extension: ExtensionInfo,
+    ): Promise<ExtensionOperationResult> {
+      return runner.run(
         ["extensions", "remove", extension.id],
         {
           label: `卸载扩展 ${extension.id}`,
           visualState: "loading",
         },
-        parseVoidData,
+        parseCliData("extensions remove", isExtensionOperationResult),
       );
     },
 
@@ -189,10 +204,20 @@ export function createSourcesService(runner: AsgCommandRunner) {
           ),
         ),
       ]);
+      if (
+        configResult.id !== extension.id ||
+        describeResult.id !== extension.id
+      ) {
+        throw new Error(
+          `ASG 扩展配置响应与请求的扩展不匹配：${extension.id}`,
+        );
+      }
       return {
-        id: extension.id,
-        config: structuredClone(configResult.config ?? {}),
-        fields: describeResult.fields ?? [],
+        id: configResult.id,
+        config: structuredClone(configResult.config),
+        fields: describeResult.fields,
+        valid: configResult.valid,
+        ...(configResult.valid ? {} : { error: configResult.error }),
       };
     },
 
@@ -209,7 +234,7 @@ export function createSourcesService(runner: AsgCommandRunner) {
           label: `保存扩展 ${id} 配置`,
           visualState: "restarting",
         },
-        parseVoidData,
+        parseCliData("extensions config", isConfigMutationResult),
       );
       return true;
     },
@@ -225,7 +250,7 @@ export function createSourcesService(runner: AsgCommandRunner) {
           stdin: payload.secret,
           visualState: "restarting",
         },
-        parseVoidData,
+        parseCliData("extensions secret", isConfigMutationResult),
       );
     },
   };

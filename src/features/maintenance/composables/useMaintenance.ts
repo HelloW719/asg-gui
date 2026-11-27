@@ -2,10 +2,15 @@ import { computed, onMounted, ref } from "vue";
 import { useAsgServices } from "@/app/useAsgServices";
 import { useJobsStore } from "@/stores/jobs";
 import type {
+  AdFilterLevel,
   BrowserStatus,
   DoctorCheck,
   UpdateCheckStatus,
 } from "@/types/cli";
+import {
+  adlistSuccessMessage,
+  updateSuccessMessage,
+} from "../maintenancePresentation";
 
 export function useMaintenance() {
   const jobs = useJobsStore();
@@ -14,7 +19,7 @@ export function useMaintenance() {
   const doctorLoaded = ref(false);
   const browser = ref<BrowserStatus | null>(null);
   const update = ref<UpdateCheckStatus | null>(null);
-  const adLevel = ref("ads");
+  const adLevel = ref<AdFilterLevel>("ads");
   const error = ref<string | null>(null);
   const success = ref<string | null>(null);
   const updateConfirm = ref(false);
@@ -58,8 +63,9 @@ export function useMaintenance() {
     error.value = null;
     success.value = null;
     try {
-      await serviceClient.maintenance.updateAdlist(adLevel.value);
-      success.value = "广告过滤列表已更新，整栈已重启。";
+      const result =
+        await serviceClient.maintenance.updateAdlist(adLevel.value);
+      success.value = adlistSuccessMessage(result);
     } catch (cause) {
       setError(cause);
     }
@@ -80,9 +86,11 @@ export function useMaintenance() {
     error.value = null;
     success.value = null;
     try {
-      await serviceClient.maintenance.applyUpdate();
-      success.value = "ASG 已更新，整栈已重启。";
+      const result = await serviceClient.maintenance.applyUpdate();
       await checkUpdate();
+      if (!error.value) {
+        success.value = updateSuccessMessage(result);
+      }
     } catch (cause) {
       setError(cause);
     }

@@ -1,5 +1,5 @@
-import type { LifecycleAction } from "../../types/cli";
-import { parseVoidData } from "../../utils/cli";
+import type { LifecycleAction, LifecycleResult } from "../../types/cli";
+import { isLifecycleResult, parseCliData } from "../../utils/cli";
 import type { AsgCommandRunner } from "./command";
 
 const ACTION_COPY: Record<
@@ -13,8 +13,12 @@ const ACTION_COPY: Record<
 
 export function createLifecycleService(runner: AsgCommandRunner) {
   return {
-    async run(action: LifecycleAction): Promise<void> {
-      await runner.run([action], ACTION_COPY[action], parseVoidData);
+    run(action: LifecycleAction): Promise<LifecycleResult> {
+      return runner.run(
+        [action],
+        ACTION_COPY[action],
+        parseCliData(action, isLifecycleResult),
+      );
     },
   };
 }

@@ -15,9 +15,13 @@ import SelectField from "@/shared/ui/SelectField.vue";
 import DiagnosticReport from "./components/DiagnosticReport.vue";
 import MaintenanceActionCard from "./components/MaintenanceActionCard.vue";
 import { useMaintenance } from "./composables/useMaintenance";
+import type { AdFilterLevel } from "@/types/cli";
 
 const maintenance = useMaintenance();
-const adLevelOptions = [
+const adLevelOptions: ReadonlyArray<{
+  value: AdFilterLevel;
+  label: string;
+}> = [
   { value: "off", label: "off" },
   { value: "ads", label: "ads" },
   { value: "ads+tracking", label: "ads+tracking" },

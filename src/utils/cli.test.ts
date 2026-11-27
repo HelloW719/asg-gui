@@ -1,12 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
   commandTextResultFromError,
+  isAdlistUpdateResult,
   isCliResult,
+  isConfigMutationResult,
+  isConfigValidationResult,
   isEngineSecretRequirement,
+  isExtensionConfigFieldsResult,
+  isExtensionConfigResult,
+  isExtensionOperationResult,
   isJobEvent,
+  isLifecycleResult,
+  isLogFollowResult,
   isLogCliEvent,
   isSearxngApiKeyRequirement,
   isStackStatus,
+  isUpdateApplyStatus,
   parseCliData,
   parseNdjson,
 } from "./cli";
@@ -163,6 +172,101 @@ describe("CLI output helpers", () => {
     expect(() => parseStatus({ services: {} })).toThrow(
       "ASG status 返回的数据不符合 schema_version 1 契约",
     );
+  });
+
+  it("requires complete extension config read and describe responses", () => {
+    expect(isExtensionConfigResult({})).toBe(false);
+    expect(
+      isExtensionConfigResult({
+        id: "demo",
+        fields: [],
+      }),
+    ).toBe(false);
+    expect(
+      isExtensionConfigResult({
+        id: "demo",
+        config: {},
+        valid: false,
+      }),
+    ).toBe(false);
+    expect(
+      isExtensionConfigResult({
+        id: "demo",
+        config: {},
+        valid: false,
+        error: "invalid config",
+      }),
+    ).toBe(true);
+    expect(isExtensionConfigFieldsResult({ id: "demo" })).toBe(false);
+    expect(
+      isExtensionConfigFieldsResult({
+        id: "demo",
+        config: {},
+      }),
+    ).toBe(false);
+    expect(
+      isExtensionConfigFieldsResult({
+        id: "demo",
+        fields: [],
+      }),
+    ).toBe(true);
+  });
+
+  it("preserves structured mutation and validation status", () => {
+    expect(
+      isConfigValidationResult({
+        valid: true,
+        warnings: ["deprecated option"],
+      }),
+    ).toBe(true);
+    expect(
+      isConfigMutationResult({
+        changed: ["gateway.port"],
+        restart: "all",
+        restarted: true,
+      }),
+    ).toBe(true);
+    expect(
+      isAdlistUpdateResult({
+        level: "off",
+        entries: 0,
+        path: "/data/adblock/hosts",
+        restart: "all",
+        restarted: false,
+      }),
+    ).toBe(true);
+    expect(
+      isUpdateApplyStatus({
+        action: "apply",
+        version: null,
+        restarted: false,
+      }),
+    ).toBe(true);
+    expect(
+      isExtensionOperationResult({
+        id: "demo-fetch",
+        plugin_id: "demo-fetch",
+        backend_ids: ["api"],
+        restarted: false,
+      }),
+    ).toBe(true);
+    expect(
+      isLifecycleResult({
+        state: "started",
+        supervisor: {
+          managed: true,
+          mode: "schtasks",
+          active: true,
+        },
+      }),
+    ).toBe(true);
+    expect(
+      isLifecycleResult({
+        state: "started",
+      }),
+    ).toBe(false);
+    expect(isLogFollowResult({ streamed: true, services: [] })).toBe(true);
+    expect(isLogFollowResult({ streamed: false, services: [] })).toBe(false);
   });
 });
 

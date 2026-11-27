@@ -64,17 +64,19 @@ export interface ServiceProbe {
   error?: string;
 }
 
+export interface SupervisorStatus {
+  managed: boolean;
+  mode: "systemd" | "launchd" | "schtasks" | "pid" | "none";
+  active: boolean;
+}
+
 export interface StackStatus {
   services: {
     gateway: ServiceProbe;
     searxng: ServiceProbe;
     flaresolverr: ServiceProbe;
   };
-  supervisor: {
-    managed: boolean;
-    mode: "systemd" | "launchd" | "schtasks" | "pid" | "none";
-    active: boolean;
-  };
+  supervisor: SupervisorStatus;
 }
 
 export interface RootSelection {
@@ -211,6 +213,43 @@ export interface BrowserStatus {
 export interface BrowserInstallStatus extends BrowserStatus {
   full: boolean;
 }
+
+export type AdFilterLevel = "off" | "ads" | "ads+tracking" | "full";
+
+export interface AdlistUpdateResult {
+  level: AdFilterLevel;
+  entries: number;
+  path: string;
+  restart: "all";
+  restarted: boolean;
+}
+
+export interface ConfigMutationResult {
+  changed: string[];
+  restart: "all";
+  restarted: boolean;
+}
+
+export interface ConfigValidationResult {
+  valid: true;
+  warnings: string[];
+}
+
+export interface ExtensionOperationResult {
+  id: string;
+  plugin_id: string;
+  backend_ids: string[];
+  restarted: boolean;
+}
+
+export type LifecycleResult =
+  | {
+      state: "started" | "already_running";
+      supervisor: SupervisorStatus;
+    }
+  | {
+      state: "stopped" | "already_stopped";
+    };
 
 interface UpdateStatusBase {
   version: string | null;

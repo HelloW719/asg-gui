@@ -1,5 +1,10 @@
 import type { JobEvent, LogLine } from "../../types/cli";
-import { isLogReadResult, parseCliData } from "../../utils/cli";
+import {
+  isLogFollowResult,
+  isLogReadResult,
+  parseCliData,
+  type LogFollowResult,
+} from "../../utils/cli";
 import type {
   AsgCommandRunner,
   AsgStreamHandle,
@@ -31,13 +36,14 @@ export function createLogService(runner: AsgCommandRunner) {
       services: readonly string[],
       onEvent: (event: JobEvent) => void,
     ): Promise<FollowLogHandle> {
-      const stream: AsgStreamHandle<unknown> = await runner.stream(
+      const stream: AsgStreamHandle<LogFollowResult> = await runner.stream(
         withServices(["-f"], services),
         {
           label: "跟随日志",
           mode: "jsonl",
           onEvent,
         },
+        parseCliData("logs follow", isLogFollowResult),
       );
       return {
         jobId: stream.jobId,

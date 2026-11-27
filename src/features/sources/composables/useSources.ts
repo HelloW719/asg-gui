@@ -50,8 +50,8 @@ export function useSources() {
     extensionSecret.value = extension;
   }
 
-  async function runAndRefresh(
-    action: () => Promise<void>,
+  async function runAndRefresh<T>(
+    action: () => Promise<T>,
     successMessage: string,
   ): Promise<boolean> {
     error.value = null;

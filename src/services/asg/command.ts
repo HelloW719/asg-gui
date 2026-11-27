@@ -3,6 +3,9 @@ import type {
   JobEvent,
   VisualState,
 } from "../../types/cli";
+import type { CliDataParser } from "../../utils/cli";
+
+export type { CliDataParser } from "../../utils/cli";
 
 export interface AsgRunOptions {
   label: string;
@@ -19,18 +22,17 @@ export interface AsgStreamHandle<T> {
   cancel: () => Promise<void>;
 }
 
-export type CliDataParser<T> = (value: unknown) => T;
-
 export interface AsgCommandRunner {
   run<T>(
     args: string[],
     options: AsgRunOptions,
     parseData: CliDataParser<T>,
   ): Promise<T>;
-  stream(
+  stream<T>(
     args: string[],
     options: AsgRunOptions,
-  ): Promise<AsgStreamHandle<unknown>>;
+    parseData: CliDataParser<T>,
+  ): Promise<AsgStreamHandle<T>>;
 }
 
 export class AsgCommandError extends Error {

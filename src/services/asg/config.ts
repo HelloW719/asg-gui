@@ -1,4 +1,13 @@
-import { isRecord, parseCliData, parseVoidData } from "../../utils/cli";
+import type {
+  ConfigMutationResult,
+  ConfigValidationResult,
+} from "../../types/cli";
+import {
+  isConfigMutationResult,
+  isConfigValidationResult,
+  isRecord,
+  parseCliData,
+} from "../../utils/cli";
 import type { AsgCommandRunner } from "./command";
 
 export function createConfigService(runner: AsgCommandRunner) {
@@ -13,38 +22,42 @@ export function createConfigService(runner: AsgCommandRunner) {
       );
     },
 
-    async validate(): Promise<void> {
-      await runner.run(
+    validate(): Promise<ConfigValidationResult> {
+      return runner.run(
         ["config", "validate"],
         {
           label: "校验配置",
         },
-        parseVoidData,
+        parseCliData("config validate", isConfigValidationResult),
       );
     },
 
-    async set(path: string, value: string, originalIsString: boolean): Promise<void> {
+    set(
+      path: string,
+      value: string,
+      originalIsString: boolean,
+    ): Promise<ConfigMutationResult> {
       const args = ["config", "set", path, value];
       if (originalIsString) args.push("--string");
-      await runner.run(
+      return runner.run(
         args,
         {
           label: `保存 ${path}`,
           visualState: "restarting",
         },
-        parseVoidData,
+        parseCliData("config set", isConfigMutationResult),
       );
     },
 
-    async setSecret(path: string, secret: string): Promise<void> {
-      await runner.run(
+    setSecret(path: string, secret: string): Promise<ConfigMutationResult> {
+      return runner.run(
         ["config", "set", path, "--stdin"],
         {
           label: "保存密钥",
           stdin: secret,
           visualState: "restarting",
         },
-        parseVoidData,
+        parseCliData("config set", isConfigMutationResult),
       );
     },
   };

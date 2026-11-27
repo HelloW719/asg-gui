@@ -1,6 +1,11 @@
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CliResult } from "../types/cli";
+import {
+  isLogFollowResult,
+  isRecord,
+  parseCliData,
+} from "../utils/cli";
 
 const startMock = vi.hoisted(() => vi.fn());
 
@@ -17,6 +22,8 @@ interface PendingJob {
 function successResult(command = "fixture"): CliResult {
   return { schema_version: 1, ok: true, command, data: {} };
 }
+
+const parseObject = parseCliData("fixture", isRecord);
 
 describe("jobs store concurrency", () => {
   beforeEach(() => {
@@ -45,13 +52,13 @@ describe("jobs store concurrency", () => {
     const first = jobs.commandRunner.run([], {
       label: "第一个任务",
       visualState: "loading",
-    }, () => undefined);
+    }, parseObject);
     await vi.waitFor(() => expect(pending).toHaveLength(1));
 
     const second = jobs.commandRunner.run([], {
       label: "第二个任务",
       visualState: "restarting",
-    }, () => undefined);
+    }, parseObject);
     await vi.waitFor(() => expect(pending).toHaveLength(2));
     expect(jobs.active).toBe(2);
     expect(jobs.activeLabels).toEqual(["第一个任务", "第二个任务"]);
@@ -82,12 +89,40 @@ describe("jobs store concurrency", () => {
     const jobs = useJobsStore();
 
     await expect(
-      jobs.commandRunner.run([], { label: "校验数据" }, () => {
-        throw new Error("CLI 数据契约不匹配");
-      }),
-    ).rejects.toThrow("CLI 数据契约不匹配");
+      jobs.commandRunner.run(
+        [],
+        { label: "校验数据" },
+        parseCliData(
+          "fixture",
+          (value): value is string => typeof value === "string",
+        ),
+      ),
+    ).rejects.toThrow("ASG fixture 返回的数据不符合 schema_version 1 契约");
 
-    expect(jobs.lastError).toBe("CLI 数据契约不匹配");
+    expect(jobs.lastError).toBe(
+      "ASG fixture 返回的数据不符合 schema_version 1 契约。",
+    );
+    expect(jobs.active).toBe(0);
+  });
+
+  it("validates the final data from streamed commands", async () => {
+    startMock.mockResolvedValue({
+      jobId: "invalid-stream-data",
+      cancellable: true,
+      mutating: false,
+      done: Promise.resolve(successResult("logs")),
+      cancel: vi.fn(),
+    });
+    const jobs = useJobsStore();
+    const stream = await jobs.commandRunner.stream(
+      ["logs", "-f"],
+      { label: "跟随日志" },
+      parseCliData("logs follow", isLogFollowResult),
+    );
+
+    await expect(stream.done).rejects.toThrow(
+      "ASG logs follow 返回的数据不符合 schema_version 1 契约",
+    );
     expect(jobs.active).toBe(0);
   });
 });
