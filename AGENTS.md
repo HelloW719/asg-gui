@@ -118,8 +118,8 @@ stores -> services
 
 ## 数据契约
 
-- ASG core 的 `src/cli/contract.ts` 和 `docs/cli-contract.md` 是机器数据契约的
-  权威来源。GUI 只消费契约，不在本仓库重新解释命令输出或复制业务规则。
+- ASG core 的 `docs/cli-contract.md`、`src/cli/output.ts` 及相关命令模块是机器
+  数据契约的权威来源。GUI 只消费契约，不在本仓库重新解释命令输出或复制业务规则。
 - `schema_version` 标识 CLI 数据协议版本，与 ASG core 版本、GUI 版本相互独立。
 - CLI result 中，`ok:true` 必须包含 `data` 且不能包含 `error`；`ok:false` 必须包含
   `error`。只有 `search` / `fetch` 的数据面失败可以同时保留 `data`，GUI 必须继续

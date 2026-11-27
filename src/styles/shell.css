@@ -783,8 +783,30 @@ m3e-theme {
 }
 
 .app-content {
+  scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--text-faint) 22%, transparent)
     transparent;
+}
+
+.app-content::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.app-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--text-faint) 24%, transparent);
+  background-clip: padding-box;
+}
+
+.app-content::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text-faint) 38%, transparent);
+  background-clip: padding-box;
 }
 
 .page {

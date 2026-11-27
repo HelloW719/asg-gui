@@ -24,7 +24,6 @@ const COMMANDS: &[&str] = &[
     "logs",
     "config",
     "engines",
-    "plugins",
     "extensions",
     "browser",
     "adlist",
@@ -36,6 +35,10 @@ fn emit_job(app: &AppHandle, event: JobEvent) {
     let _ = app.emit(JOB_EVENT, event);
 }
 
+fn is_allowed_command(command: &str) -> bool {
+    command != "serve" && COMMANDS.contains(&command)
+}
+
 fn is_mutating(args: &[String]) -> bool {
     let command = args.first().map(String::as_str).unwrap_or_default();
     let subcommand = args.get(1).map(String::as_str).unwrap_or_default();
@@ -43,7 +46,6 @@ fn is_mutating(args: &[String]) -> bool {
         "start" | "stop" | "restart" | "adlist" => true,
         "config" => subcommand == "set",
         "engines" => matches!(subcommand, "enable" | "disable" | "route" | "secret"),
-        "plugins" => matches!(subcommand, "install" | "remove"),
         "extensions" => {
             matches!(subcommand, "install" | "remove" | "secret")
                 || (subcommand == "config"
@@ -156,7 +158,7 @@ pub async fn run_cli(
     let command_name = args
         .first()
         .ok_or_else(|| "CLI 参数不能为空。".to_string())?;
-    if command_name == "serve" || !COMMANDS.contains(&command_name.as_str()) {
+    if !is_allowed_command(command_name) {
         return Err(format!("GUI 不允许执行该 CLI 命令：{command_name}"));
     }
     if mode != "json" && mode != "jsonl" {
@@ -395,6 +397,16 @@ mod tests {
         assert!(!is_mutating(&args(&["status"])));
         assert!(!is_mutating(&args(&["config", "get", "--all"])));
         assert!(!is_mutating(&args(&["extensions", "list"])));
+    }
+
+    #[test]
+    fn only_allows_current_cli_commands() {
+        assert!(is_allowed_command("status"));
+        assert!(is_allowed_command("search"));
+        assert!(is_allowed_command("extensions"));
+        assert!(!is_allowed_command("serve"));
+        assert!(!is_allowed_command("plugins"));
+        assert!(!is_allowed_command("../bin/asg"));
     }
 
     #[test]

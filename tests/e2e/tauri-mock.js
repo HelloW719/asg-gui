@@ -53,10 +53,11 @@
     }, 30);
   };
 
-  const failure = (command, code, message) => ({
+  const failure = (command, code, message, data) => ({
     schema_version: 1,
     ok: false,
     command,
+    ...(data === undefined ? {} : { data }),
     error: { code, message },
   });
 
@@ -243,6 +244,36 @@
                 selectedServices.has(line.service),
             ),
           }),
+        );
+      } else if (name === "search" || name === "fetch") {
+        const text = scenario.explorerError
+          ? `[${name === "search" ? "SEARCH_UPSTREAM" : "FETCH_NETWORK"}] ${scenario.explorerError}`
+          : name === "search"
+            ? `# Search fixture\n\nSEARCH_RESULT_TOKEN: ${cliArgs[1] ?? ""}`
+            : `# Fetch fixture\n\nFETCH_RESULT_TOKEN: ${cliArgs[1] ?? ""}`;
+        const data = {
+          tool: name,
+          endpoint: "http://127.0.0.1:3000/mcp",
+          elapsed_ms: name === "search" ? 12 : 7,
+          ok: !scenario.explorerError,
+          code: scenario.explorerError
+            ? name === "search"
+              ? "SEARCH_UPSTREAM"
+              : "FETCH_NETWORK"
+            : null,
+          text,
+          ...(name === "fetch" ? { render: "auto" } : {}),
+        };
+        finish(
+          id,
+          scenario.explorerError
+            ? failure(
+                name,
+                data.code,
+                scenario.explorerError,
+                data,
+              )
+            : result(name, data),
         );
       } else if (name === "doctor") {
         finish(
@@ -496,7 +527,10 @@
       }
       return {
         jobId: id,
-        cancellable: name === "logs" && cliArgs.includes("-f"),
+        cancellable:
+          name === "search" ||
+          name === "fetch" ||
+          (name === "logs" && cliArgs.includes("-f")),
         mutating: false,
       };
     },

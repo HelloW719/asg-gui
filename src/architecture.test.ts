@@ -11,16 +11,23 @@ function filesIn(folder: string): Array<[string, string]> {
   );
 }
 
+function moduleSpecifiers(source: string): string[] {
+  const patterns = [
+    /\b(?:import|export)\s+(?:[^"'`;]*?\s+from\s+)?["']([^"']+)["']/g,
+    /\b(?:import|require)\s*\(\s*["']([^"']+)["']\s*\)/g,
+  ];
+  return [...new Set(patterns.flatMap((pattern) =>
+    [...source.matchAll(pattern)].map((match) => match[1] ?? ""),
+  ))];
+}
+
 function expectNoImports(
   files: Array<[string, string]>,
   forbidden: RegExp,
   rule: string,
 ): void {
   const violations = files.flatMap(([path, source]) => {
-    const imports = [...source.matchAll(/from\s+["']([^"']+)["']/g)].map(
-      (match) => match[1] ?? "",
-    );
-    return imports.filter((target) => forbidden.test(target)).map(
+    return moduleSpecifiers(source).filter((target) => forbidden.test(target)).map(
       (target) => `${path} -> ${target}`,
     );
   });
@@ -28,6 +35,26 @@ function expectNoImports(
 }
 
 describe("frontend architecture boundaries", () => {
+  it("recognizes every JavaScript import form used by the boundary guards", () => {
+    expect(
+      moduleSpecifiers(`
+        import value from "static";
+        import "side-effect";
+        export { value } from "re-export";
+        const lazy = import("dynamic");
+        const legacy = require("commonjs");
+      `),
+    ).toEqual(
+      expect.arrayContaining([
+        "static",
+        "side-effect",
+        "re-export",
+        "dynamic",
+        "commonjs",
+      ]),
+    );
+  });
+
   it("keeps services independent from Vue, stores and UI", () => {
     expectNoImports(
       filesIn("services"),
@@ -61,12 +88,16 @@ describe("frontend architecture boundaries", () => {
   });
 
   it("keeps native integrations behind the desktop service", () => {
-    const violations = filesIn("features").flatMap(([path, source]) =>
-      /from\s+["']@tauri-apps\//.test(source) ||
-      /from\s+["'][^"']*services\/desktop/.test(source)
+    const violations = filesIn("features").flatMap(([path, source]) => {
+      const imports = moduleSpecifiers(source);
+      return imports.some(
+        (target) =>
+          target.startsWith("@tauri-apps/") ||
+          /(^|\/)services\/desktop(?:\/|$)/.test(target),
+      )
         ? [path]
-        : [],
-    );
+        : [];
+    });
     expect(
       violations,
       "功能层必须通过 services/desktop 暴露的类型化能力访问 Tauri",
@@ -80,7 +111,7 @@ describe("frontend architecture boundaries", () => {
           /\bjobClient\b/,
           /\bjobs\.(execute|stream)\s*\(/,
           /runner\.(run|stream)\s*\(/,
-          /\[\s*["'](status|logs|doctor|engines|plugins|extensions|config|browser|adlist|update)["']/,
+          /\[\s*["'](status|search|fetch|start|stop|restart|logs|doctor|engines|extensions|config|browser|adlist|update)["']/,
         ];
         return patterns.some((pattern) => pattern.test(source)) ? [path] : [];
       });

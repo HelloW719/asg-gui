@@ -1,6 +1,10 @@
 import { onBeforeUnmount, onMounted, watch } from "vue";
 import { inTauri, listenNavigate, listenQuitBlocked } from "../services/desktop";
-import { useAppearanceStore } from "../stores/appearance";
+import {
+  REDUCED_MOTION_QUERY,
+  SYSTEM_THEME_QUERY,
+  useAppearanceStore,
+} from "../stores/appearance";
 import { useSessionStore } from "../stores/session";
 import { useStatusStore } from "../stores/status";
 import { useAppStatus } from "./useAppStatus";
@@ -53,6 +57,21 @@ export function useAppBootstrap(options: AppBootstrapOptions): void {
 
   onMounted(async () => {
     appearance.initialize();
+    const themeMedia = window.matchMedia(SYSTEM_THEME_QUERY);
+    const motionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
+    const onThemeChange = (event: MediaQueryListEvent) => {
+      appearance.setSystemDark(event.matches);
+    };
+    const onMotionChange = (event: MediaQueryListEvent) => {
+      appearance.setReducedMotion(event.matches);
+    };
+    themeMedia.addEventListener("change", onThemeChange);
+    motionMedia.addEventListener("change", onMotionChange);
+    cleanups.push(() => {
+      themeMedia.removeEventListener("change", onThemeChange);
+      motionMedia.removeEventListener("change", onMotionChange);
+    });
+
     const savedTheme = await session.initialize();
     if (savedTheme) appearance.applyPreference(savedTheme);
     applyDocumentState();

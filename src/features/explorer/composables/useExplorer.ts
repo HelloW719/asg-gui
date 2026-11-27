@@ -1,4 +1,4 @@
-import { reactive, ref } from "vue";
+import { reactive, ref, type Ref } from "vue";
 import { useDesktopIntegration } from "@/app/useDesktopIntegration";
 import { useAsgServices } from "@/app/useAsgServices";
 import { useJobsStore } from "@/stores/jobs";
@@ -28,11 +28,18 @@ export function useExplorer() {
     maxChars: "",
     timeout: "",
   });
-  const resultText = ref("");
-  const resultMeta = ref("");
-  const error = ref<string | null>(null);
+  const searchResultText = ref("");
+  const searchResultMeta = ref("");
+  const fetchResultText = ref("");
+  const fetchResultMeta = ref("");
+  const searchError = ref<string | null>(null);
+  const fetchError = ref<string | null>(null);
 
-  function applyResult(data: CommandTextResult): void {
+  function applyResult(
+    resultText: Ref<string>,
+    resultMeta: Ref<string>,
+    data: CommandTextResult,
+  ): void {
     if (data.text) resultText.value = data.text;
     resultMeta.value = [
       data.elapsed_ms !== undefined ? `${data.elapsed_ms} ms` : "",
@@ -48,40 +55,54 @@ export function useExplorer() {
   }
 
   async function search(): Promise<void> {
-    error.value = null;
-    resultText.value = "";
-    resultMeta.value = "";
+    searchError.value = null;
+    searchResultText.value = "";
+    searchResultMeta.value = "";
     if (
       !searchForm.query.trim() &&
       !searchForm.imagePath?.trim() &&
       !searchForm.categories?.trim()
     ) {
-      error.value = "请输入查询词，或者提供图片或类别。";
+      searchError.value = "请输入查询词，或者提供图片或类别。";
       return;
     }
     try {
-      applyResult(await serviceClient.explorer.search(searchForm));
+      applyResult(
+        searchResultText,
+        searchResultMeta,
+        await serviceClient.explorer.search(searchForm),
+      );
     } catch (cause) {
       const failedResult = commandTextResultFromError(cause);
-      if (failedResult) applyResult(failedResult);
-      error.value = cause instanceof Error ? cause.message : String(cause);
+      if (failedResult) {
+        applyResult(searchResultText, searchResultMeta, failedResult);
+      }
+      searchError.value =
+        cause instanceof Error ? cause.message : String(cause);
     }
   }
 
   async function fetchPage(): Promise<void> {
-    error.value = null;
-    resultText.value = "";
-    resultMeta.value = "";
+    fetchError.value = null;
+    fetchResultText.value = "";
+    fetchResultMeta.value = "";
     if (!fetchForm.url.trim()) {
-      error.value = "请输入 http/https URL。";
+      fetchError.value = "请输入 http/https URL。";
       return;
     }
     try {
-      applyResult(await serviceClient.explorer.fetch(fetchForm));
+      applyResult(
+        fetchResultText,
+        fetchResultMeta,
+        await serviceClient.explorer.fetch(fetchForm),
+      );
     } catch (cause) {
       const failedResult = commandTextResultFromError(cause);
-      if (failedResult) applyResult(failedResult);
-      error.value = cause instanceof Error ? cause.message : String(cause);
+      if (failedResult) {
+        applyResult(fetchResultText, fetchResultMeta, failedResult);
+      }
+      fetchError.value =
+        cause instanceof Error ? cause.message : String(cause);
     }
   }
 
@@ -89,9 +110,12 @@ export function useExplorer() {
     jobs,
     searchForm,
     fetchForm,
-    resultText,
-    resultMeta,
-    error,
+    searchResultText,
+    searchResultMeta,
+    fetchResultText,
+    fetchResultMeta,
+    searchError,
+    fetchError,
     chooseImage,
     search,
     fetchPage,

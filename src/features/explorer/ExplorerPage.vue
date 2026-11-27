@@ -25,14 +25,6 @@ const explorer = useExplorer();
       description="调用运行中的 gateway，不修改配置，也不会重启服务。"
     />
 
-    <InlineNotice
-      v-if="explorer.error.value"
-      tone="error"
-      :message="explorer.error.value"
-      dismissible
-      @dismiss="explorer.error.value = null"
-    />
-
     <TabsRoot default-value="search" class="explorer-tabs">
       <TabsList class="tab-list glass-surface" aria-label="检索模式">
         <TabsTrigger value="search" class="tab-trigger">
@@ -46,6 +38,13 @@ const explorer = useExplorer();
       </TabsList>
 
       <TabsContent value="search" class="tab-content">
+        <InlineNotice
+          v-if="explorer.searchError.value"
+          tone="error"
+          :message="explorer.searchError.value"
+          dismissible
+          @dismiss="explorer.searchError.value = null"
+        />
         <SearchFormPanel
           :form="explorer.searchForm"
           :busy="explorer.jobs.hasRunningOperation"
@@ -53,21 +52,28 @@ const explorer = useExplorer();
           @choose-image="explorer.chooseImage"
         />
         <ExplorerResult
-          :text="explorer.resultText.value"
-          :meta="explorer.resultMeta.value"
+          :text="explorer.searchResultText.value"
+          :meta="explorer.searchResultMeta.value"
           title="搜索结果"
         />
       </TabsContent>
 
       <TabsContent value="fetch" class="tab-content">
+        <InlineNotice
+          v-if="explorer.fetchError.value"
+          tone="error"
+          :message="explorer.fetchError.value"
+          dismissible
+          @dismiss="explorer.fetchError.value = null"
+        />
         <FetchFormPanel
           :form="explorer.fetchForm"
           :busy="explorer.jobs.hasRunningOperation"
           @submit="explorer.fetchPage"
         />
         <ExplorerResult
-          :text="explorer.resultText.value"
-          :meta="explorer.resultMeta.value"
+          :text="explorer.fetchResultText.value"
+          :meta="explorer.fetchResultMeta.value"
           title="抓取结果"
         />
       </TabsContent>

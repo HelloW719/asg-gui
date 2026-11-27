@@ -90,6 +90,88 @@ test("refreshes status and configuration when switching to another valid root", 
   expect(calls.config).toBeGreaterThanOrEqual(2);
 });
 
+test("keeps search and fetch results isolated across tabs", async ({ page }) => {
+  await installMock(page);
+  await page.goto("/#/explore");
+  await expect(
+    page.getByRole("heading", { name: "检索与抓取" }),
+  ).toBeVisible();
+
+  await page
+    .getByPlaceholder("输入问题、关键词或站点范围")
+    .fill("search isolation");
+  await page.getByRole("button", { name: "开始搜索" }).click();
+
+  const activePanel = page.locator('[role="tabpanel"]:visible');
+  await expect(
+    activePanel.getByText(/SEARCH_RESULT_TOKEN: search isolation/),
+  ).toBeVisible();
+  await expect(activePanel.getByText("12 ms · 调用成功")).toBeVisible();
+
+  await page.getByRole("tab", { name: "抓取" }).click();
+  await expect(
+    activePanel.getByText(/SEARCH_RESULT_TOKEN/),
+  ).toHaveCount(0);
+  await expect(
+    activePanel.getByText("等待抓取结果", { exact: true }),
+  ).toBeVisible();
+
+  await page
+    .getByPlaceholder("https://example.com/article")
+    .fill("https://example.org/fixture");
+  await page.getByRole("button", { name: "抓取正文" }).click();
+  await expect(
+    activePanel.getByText(/FETCH_RESULT_TOKEN: https:\/\/example\.org\/fixture/),
+  ).toBeVisible();
+  await expect(activePanel.getByText("7 ms · 调用成功")).toBeVisible();
+
+  await page.getByRole("tab", { name: "搜索" }).click();
+  await expect(activePanel.getByText(/FETCH_RESULT_TOKEN/)).toHaveCount(0);
+  await expect(
+    activePanel.getByText(/SEARCH_RESULT_TOKEN: search isolation/),
+  ).toBeVisible();
+});
+
+test("keeps structured search and fetch failures isolated", async ({ page }) => {
+  await installMock(page, { explorerError: "上游暂时不可用。" });
+  await page.goto("/#/explore");
+  await expect(
+    page.getByRole("heading", { name: "检索与抓取" }),
+  ).toBeVisible();
+
+  await page
+    .getByPlaceholder("输入问题、关键词或站点范围")
+    .fill("failed search");
+  await page.getByRole("button", { name: "开始搜索" }).click();
+
+  const activePanel = page.locator('[role="tabpanel"]:visible');
+  await expect(
+    activePanel.getByText("上游暂时不可用。", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    activePanel.getByText(/\[SEARCH_UPSTREAM\] 上游暂时不可用。/),
+  ).toBeVisible();
+
+  await page.getByRole("tab", { name: "抓取" }).click();
+  await expect(
+    activePanel.getByText("上游暂时不可用。", { exact: true }),
+  ).toHaveCount(0);
+
+  await page
+    .getByPlaceholder("https://example.com/article")
+    .fill("https://example.org/failure");
+  await page.getByRole("button", { name: "抓取正文" }).click();
+  await expect(
+    activePanel.getByText("上游暂时不可用。", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    activePanel.getByText(/\[FETCH_NETWORK\] 上游暂时不可用。/),
+  ).toBeVisible();
+  await expect(
+    activePanel.getByText(/\[SEARCH_UPSTREAM\]/),
+  ).toHaveCount(0);
+});
+
 test("keeps secret input visible when the write fails", async ({ page }) => {
   await installMock(page, { secretError: "密钥写入失败。" });
   await page.goto("/#/settings");

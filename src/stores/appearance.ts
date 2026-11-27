@@ -7,7 +7,8 @@ import {
   type GlassFrameRate,
 } from "../types/appearance";
 
-const SYSTEM_THEME_QUERY = "(prefers-color-scheme: dark)";
+export const SYSTEM_THEME_QUERY = "(prefers-color-scheme: dark)";
+export const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const REDUCED_TRANSPARENCY_KEY = "asg-gui-reduced-transparency";
 const GLASS_FRAME_RATE_KEY = "asg-gui-glass-frame-rate";
 
@@ -32,7 +33,8 @@ export const useAppearanceStore = defineStore("appearance", () => {
     initialized = true;
 
     const themeMedia = window.matchMedia(SYSTEM_THEME_QUERY);
-    const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const motionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
+    systemDark.value = themeMedia.matches;
     reducedMotion.value = motionMedia.matches;
     reducedTransparency.value =
       localStorage.getItem(REDUCED_TRANSPARENCY_KEY) === "true";
@@ -43,12 +45,6 @@ export const useAppearanceStore = defineStore("appearance", () => {
         : Number(rawFrameRate);
     if (isGlassFrameRate(savedFrameRate)) glassFrameRate.value = savedFrameRate;
 
-    themeMedia.addEventListener("change", (event) => {
-      systemDark.value = event.matches;
-    });
-    motionMedia.addEventListener("change", (event) => {
-      reducedMotion.value = event.matches;
-    });
   }
 
   function applyPreference(theme: ThemePreference): void {
@@ -66,6 +62,10 @@ export const useAppearanceStore = defineStore("appearance", () => {
 
   function setReducedMotion(value: boolean): void {
     reducedMotion.value = value;
+  }
+
+  function setSystemDark(value: boolean): void {
+    systemDark.value = value;
   }
 
   function setReducedTransparency(value: boolean): void {
@@ -89,6 +89,7 @@ export const useAppearanceStore = defineStore("appearance", () => {
     setTheme,
     toggleTheme,
     setReducedMotion,
+    setSystemDark,
     setReducedTransparency,
     setGlassFrameRate,
   };
