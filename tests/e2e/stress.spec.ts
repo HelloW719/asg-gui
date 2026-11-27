@@ -98,3 +98,44 @@ test("caps a high-rate log stream and announces through one throttled region", a
   await expectNoHorizontalOverflow(page);
   expect(errors).toEqual([]);
 });
+
+test("coalesces rapid duplicate search and fetch submissions", async ({
+  page,
+}) => {
+  await installMock(page);
+  await page.goto("/#/explore");
+  await expect(
+    page.getByRole("heading", { name: "检索与抓取" }),
+  ).toBeVisible();
+
+  await page
+    .getByPlaceholder("输入问题、关键词或站点范围")
+    .fill("double submit");
+  await page.getByRole("button", { name: "开始搜索" }).dblclick({ delay: 0 });
+  await expect(
+    page.getByText(/SEARCH_RESULT_TOKEN: double submit/),
+  ).toBeVisible();
+
+  await page.getByRole("tab", { name: "抓取" }).click();
+  await page
+    .getByPlaceholder("https://example.com/article")
+    .fill("https://example.org/double-submit");
+  await page.getByRole("button", { name: "抓取正文" }).dblclick({ delay: 0 });
+  await expect(
+    page.getByText(/FETCH_RESULT_TOKEN: https:\/\/example\.org\/double-submit/),
+  ).toBeVisible();
+  await page.waitForTimeout(150);
+
+  const commandCounts = await page.evaluate(() => {
+    const commands = (
+      window as typeof window & {
+        __TAURI_TEST_CLI_COMMANDS__: string[];
+      }
+    ).__TAURI_TEST_CLI_COMMANDS__;
+    return {
+      search: commands.filter((command) => command === "search").length,
+      fetch: commands.filter((command) => command === "fetch").length,
+    };
+  });
+  expect(commandCounts).toEqual({ search: 1, fetch: 1 });
+});

@@ -19,10 +19,20 @@ interface InternalJob {
   done: Promise<CliResult>;
 }
 
+interface UnboundJob {
+  events: JobEvent[];
+  cleanupTimer: ReturnType<typeof setTimeout> | null;
+}
+
+const MAX_UNBOUND_JOBS = 128;
+const MAX_UNBOUND_EVENTS_PER_JOB = 32;
+const UNBOUND_TTL_MS = 30_000;
+const COMPLETED_UNBOUND_TTL_MS = 2_000;
+
 export class JobClient {
   private initialization: Promise<void> | null = null;
   private readonly jobs = new Map<string, InternalJob>();
-  private readonly unbound = new Map<string, JobEvent[]>();
+  private readonly unbound = new Map<string, UnboundJob>();
 
   initialize(): Promise<void> {
     if (!this.initialization) {
@@ -84,8 +94,7 @@ export class JobClient {
     };
     this.jobs.set(jobId, job);
     if (listener) job.listeners.add(listener);
-    const buffered = this.unbound.get(jobId) ?? [];
-    this.unbound.delete(jobId);
+    const buffered = this.takeUnbound(jobId);
     for (const event of buffered) this.applyEvent(job, event);
     return job;
   }
@@ -93,12 +102,56 @@ export class JobClient {
   private handleEvent(event: JobEvent): void {
     const job = this.jobs.get(event.jobId);
     if (!job) {
-      const buffered = this.unbound.get(event.jobId) ?? [];
-      buffered.push(event);
-      this.unbound.set(event.jobId, buffered);
+      this.bufferUnbound(event);
       return;
     }
     this.applyEvent(job, event);
+  }
+
+  private bufferUnbound(event: JobEvent): void {
+    let buffered = this.unbound.get(event.jobId);
+    if (!buffered) {
+      while (this.unbound.size >= MAX_UNBOUND_JOBS) {
+        const oldestJobId = this.unbound.keys().next().value;
+        if (oldestJobId === undefined) break;
+        this.removeUnbound(oldestJobId);
+      }
+      buffered = {
+        events: [],
+        cleanupTimer: null,
+      };
+      this.unbound.set(event.jobId, buffered);
+    }
+
+    buffered.events.push(event);
+    if (buffered.events.length > MAX_UNBOUND_EVENTS_PER_JOB) {
+      buffered.events.splice(
+        0,
+        buffered.events.length - MAX_UNBOUND_EVENTS_PER_JOB,
+      );
+    }
+
+    if (buffered.cleanupTimer) clearTimeout(buffered.cleanupTimer);
+    const terminal = event.kind === "exit" || event.kind === "cancelled";
+    const ttl = terminal ? COMPLETED_UNBOUND_TTL_MS : UNBOUND_TTL_MS;
+    buffered.cleanupTimer = setTimeout(() => {
+      this.removeUnbound(event.jobId);
+    }, ttl);
+  }
+
+  private takeUnbound(jobId: string): JobEvent[] {
+    const buffered = this.unbound.get(jobId);
+    if (!buffered) return [];
+    if (buffered.cleanupTimer) clearTimeout(buffered.cleanupTimer);
+    this.unbound.delete(jobId);
+    return buffered.events;
+  }
+
+  private removeUnbound(jobId: string): void {
+    const buffered = this.unbound.get(jobId);
+    if (!buffered) return;
+    if (buffered.cleanupTimer) clearTimeout(buffered.cleanupTimer);
+    this.unbound.delete(jobId);
   }
 
   private applyEvent(job: InternalJob, event: JobEvent): void {

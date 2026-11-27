@@ -271,6 +271,67 @@ test("preserves log controls across navigation and stops following on leave", as
   await expect(page.getByRole("button", { name: "实时跟随" })).toBeVisible();
 });
 
+test("cancels a log follow that finishes starting after navigation", async ({
+  page,
+}) => {
+  await installMock(page, { followStartDelay: 500 });
+  await page.goto("/#/logs");
+  await expect(page.getByRole("heading", { name: "日志", exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "实时跟随" }).click();
+  await expect(page.getByRole("button", { name: "正在跟随" })).toBeDisabled();
+  await page.getByRole("link", { name: "状态", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
+  await page.waitForTimeout(700);
+  await page.getByRole("link", { name: "日志", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "日志", exact: true })).toBeVisible();
+
+  await expect(page.getByRole("button", { name: "实时跟随" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "暂停跟随" })).toHaveCount(0);
+});
+
+test("keeps log follow active when cancellation fails", async ({ page }) => {
+  await installMock(page, { cancelError: "日志流取消失败。" });
+  await page.goto("/#/logs");
+  await expect(page.getByRole("heading", { name: "日志", exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "实时跟随" }).click();
+  await expect(page.getByRole("button", { name: "暂停跟随" })).toBeVisible();
+  await page.getByRole("button", { name: "暂停跟随" }).click();
+  await expect(
+    page.getByText("日志流取消失败。", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "暂停跟随" })).toBeVisible();
+
+  const jobId = await page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          __TAURI_TEST_LAST_FOLLOW_JOB_ID__?: string;
+        }
+      ).__TAURI_TEST_LAST_FOLLOW_JOB_ID__,
+  );
+  expect(jobId).toBeTruthy();
+  await page.evaluate((activeJobId) => {
+    (
+      window as typeof window & {
+        __TAURI_TEST_EMIT__: (event: string, payload: unknown) => void;
+      }
+    ).__TAURI_TEST_EMIT__("asg://job", {
+      jobId: activeJobId,
+      kind: "stdout",
+      data: {
+        type: "event",
+        schema_version: 1,
+        event: "log",
+        service: "gateway",
+        line: "仍在实时跟随",
+      },
+    });
+  }, jobId);
+  await expect(page.getByText("仍在实时跟随", { exact: true })).toBeVisible();
+});
+
 test("refreshes visible logs as service selections change", async ({ page }) => {
   await installMock(page);
   await page.goto("/#/logs");

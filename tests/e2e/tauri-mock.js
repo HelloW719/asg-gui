@@ -144,6 +144,9 @@
         return null;
       }
       if (command === "cancel_cli") {
+        if (scenario.cancelError) {
+          throw new Error(scenario.cancelError);
+        }
         const id = args.jobId;
         if (runningJobs.has(id)) {
           runningJobs.delete(id);

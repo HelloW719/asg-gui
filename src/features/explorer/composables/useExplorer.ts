@@ -1,4 +1,4 @@
-import { reactive, ref, type Ref } from "vue";
+import { computed, reactive, ref, type Ref } from "vue";
 import { useDesktopIntegration } from "@/app/useDesktopIntegration";
 import { useAsgServices } from "@/app/useAsgServices";
 import { useJobsStore } from "@/stores/jobs";
@@ -34,6 +34,14 @@ export function useExplorer() {
   const fetchResultMeta = ref("");
   const searchError = ref<string | null>(null);
   const fetchError = ref<string | null>(null);
+  const searchPending = ref(false);
+  const fetchPending = ref(false);
+  const searchBusy = computed(
+    () => searchPending.value || jobs.hasRunningOperation,
+  );
+  const fetchBusy = computed(
+    () => fetchPending.value || jobs.hasRunningOperation,
+  );
 
   function applyResult(
     resultText: Ref<string>,
@@ -55,6 +63,7 @@ export function useExplorer() {
   }
 
   async function search(): Promise<void> {
+    if (searchBusy.value) return;
     searchError.value = null;
     searchResultText.value = "";
     searchResultMeta.value = "";
@@ -66,6 +75,7 @@ export function useExplorer() {
       searchError.value = "请输入查询词，或者提供图片或类别。";
       return;
     }
+    searchPending.value = true;
     try {
       applyResult(
         searchResultText,
@@ -79,10 +89,13 @@ export function useExplorer() {
       }
       searchError.value =
         cause instanceof Error ? cause.message : String(cause);
+    } finally {
+      searchPending.value = false;
     }
   }
 
   async function fetchPage(): Promise<void> {
+    if (fetchBusy.value) return;
     fetchError.value = null;
     fetchResultText.value = "";
     fetchResultMeta.value = "";
@@ -90,6 +103,7 @@ export function useExplorer() {
       fetchError.value = "请输入 http/https URL。";
       return;
     }
+    fetchPending.value = true;
     try {
       applyResult(
         fetchResultText,
@@ -103,6 +117,8 @@ export function useExplorer() {
       }
       fetchError.value =
         cause instanceof Error ? cause.message : String(cause);
+    } finally {
+      fetchPending.value = false;
     }
   }
 
@@ -116,6 +132,8 @@ export function useExplorer() {
     fetchResultMeta,
     searchError,
     fetchError,
+    searchBusy,
+    fetchBusy,
     chooseImage,
     search,
     fetchPage,

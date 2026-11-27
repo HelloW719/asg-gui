@@ -30,12 +30,15 @@ export function useLogFeed() {
   const lines = ref<LogFeedLine[]>([]);
   const query = ref("");
   const starting = ref(false);
+  const stopping = ref(false);
   const following = ref(false);
   const jobId = ref<string | null>(null);
   const followHandle = ref<FollowLogHandle | null>(null);
   const error = ref<string | null>(null);
   let nextLineId = 1;
   let historyRevision = 0;
+  let followRevision = 0;
+  let stoppingJobId: string | null = null;
   let pendingLines: LogFeedLine[] = [];
   let flushFrame: number | null = null;
 
@@ -109,8 +112,33 @@ export function useLogFeed() {
     scheduleLineFlush();
   }
 
+  function trackRunning(running: FollowLogHandle): void {
+    jobId.value = running.jobId;
+    followHandle.value = running;
+    following.value = true;
+    stoppingJobId = null;
+    const followJobId = running.jobId;
+    void running.done
+      .catch((cause) => {
+        if (
+          followHandle.value?.jobId === followJobId &&
+          stoppingJobId !== followJobId
+        ) {
+          error.value = cause instanceof Error ? cause.message : String(cause);
+        }
+      })
+      .finally(() => {
+        if (followHandle.value?.jobId !== followJobId) return;
+        following.value = false;
+        stopping.value = false;
+        stoppingJobId = null;
+        jobId.value = null;
+        followHandle.value = null;
+      });
+  }
+
   async function toggleFollow(): Promise<void> {
-    if (starting.value) return;
+    if (starting.value || stopping.value) return;
     if (following.value) {
       await stopFollow();
       return;
@@ -121,43 +149,45 @@ export function useLogFeed() {
     }
     error.value = null;
     starting.value = true;
+    const revision = ++followRevision;
     try {
       const running = await serviceClient.logs.follow(
         selectedServices.value,
         handleEvent,
       );
-      jobId.value = running.jobId;
-      followHandle.value = running;
-      following.value = true;
-      const followJobId = running.jobId;
-      void running.done
-        .catch((cause) => {
-          if (followHandle.value?.jobId === followJobId) {
-            error.value = cause instanceof Error ? cause.message : String(cause);
-          }
-        })
-        .finally(() => {
-          if (followHandle.value?.jobId !== followJobId) return;
-          following.value = false;
-          jobId.value = null;
-          followHandle.value = null;
-        });
+      if (revision !== followRevision) {
+        void running.done.catch(() => undefined);
+        try {
+          await running.cancel();
+        } catch (cause) {
+          error.value =
+            cause instanceof Error ? cause.message : String(cause);
+          trackRunning(running);
+        }
+        return;
+      }
+      trackRunning(running);
     } catch (cause) {
-      error.value = cause instanceof Error ? cause.message : String(cause);
+      if (revision === followRevision) {
+        error.value = cause instanceof Error ? cause.message : String(cause);
+      }
     } finally {
       starting.value = false;
     }
   }
 
   async function stopFollow(): Promise<void> {
+    followRevision += 1;
     const running = followHandle.value;
-    if (!running) return;
-    followHandle.value = null;
-    following.value = false;
-    jobId.value = null;
+    if (!running || stopping.value) return;
+    stopping.value = true;
+    stoppingJobId = running.jobId;
     try {
       await running.cancel();
     } catch (cause) {
+      if (followHandle.value?.jobId !== running.jobId) return;
+      stopping.value = false;
+      stoppingJobId = null;
       error.value = cause instanceof Error ? cause.message : String(cause);
     }
   }
@@ -208,14 +238,12 @@ export function useLogFeed() {
   });
 
   onBeforeUnmount(() => {
-    const running = followHandle.value;
-    followHandle.value = null;
     pendingLines = [];
     if (flushFrame !== null) {
       window.cancelAnimationFrame(flushFrame);
       flushFrame = null;
     }
-    void running?.cancel();
+    void stopFollow();
   });
 
   return {
@@ -223,6 +251,7 @@ export function useLogFeed() {
     lines,
     query,
     starting,
+    stopping,
     following,
     jobId,
     error,

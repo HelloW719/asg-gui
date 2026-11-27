@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { Download, Pause, Play } from "@lucide/vue";
 import BaseButton from "@/shared/ui/BaseButton.vue";
 import InlineNotice from "@/shared/ui/InlineNotice.vue";
@@ -12,6 +12,14 @@ defineOptions({ name: "LogsPage" });
 
 const feed = useLogFeed();
 const autoScroll = ref(true);
+const followLoading = computed(
+  () => feed.starting.value || feed.stopping.value,
+);
+const followLabel = computed(() => {
+  if (feed.starting.value) return "正在跟随";
+  if (feed.stopping.value) return "正在暂停";
+  return feed.following.value ? "暂停跟随" : "实时跟随";
+});
 </script>
 
 <template>
@@ -34,14 +42,14 @@ const autoScroll = ref(true);
         <BaseButton
           size="compact"
           variant="primary"
-          :loading="feed.starting.value"
+          :loading="followLoading"
           @click="feed.toggleFollow"
         >
           <template #icon>
             <Pause v-if="feed.following.value" :size="15" />
             <Play v-else :size="15" />
           </template>
-          {{ feed.starting.value ? "正在跟随" : feed.following.value ? "暂停跟随" : "实时跟随" }}
+          {{ followLabel }}
         </BaseButton>
       </template>
     </PageHeader>

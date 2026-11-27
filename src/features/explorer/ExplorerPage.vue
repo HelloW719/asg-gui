@@ -47,7 +47,7 @@ const explorer = useExplorer();
         />
         <SearchFormPanel
           :form="explorer.searchForm"
-          :busy="explorer.jobs.hasRunningOperation"
+          :busy="explorer.searchBusy.value"
           @submit="explorer.search"
           @choose-image="explorer.chooseImage"
         />
@@ -68,7 +68,7 @@ const explorer = useExplorer();
         />
         <FetchFormPanel
           :form="explorer.fetchForm"
-          :busy="explorer.jobs.hasRunningOperation"
+          :busy="explorer.fetchBusy.value"
           @submit="explorer.fetchPage"
         />
         <ExplorerResult

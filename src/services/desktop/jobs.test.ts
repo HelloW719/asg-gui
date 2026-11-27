@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CliResult, JobEvent } from "../../types/cli";
 
 const startCliJob = vi.hoisted(() => vi.fn());
@@ -55,6 +55,10 @@ describe("JobClient event delivery", () => {
       cancellable: true,
       mutating: false,
     });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("delivers events that arrive before the start invocation resolves", async () => {
@@ -119,5 +123,33 @@ describe("JobClient event delivery", () => {
       "stdout",
       "cancelled",
     ]);
+  });
+
+  it("bounds and expires completed events for unbound jobs", async () => {
+    vi.useFakeTimers();
+    const client = new JobClient();
+    await client.initialize();
+
+    for (let index = 0; index < 10_000; index += 1) {
+      deliver({ jobId: `stale-${index}`, kind: "result", data: result });
+      deliver({ jobId: `stale-${index}`, kind: "exit", data: 0 });
+    }
+
+    const internal = client as unknown as {
+      unbound: Map<string, { events: JobEvent[] }>;
+    };
+    const stats = () => ({
+      jobs: internal.unbound.size,
+      events: [...internal.unbound.values()].reduce(
+        (total, buffered) => total + buffered.events.length,
+        0,
+      ),
+    });
+
+    expect(stats().jobs).toBeLessThanOrEqual(128);
+    expect(stats().events).toBeLessThanOrEqual(128 * 32);
+
+    vi.advanceTimersByTime(2_001);
+    expect(stats()).toEqual({ jobs: 0, events: 0 });
   });
 });
