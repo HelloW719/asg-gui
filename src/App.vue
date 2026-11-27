@@ -100,7 +100,9 @@ useAppBootstrap({
           <main class="app-content">
             <RouterView v-if="showShell" v-slot="{ Component }">
               <Transition name="page" mode="out-in">
-                <component :is="Component" />
+                <KeepAlive :include="['LogsPage']">
+                  <component :is="Component" />
+                </KeepAlive>
               </Transition>
             </RouterView>
             <SetupPage v-else />

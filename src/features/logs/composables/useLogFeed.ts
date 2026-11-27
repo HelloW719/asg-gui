@@ -1,4 +1,10 @@
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import {
+  computed,
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  ref,
+} from "vue";
 import { useAsgServices } from "@/app/useAsgServices";
 import type { FollowLogHandle } from "@/services/asg";
 import type { JobEvent, LogLine } from "@/types/cli";
@@ -175,8 +181,17 @@ export function useLogFeed() {
     URL.revokeObjectURL(url);
   }
 
-  onMounted(() => {
+  onActivated(() => {
     void loadHistory();
+  });
+
+  onDeactivated(() => {
+    void stopFollow();
+    pendingLines = [];
+    if (flushFrame !== null) {
+      window.cancelAnimationFrame(flushFrame);
+      flushFrame = null;
+    }
   });
 
   onBeforeUnmount(() => {

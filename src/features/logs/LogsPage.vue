@@ -8,6 +8,8 @@ import LogConsole from "./components/LogConsole.vue";
 import LogToolbar from "./components/LogToolbar.vue";
 import { useLogFeed } from "./composables/useLogFeed";
 
+defineOptions({ name: "LogsPage" });
+
 const feed = useLogFeed();
 const autoScroll = ref(true);
 </script>

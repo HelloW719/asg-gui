@@ -164,6 +164,120 @@ test("shows a terminal log stream failure", async ({ page }) => {
   await expect(page.getByRole("button", { name: "实时跟随" })).toBeVisible();
 });
 
+test("preserves log controls across navigation and stops following on leave", async ({
+  page,
+}) => {
+  await installMock(page);
+  await page.goto("/#/logs");
+  await expect(page.getByRole("heading", { name: "日志", exact: true })).toBeVisible();
+
+  const toolbar = page.locator(".log-toolbar");
+  const autoScroll = toolbar.getByLabel("自动滚动");
+  const gateway = toolbar.getByLabel("Gateway");
+  await autoScroll.uncheck();
+  await gateway.uncheck();
+
+  await page.getByRole("button", { name: "实时跟随" }).click();
+  await expect(page.getByRole("button", { name: "暂停跟随" })).toBeVisible();
+  await page.getByRole("link", { name: "状态", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "系统状态" })).toBeVisible();
+
+  await page.getByRole("link", { name: "日志", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "日志", exact: true })).toBeVisible();
+  await expect(autoScroll).not.toBeChecked();
+  await expect(gateway).not.toBeChecked();
+  await expect(page.getByRole("button", { name: "实时跟随" })).toBeVisible();
+});
+
+test("auto-scrolls new log output and responds when re-enabled", async ({
+  page,
+}) => {
+  await installMock(page);
+  await page.goto("/#/logs");
+  await expect(page.getByRole("heading", { name: "日志", exact: true })).toBeVisible();
+
+  const autoScroll = page.getByLabel("自动滚动");
+  const logConsole = page.locator(".log-console");
+  await expect(autoScroll).toBeChecked();
+  await page.getByRole("button", { name: "实时跟随" }).click();
+
+  const jobId = await page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          __TAURI_TEST_LAST_FOLLOW_JOB_ID__?: string;
+        }
+      ).__TAURI_TEST_LAST_FOLLOW_JOB_ID__,
+  );
+  expect(jobId).toBeTruthy();
+
+  await page.evaluate((activeJobId) => {
+    for (let index = 0; index < 120; index += 1) {
+      (
+        window as typeof window & {
+          __TAURI_TEST_EMIT__: (event: string, payload: unknown) => void;
+        }
+      ).__TAURI_TEST_EMIT__("asg://job", {
+        jobId: activeJobId,
+        kind: "stdout",
+        data: {
+          type: "event",
+          schema_version: 1,
+          event: "log",
+          service: "gateway",
+          line: `scroll line ${index}`,
+        },
+      });
+    }
+  }, jobId);
+
+  await expect
+    .poll(() =>
+      logConsole.evaluate(
+        (element) =>
+          Math.abs(
+            element.scrollHeight - element.clientHeight - element.scrollTop,
+          ) <= 2,
+      ),
+    )
+    .toBe(true);
+
+  await autoScroll.uncheck();
+  await logConsole.evaluate((element) => {
+    element.scrollTop = 0;
+  });
+  await page.evaluate((activeJobId) => {
+    (
+      window as typeof window & {
+        __TAURI_TEST_EMIT__: (event: string, payload: unknown) => void;
+      }
+    ).__TAURI_TEST_EMIT__("asg://job", {
+      jobId: activeJobId,
+      kind: "stdout",
+      data: {
+        type: "event",
+        schema_version: 1,
+        event: "log",
+        service: "gateway",
+        line: "manual scroll position",
+      },
+    });
+  }, jobId);
+  await expect(logConsole).toHaveJSProperty("scrollTop", 0);
+
+  await autoScroll.check();
+  await expect
+    .poll(() =>
+      logConsole.evaluate(
+        (element) =>
+          Math.abs(
+            element.scrollHeight - element.clientHeight - element.scrollTop,
+          ) <= 2,
+      ),
+    )
+    .toBe(true);
+});
+
 test("allows structured extension fields to be edited and validated", async ({
   page,
 }) => {

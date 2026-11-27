@@ -15,15 +15,18 @@ const liveAnnouncement = ref("");
 let announcementTimer: ReturnType<typeof setTimeout> | null = null;
 
 watch(
-  () => props.lines.length,
-  async () => {
-    if (!props.autoScroll) return;
+  () => [props.autoScroll, props.lines.at(-1)?.id] as const,
+  async ([autoScroll]) => {
+    if (!autoScroll) return;
     await nextTick();
-    logBox.value?.scrollTo({
-      top: logBox.value.scrollHeight,
-      behavior: props.following ? "auto" : "smooth",
+    const box = logBox.value;
+    if (!box) return;
+    box.scrollTo({
+      top: box.scrollHeight,
+      behavior: "auto",
     });
   },
+  { flush: "post" },
 );
 
 watch(
