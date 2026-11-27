@@ -21,6 +21,14 @@ function moduleSpecifiers(source: string): string[] {
   ))];
 }
 
+function featureName(sourcePath: string): string | null {
+  return sourcePath.match(/^\/src\/features\/([^/]+)\//)?.[1] ?? null;
+}
+
+function resolveRelativeModule(sourcePath: string, specifier: string): string {
+  return new URL(specifier, `https://asg.local${sourcePath}`).pathname;
+}
+
 function expectNoImports(
   files: Array<[string, string]>,
   forbidden: RegExp,
@@ -52,6 +60,17 @@ describe("frontend architecture boundaries", () => {
         "dynamic",
         "commonjs",
       ]),
+    );
+  });
+
+  it("resolves feature-relative modules against their owning slice", () => {
+    const sourcePath = "/src/features/logs/composables/useLogFeed.ts";
+    expect(featureName(sourcePath)).toBe("logs");
+    expect(resolveRelativeModule(sourcePath, "../components/LogConsole.vue")).toBe(
+      "/src/features/logs/components/LogConsole.vue",
+    );
+    expect(resolveRelativeModule(sourcePath, "../../settings/SettingsPage.vue")).toBe(
+      "/src/features/settings/SettingsPage.vue",
     );
   });
 
@@ -101,11 +120,40 @@ describe("frontend architecture boundaries", () => {
     );
   });
 
-  it("keeps feature modules from reaching into each other", () => {
+  it("keeps feature modules inside their own slice", () => {
+    const violations = filesIn("features").flatMap(([path, source]) => {
+      const owner = featureName(path);
+      if (!owner) return [];
+      const ownPrefix = `/src/features/${owner}/`;
+      return moduleSpecifiers(source).flatMap((target) => {
+        if (target.startsWith("@/features/")) {
+          return [`${path} -> ${target}`];
+        }
+        if (!target.startsWith(".")) return [];
+        const resolved = resolveRelativeModule(path, target);
+        return resolved.startsWith(ownPrefix) ? [] : [`${path} -> ${target}`];
+      });
+    });
+
+    expect(
+      violations,
+      "功能模块内部应使用相对路径；跨顶层模块应通过 app、共享 UI 或领域服务",
+    ).toEqual([]);
+  });
+
+  it("keeps feature modules behind the app service boundary", () => {
     expectNoImports(
       filesIn("features"),
-      /(^|\/)features\/(dashboard|explorer|sources|settings|logs|maintenance|setup|welcome)(\/|$)/,
-      "功能模块只能通过 app 层或共享 UI 进行跨模块协作",
+      /(^|\/)services(?:\/|$)/,
+      "功能层不得直接依赖 services，服务能力应经 app 层暴露",
+    );
+  });
+
+  it("keeps the visual subsystem independent from application state", () => {
+    expectNoImports(
+      filesIn("visual"),
+      /(^|\/)(app|stores|services|features)(?:\/|$)/,
+      "视觉层只能依赖类型、纯工具和其他视觉模块",
     );
   });
 

@@ -6,8 +6,10 @@ import {
   ref,
   watch,
 } from "vue";
-import { useAsgServices } from "@/app/useAsgServices";
-import type { FollowLogHandle } from "@/services/asg";
+import {
+  useAsgServices,
+  type FollowLogHandle,
+} from "@/app/useAsgServices";
 import type { JobEvent, LogLine } from "@/types/cli";
 import { isLogCliEvent } from "@/utils/cli";
 
