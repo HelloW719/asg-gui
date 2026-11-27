@@ -196,14 +196,52 @@
           }
           return { jobId: id, cancellable: true, mutating: false };
         }
+        const allLines = [
+          {
+            service: "gateway",
+            at: new Date().toISOString(),
+            line: "gateway listening on 127.0.0.1:3000",
+          },
+          {
+            service: "supervisor",
+            at: new Date().toISOString(),
+            line: "searxng health check passed",
+          },
+          {
+            service: "searxng",
+            at: new Date().toISOString(),
+            line: "searxng fixture ready",
+          },
+          {
+            service: "flaresolverr",
+            at: new Date().toISOString(),
+            line: "service ready",
+          },
+        ];
+        const requestedServices = [];
+        for (let index = 1; index < cliArgs.length; index += 1) {
+          const argument = cliArgs[index];
+          if (argument === "--lines") {
+            index += 1;
+          } else if (!argument.startsWith("-")) {
+            requestedServices.push(argument);
+          }
+        }
+        const selectedServices = requestedServices.includes("all")
+          ? null
+          : new Set(
+              requestedServices.length
+                ? requestedServices
+                : ["gateway", "supervisor"],
+            );
         finish(
           id,
           result("logs", {
-            lines: [
-              { service: "gateway", at: new Date().toISOString(), line: "gateway listening on 127.0.0.1:3000" },
-              { service: "supervisor", at: new Date().toISOString(), line: "searxng health check passed" },
-              { service: "flaresolverr", at: new Date().toISOString(), line: "service ready" },
-            ],
+            lines: allLines.filter(
+              (line) =>
+                selectedServices === null ||
+                selectedServices.has(line.service),
+            ),
           }),
         );
       } else if (name === "doctor") {

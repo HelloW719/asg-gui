@@ -189,6 +189,38 @@ test("preserves log controls across navigation and stops following on leave", as
   await expect(page.getByRole("button", { name: "实时跟随" })).toBeVisible();
 });
 
+test("refreshes visible logs as service selections change", async ({ page }) => {
+  await installMock(page);
+  await page.goto("/#/logs");
+  await expect(page.getByRole("heading", { name: "日志", exact: true })).toBeVisible();
+
+  const toolbar = page.locator(".log-toolbar");
+  const gateway = toolbar.getByLabel("Gateway");
+  const searxng = toolbar.getByLabel("SearXNG");
+  const gatewayLine = page.getByText(
+    "gateway listening on 127.0.0.1:3000",
+    { exact: true },
+  );
+
+  await expect(gateway).toBeChecked();
+  await expect(searxng).not.toBeChecked();
+  await expect(gatewayLine).toBeVisible();
+  await expect(
+    page.getByText("searxng fixture ready", { exact: true }),
+  ).toHaveCount(0);
+
+  await searxng.check();
+  await expect(
+    page.getByText("searxng fixture ready", { exact: true }),
+  ).toBeVisible();
+
+  await gateway.uncheck();
+  await expect(gatewayLine).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "日志", exact: true }),
+  ).toBeVisible();
+});
+
 test("auto-scrolls new log output and responds when re-enabled", async ({
   page,
 }) => {

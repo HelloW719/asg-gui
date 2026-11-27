@@ -4,6 +4,7 @@ import {
   onBeforeUnmount,
   onDeactivated,
   ref,
+  watch,
 } from "vue";
 import { useAsgServices } from "@/app/useAsgServices";
 import type { FollowLogHandle } from "@/services/asg";
@@ -59,20 +60,28 @@ export function useLogFeed() {
   }
 
   const filteredLines = computed(() => {
+    const selected = new Set(selectedServices.value);
     const needle = query.value.trim().toLowerCase();
-    if (!needle) return lines.value;
-    return lines.value.filter(
-      (entry) =>
+    return lines.value.filter((entry) => {
+      if (!selected.has(entry.service)) return false;
+      if (!needle) return true;
+      return (
         entry.line.toLowerCase().includes(needle) ||
-        entry.service.toLowerCase().includes(needle),
-    );
+        entry.service.toLowerCase().includes(needle)
+      );
+    });
   });
 
   async function loadHistory(): Promise<void> {
     const revision = ++historyRevision;
     error.value = null;
+    const services = [...selectedServices.value];
+    if (services.length === 0) {
+      lines.value = [];
+      return;
+    }
     try {
-      const history = await serviceClient.logs.read(400, selectedServices.value);
+      const history = await serviceClient.logs.read(400, services);
       if (revision !== historyRevision) return;
       lines.value = history.map(withLineId);
     } catch (cause) {
@@ -183,6 +192,10 @@ export function useLogFeed() {
 
   onActivated(() => {
     void loadHistory();
+  });
+
+  watch(selectedServices, () => {
+    if (!following.value) void loadHistory();
   });
 
   onDeactivated(() => {
