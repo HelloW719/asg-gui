@@ -11,17 +11,25 @@ import type {
   ConfigMutationResult,
   ConfigValidationResult,
   DoctorCheck,
+  DoctorResult,
   EngineInfo,
+  EnginesResult,
   ExtensionBackendInfo,
+  ExtensionConfigFieldsResult,
+  ExtensionConfigResult,
   ExtensionFetchChannelInfo,
   ExtensionInfo,
   ExtensionOperationResult,
   ExtensionSearchEngineInfo,
   ExtensionSearchItem,
+  ExtensionSearchResult,
+  ExtensionsResult,
   JobEvent,
   LifecycleResult,
   LogCliEvent,
+  LogFollowResult,
   LogLine,
+  LogReadResult,
   ProgressCliEvent,
   StackStatus,
   SupervisorStatus,
@@ -43,50 +51,6 @@ function brandedParser<T>(
 ): CliDataParser<T> {
   return Object.assign(parser, { [cliDataParserBrand]: true as const });
 }
-
-export type LogReadResult = {
-  lines: LogLine[];
-};
-
-export type LogFollowResult = {
-  streamed: true;
-  services: string[];
-};
-
-export type DoctorResult = {
-  checks: DoctorCheck[];
-};
-
-export type EnginesResult = {
-  engines: EngineInfo[];
-};
-
-export type ExtensionsResult = {
-  extensions: ExtensionInfo[];
-};
-
-export type ExtensionSearchResult = {
-  results: ExtensionSearchItem[];
-};
-
-export type ExtensionConfigResult =
-  | {
-      id: string;
-      config: Record<string, unknown>;
-      valid: true;
-      error?: never;
-    }
-  | {
-      id: string;
-      config: Record<string, unknown>;
-      valid: false;
-      error: string;
-    };
-
-export type ExtensionConfigFieldsResult = {
-  id: string;
-  fields: ConfigFieldInfo[];
-};
 
 export function parseCliData<T>(
   command: string,

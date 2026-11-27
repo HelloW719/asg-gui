@@ -136,6 +136,10 @@ export interface EngineInfo {
   source?: "default" | "local";
 }
 
+export type EnginesResult = {
+  engines: EngineInfo[];
+};
+
 export interface ExtensionBackendInfo {
   id: string;
   name: string;
@@ -174,6 +178,10 @@ export interface ExtensionInfo {
   error?: string;
 }
 
+export type ExtensionsResult = {
+  extensions: ExtensionInfo[];
+};
+
 export interface ExtensionSearchItem {
   repo: string;
   description: string;
@@ -182,11 +190,43 @@ export interface ExtensionSearchItem {
   updated_at: string;
 }
 
+export type ExtensionSearchResult = {
+  results: ExtensionSearchItem[];
+};
+
+export type ExtensionConfigResult =
+  | {
+      id: string;
+      config: Record<string, unknown>;
+      valid: true;
+      error?: never;
+    }
+  | {
+      id: string;
+      config: Record<string, unknown>;
+      valid: false;
+      error: string;
+    };
+
+export type ExtensionConfigFieldsResult = {
+  id: string;
+  fields: ConfigFieldInfo[];
+};
+
 export interface LogLine {
   service: string;
   at?: string;
   line: string;
 }
+
+export type LogReadResult = {
+  lines: LogLine[];
+};
+
+export type LogFollowResult = {
+  streamed: true;
+  services: string[];
+};
 
 export interface DoctorCheck {
   name: string;
@@ -195,6 +235,10 @@ export interface DoctorCheck {
   code?: string;
   message?: string;
 }
+
+export type DoctorResult = {
+  checks: DoctorCheck[];
+};
 
 export interface ConfigFieldInfo {
   key: string;

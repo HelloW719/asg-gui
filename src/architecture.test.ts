@@ -79,6 +79,28 @@ describe("frontend architecture boundaries", () => {
     );
   });
 
+  it("keeps CLI wire response types in the protocol module", () => {
+    const protocol = sourceFiles["/src/types/cli.ts"] ?? "";
+    const utilities = sourceFiles["/src/utils/cli.ts"] ?? "";
+    const responseTypes = [
+      "LogReadResult",
+      "LogFollowResult",
+      "DoctorResult",
+      "EnginesResult",
+      "ExtensionsResult",
+      "ExtensionSearchResult",
+      "ExtensionConfigResult",
+      "ExtensionConfigFieldsResult",
+    ];
+
+    for (const name of responseTypes) {
+      expect(protocol).toContain(`export type ${name}`);
+    }
+    expect(utilities).not.toMatch(
+      /\bexport\s+(?:type|interface)\s+\w+(?:Result|Response)\b/,
+    );
+  });
+
   it("keeps feature modules from reaching into each other", () => {
     expectNoImports(
       filesIn("features"),

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "source": "agent_search_gateway",
+  "files": {
+    "docs/cli-contract.md": "dadc20d80141a6dc5ee03fbca9b8d3928c698652d41000c982d61942883079d4",
+    "src/cli/asg.ts": "46ac7a4ca2ee88a4efe971a0f703e9997c25e13096e0bee76cad73086c7cf365",
+    "src/cli/commands/adlist.ts": "d0c9b2d69e9c065034e7b9c93aac1ed68e41ad6ae4b3993149da85515517ed54",
+    "src/cli/commands/browser.ts": "af69a9784d9947e3578c2432154ddc71eed82b1591626328086f60419ad64b28",
+    "src/cli/commands/config.ts": "a97e67bdb28bce2699bdcef5772315b521cf87d3a3847c3e8fe9c749de62f955",
+    "src/cli/commands/dataplane-common.ts": "e996354521c29746813f90d4051473e4a40917ba4eec826c1b80ceac29e2427a",
+    "src/cli/commands/doctor.ts": "3ca0b9ef0b8d75e1463d4ca2b6e92bf8b0bbdc2c66b16710e5e18b4c180bf57e",
+    "src/cli/commands/engines.ts": "97149f3c98f810f6686c91c6ea5252e82f28350f06852a7b9cec03b927bc842d",
+    "src/cli/commands/extensions.ts": "8d781ba0b68807868f8693264e3731d13222dfe031aa197d88ec944e1053b175",
+    "src/cli/commands/fetch.ts": "a45e152a571ae4a6d2c3b2be42a11a64e2dc7860cfd537dabc9ebed2e2521af7",
+    "src/cli/commands/logs.ts": "bcce8d226668e32995c6e67f2fde55d73563b183c42b8c44fb126598c87ec77a",
+    "src/cli/commands/restart.ts": "6831e1f6ec685283e17855cab28daeb7ab66a95fb9aae21f62a04d92fe9e87b4",
+    "src/cli/commands/search.ts": "fdbcdc82e5200c58dc3e25db941d46c4ac845ddb333a0767724e405783e994fa",
+    "src/cli/commands/start.ts": "3e812bd5c7460782362fef63e734c539e7a9a913f3e6ef7ff9b486b4a4c1ee3c",
+    "src/cli/commands/status.ts": "dc51a07dc99dadbcdaeed30f2312079570a006e4f89eca99c7db2711ae759256",
+    "src/cli/commands/stop.ts": "20496e953a262382ff5f079c289b547d49e63dc44edb9da9de90cb456c7a1843",
+    "src/cli/commands/update.ts": "a1d51304597536c745f0d27f6bc1736527b30e2f846047c0c16235e358778a55",
+    "src/cli/context.ts": "4b7e7f6090173c60aa2fa274d4f180fe63a89b1bd1dfd16096d1dbc792e53d7e",
+    "src/cli/deps/browser.ts": "df14df9f2e3d50c536fb0e9edd67276f78eb2a81741dc22930b0ca5a04e7e336",
+    "src/cli/deps/update.ts": "b64cfbb9c9c46ec9b5e1ff8944a0686d3ab1b60aa7604b55a85dfc74dc84bb99",
+    "src/cli/output.ts": "59785d5563456d7a4953e57879867b01b2345d96e5c6d9ae4194650a817d02ad",
+    "src/cli/runtime/health.ts": "500c28ada0ae0878fd7b0d401b60550f397d7a2c430db0d9f2c9e1f01b8c7536",
+    "src/cli/runtime/logs.ts": "2994a67f8955475646ac37c159ad98718aa0d25ecc68cc93817c1bf9e135f5cb",
+    "src/cli/runtime/stack.ts": "bef311ae4545f9490810827a7b2cdaa9f25e2ce13c8ca4003eacdc07a9d8b3b0",
+    "src/engines/types.ts": "bcda6b268f310a95294b58b7f17f4fb82ba63204afeb1164c772c26516ede98f",
+    "src/extensions/install.ts": "33d008cc064692c0cd9d33881e0b0312397d11ef3aea5e0d48da6bbf42523b61",
+    "src/extensions/manifest.ts": "f91687a4d3b13ee10d0b0bc874a0ee20d6e35fc3979e5b3d31d951897e040bcd"
+  }
+}

@@ -10,9 +10,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:contract": "node scripts/check-asg-contract.mjs --optional",
+    "sync:contract": "node scripts/check-asg-contract.mjs --write",
     "typecheck:e2e": "vue-tsc --noEmit -p tsconfig.e2e.json",
     "tauri": "tauri",
-    "check": "npm run build && npm test"
+    "check": "npm run build && npm test && npm run test:contract"
   },
   "dependencies": {
     "@fontsource/epilogue": "^5.2.8",

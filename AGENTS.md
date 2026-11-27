@@ -40,6 +40,8 @@ GUI 使用 Vue 3 和 Tauri 构建。界面的业务操作必须通过 ASG CLI �
 - `npm run build`：执行 TypeScript 检查并构建 Web 资源。
 - `npm test -- --run`：运行单元测试和架构边界测试。
 - `npm run test:e2e`：在桌面和最小窗口尺寸下运行 Playwright 测试。
+- `npm run test:contract`：核对 ASG core 契约源文件指纹；同级 core 仓库不存在时跳过。
+- `npm run sync:contract`：在确认 GUI 已同步 ASG core 契约后更新契约指纹。
 - `npm run tauri build`：重新构建桌面可执行文件。
 
 `npm run build` 不会更新桌面程序。只要快捷方式或原生应用需要体现最新代码，就必须
@@ -199,11 +201,12 @@ stores -> services
 
 1. `npm run build`
 2. `npm test -- --run`
-3. 路由、交互或样式发生变化时执行 `npm run test:e2e`
-4. 需要更新桌面程序时执行 `npm run tauri build`
-5. 数据契约发生变化时，还应在 ASG 仓库执行 `npm run build`、契约测试和受影响
+3. 同级 ASG core 仓库存在时执行 `npm run test:contract`
+4. 路由、交互或样式发生变化时执行 `npm run test:e2e`
+5. 需要更新桌面程序时执行 `npm run tauri build`
+6. 数据契约发生变化时，还应在 ASG 仓库执行 `npm run build`、契约测试和受影响
    CLI 测试，再回到本仓库执行构建与测试
-6. 使用 `git diff --check` 检查格式问题
+7. 使用 `git diff --check` 检查格式问题
 
 提交信息使用中文并准确概括实际改动。无关重构、格式化和其他功能修改不要混入同一个
 提交。测试和 fixture 可以使用模拟状态，但不要把演示数据写进产品界面。

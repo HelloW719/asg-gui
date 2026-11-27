@@ -1,9 +1,12 @@
-import type { JobEvent, LogLine } from "../../types/cli";
+import type {
+  JobEvent,
+  LogFollowResult,
+  LogLine,
+} from "../../types/cli";
 import {
   isLogFollowResult,
   isLogReadResult,
   parseCliData,
-  type LogFollowResult,
 } from "../../utils/cli";
 import type {
   AsgCommandRunner,
